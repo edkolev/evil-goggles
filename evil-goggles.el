@@ -45,14 +45,22 @@
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))))
 
+(defun evil-goggles--generic-advice (beg end orig-fun args)
+  (if (evil-goggles--show-p beg end)
+      (let* ((evil-goggles--on t))
+        (evil-goggles--show beg end)
+        (apply orig-fun args))
+    (apply orig-fun args)))
+
 (defun evil-goggles--evil-delete-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (if (evil-goggles--show-p beg end)
-        (let* ((evil-goggles--on t))
-          (evil-goggles--show beg end)
-          (apply orig-fun args))
-      (apply orig-fun args))))
+    (evil-goggles--generic-advice beg end orig-fun args)))
+
+(defun evil-goggles--evil-indent-advice (orig-fun &rest args)
+  (let ((beg (nth 0 args))
+        (end (nth 1 args)))
+    (evil-goggles--generic-advice beg end orig-fun args)))
 
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
@@ -60,9 +68,12 @@
   :global t
   (cond
    (evil-goggles-mode
-    (advice-add 'evil-delete :around 'evil-goggles--evil-delete-advice))
+    (advice-add 'evil-delete :around 'evil-goggles--evil-delete-advice)
+    (advice-add 'evil-indent :around 'evil-goggles--evil-indent-advice))
    (t
-    (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice))))
+    (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice)
+    (advice-remove 'evil-indent 'evil-goggles--evil-indent-advice)
+    )))
 
 (provide 'evil-goggles)
 
