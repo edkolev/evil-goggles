@@ -22,8 +22,8 @@
 (defvar evil-goggles--on nil)
 (defvar evil-goggles-show-for 0.200) ;; .100 or .200 seem best
 
-(defun evil-goggles--show (beg end)
-  (let ((ov (evil-goggles--make-overlay beg end 'face 'region)))
+(defun evil-goggles--show (beg end face)
+  (let ((ov (evil-goggles--make-overlay beg end 'face face)))
     (sit-for evil-goggles-show-for)
     (delete-overlay ov)))
 
@@ -45,22 +45,22 @@
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))))
 
-(defun evil-goggles--generic-advice (beg end orig-fun args)
+(defun evil-goggles--generic-advice (beg end orig-fun args face)
   (if (evil-goggles--show-p beg end)
       (let* ((evil-goggles--on t))
-        (evil-goggles--show beg end)
+        (evil-goggles--show beg end face)
         (apply orig-fun args))
     (apply orig-fun args)))
 
 (defun evil-goggles--evil-delete-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args)))
+    (evil-goggles--generic-advice beg end orig-fun args 'diff-removed)))
 
 (defun evil-goggles--evil-indent-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args)))
+    (evil-goggles--generic-advice beg end orig-fun args 'region)))
 
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
