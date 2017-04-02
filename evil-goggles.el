@@ -62,6 +62,11 @@
         (end (nth 1 args)))
     (evil-goggles--generic-advice beg end orig-fun args 'region)))
 
+(defun evil-goggles--evil-yank-advice (orig-fun &rest args)
+  (let ((beg (nth 0 args))
+        (end (nth 1 args)))
+    (evil-goggles--generic-advice beg end orig-fun args 'diff-added)))
+
 (defvar evil-goggles--hooks (make-hash-table))
 
 (defun evil-goggles--advice-add (fun advice-fun)
@@ -80,6 +85,7 @@
    (evil-goggles-mode
     (evil-goggles--advice-add 'evil-delete 'evil-goggles--evil-delete-advice)
     (evil-goggles--advice-add 'evil-indent 'evil-goggles--evil-indent-advice)
+    (evil-goggles--advice-add 'evil-yank   'evil-goggles--evil-yank-advice))
    (t
     (evil-goggles--advice-remove-all)
     )))
