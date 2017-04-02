@@ -62,17 +62,26 @@
         (end (nth 1 args)))
     (evil-goggles--generic-advice beg end orig-fun args 'region)))
 
+(defvar evil-goggles--hooks (make-hash-table))
+
+(defun evil-goggles--advice-add (fun advice-fun)
+  (when evil-goggles-mode
+    (advice-add fun :around advice-fun))
+  (puthash fun advice-fun evil-goggles--hooks))
+
+(defun evil-goggles--advice-remove-all ()
+  (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--hooks))
+
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
   :lighter " (⌐■-■)"
   :global t
   (cond
    (evil-goggles-mode
-    (advice-add 'evil-delete :around 'evil-goggles--evil-delete-advice)
-    (advice-add 'evil-indent :around 'evil-goggles--evil-indent-advice))
+    (evil-goggles--advice-add 'evil-delete 'evil-goggles--evil-delete-advice)
+    (evil-goggles--advice-add 'evil-indent 'evil-goggles--evil-indent-advice)
    (t
-    (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice)
-    (advice-remove 'evil-indent 'evil-goggles--evil-indent-advice)
+    (evil-goggles--advice-remove-all)
     )))
 
 (provide 'evil-goggles)
