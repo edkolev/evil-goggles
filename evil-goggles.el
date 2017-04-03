@@ -55,7 +55,7 @@
 (defun evil-goggles--evil-delete-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args 'diff-removed)))
+    (evil-goggles--generic-advice beg end orig-fun args 'region)))
 
 (defun evil-goggles--evil-indent-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
@@ -65,17 +65,7 @@
 (defun evil-goggles--evil-yank-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args 'diff-added)))
-
-(defvar evil-goggles--hooks (make-hash-table))
-
-(defun evil-goggles--advice-add (fun advice-fun)
-  (when evil-goggles-mode
-    (advice-add fun :around advice-fun))
-  (puthash fun advice-fun evil-goggles--hooks))
-
-(defun evil-goggles--advice-remove-all ()
-  (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--hooks))
+    (evil-goggles--generic-advice beg end orig-fun args 'region)))
 
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
@@ -83,12 +73,37 @@
   :global t
   (cond
    (evil-goggles-mode
-    (evil-goggles--advice-add 'evil-delete 'evil-goggles--evil-delete-advice)
-    (evil-goggles--advice-add 'evil-indent 'evil-goggles--evil-indent-advice)
-    (evil-goggles--advice-add 'evil-yank   'evil-goggles--evil-yank-advice))
+    (evil-goggles--advice-add-all))
    (t
     (evil-goggles--advice-remove-all)
     )))
+
+(defvar evil-goggles--hooks (make-hash-table))
+
+(defun evil-goggles--advice-add (fun advice-fun)
+  (when evil-goggles-mode
+    ;; clear any old advice
+    (let ((old-advice-fun (gethash fun evil-goggles--hooks)))
+      (when old-advice-fun
+        (message "Replacing advice of %s" fun)
+        (advice-remove fun old-advice-fun)))
+
+    ;; add the new advice
+    (advice-add fun :around advice-fun))
+
+  ;; store the advice so it can be enabled/disabled by the mode
+  (puthash fun advice-fun evil-goggles--hooks))
+
+(defun evil-goggles--advice-add-all ()
+  (maphash (lambda (advised-fun advice-fun) (advice-add advised-fun :around advice-fun)) evil-goggles--hooks))
+
+(evil-goggles--advice-add 'evil-delete 'evil-goggles--evil-delete-advice)
+(evil-goggles--advice-add 'evil-indent 'evil-goggles--evil-indent-advice)
+(evil-goggles--advice-add 'evil-yank   'evil-goggles--evil-yank-advice)
+
+(defun evil-goggles--advice-remove-all ()
+  (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--hooks))
+
 
 (provide 'evil-goggles)
 
