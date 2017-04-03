@@ -67,6 +67,16 @@
         (end (nth 1 args)))
     (evil-goggles--generic-advice beg end orig-fun args 'region)))
 
+(defun evil-goggles--evil-join-advice (orig-fun &rest args)
+  (let* ((beg (nth 0 args))
+         (end (nth 1 args))
+         (beg-line (line-number-at-pos beg))
+         (end-line (line-number-at-pos end))
+         (line-count (- end-line beg-line)))
+    (if (> line-count 1) ;; don't show goggles for single lines ("J"/"gJ" without count)
+        (evil-goggles--generic-advice beg end orig-fun args 'region)
+      (apply orig-fun args))))
+
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
   :lighter " (⌐■-■)"
@@ -97,13 +107,15 @@
 (defun evil-goggles--advice-add-all ()
   (maphash (lambda (advised-fun advice-fun) (advice-add advised-fun :around advice-fun)) evil-goggles--hooks))
 
-(evil-goggles--advice-add 'evil-delete 'evil-goggles--evil-delete-advice)
-(evil-goggles--advice-add 'evil-indent 'evil-goggles--evil-indent-advice)
-(evil-goggles--advice-add 'evil-yank   'evil-goggles--evil-yank-advice)
-
 (defun evil-goggles--advice-remove-all ()
   (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--hooks))
 
+;; default advice-d core evil functions
+(evil-goggles--advice-add 'evil-delete          'evil-goggles--evil-delete-advice)
+(evil-goggles--advice-add 'evil-indent          'evil-goggles--evil-indent-advice)
+(evil-goggles--advice-add 'evil-yank            'evil-goggles--evil-yank-advice)
+(evil-goggles--advice-add 'evil-join            'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-join-whitespace 'evil-goggles--evil-join-advice)
 
 (provide 'evil-goggles)
 
