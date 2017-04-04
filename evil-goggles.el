@@ -8,6 +8,8 @@
 ;; next goals:
 ;; -  configurable integration with plugins: evil-surround, evil-lion
 ;; - '.' repeat with goggles
+;; next goals:
+;; - ex commands: evil-copy, evil-move
 
 ;; implementation:
 ;; - advise evil-delete, after
@@ -21,6 +23,19 @@
 
 (defvar evil-goggles--on nil)
 (defvar evil-goggles-show-for 0.200) ;; .100 or .200 seem best
+
+(defcustom evil-goggles-faces-alist
+  '((evil-delete . (:underline t)))
+  "Association list of faces to use for different commands")
+
+(defcustom evil-goggles-default-face
+  'region
+  "Deafult face for the overlay")
+
+(defun evil-goggles--face (command)
+  (or
+   (assoc command evil-goggles-faces-alist)
+   evil-goggles-default-face))
 
 (defun evil-goggles--show (beg end face)
   (let ((ov (evil-goggles--make-overlay beg end 'face face)))
@@ -60,12 +75,12 @@
 (defun evil-goggles--evil-indent-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args 'region)))
+    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-indent))))
 
 (defun evil-goggles--evil-yank-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args 'region)))
+    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-yank))))
 
 (defun evil-goggles--evil-join-advice (orig-fun &rest args)
   (let* ((beg (nth 0 args))
@@ -74,7 +89,7 @@
          (end-line (line-number-at-pos end))
          (line-count (- end-line beg-line)))
     (if (> line-count 1) ;; don't show goggles for single lines ("J"/"gJ" without count)
-        (evil-goggles--generic-advice beg end orig-fun args 'region)
+        (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-join))
       (apply orig-fun args))))
 
 (define-minor-mode evil-goggles-mode
