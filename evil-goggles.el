@@ -92,6 +92,11 @@
         (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-join))
       (apply orig-fun args))))
 
+(defun evil-goggles--evil-surround-region (orig-fun &rest args)
+  (let ((beg (nth 0 args))
+        (end (nth 1 args)))
+    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-surround))))
+
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
   :lighter " (⌐■-■)"
@@ -131,6 +136,7 @@
 (evil-goggles--advice-add 'evil-yank            'evil-goggles--evil-yank-advice)
 (evil-goggles--advice-add 'evil-join            'evil-goggles--evil-join-advice)
 (evil-goggles--advice-add 'evil-join-whitespace 'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-surround-region 'evil-goggles--evil-surround-region)
 
 (provide 'evil-goggles)
 
