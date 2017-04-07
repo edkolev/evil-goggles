@@ -25,7 +25,10 @@
 (defvar evil-goggles-show-for 0.200) ;; .100 or .200 seem best
 
 (defcustom evil-goggles-faces-alist
-  '((evil-delete . (:underline t)))
+  `(
+    ( evil-delete . evil-ex-substitute-matches ) ;; isearch-fail
+    ( evil-yank . evil-ex-substitute-replacement )
+    )
   "Association list of faces to use for different commands")
 
 (defcustom evil-goggles-default-face
@@ -34,7 +37,7 @@
 
 (defun evil-goggles--face (command)
   (or
-   (assoc command evil-goggles-faces-alist)
+   (assoc-default command evil-goggles-faces-alist)
    evil-goggles-default-face))
 
 (defun evil-goggles--show (beg end face)
