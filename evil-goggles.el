@@ -97,10 +97,20 @@
         (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-join))
       (apply orig-fun args))))
 
-(defun evil-goggles--evil-surround-region (orig-fun &rest args)
+(defun evil-goggles--evil-surround-region-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
         (end (nth 1 args)))
     (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-surround))))
+
+(defun evil-goggles--evil-commentary-advice (orig-fun &rest args)
+  (let ((beg (nth 0 args))
+        (end (nth 1 args)))
+    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-commentary))))
+
+(defun evil-goggles--evil-replace-with-register-advice (orig-fun &rest args)
+  (let ((beg (nth 1 args))
+        (end (nth 2 args)))
+    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-replace-with-register))))
 
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
@@ -142,6 +152,9 @@
 (evil-goggles--advice-add 'evil-join            'evil-goggles--evil-join-advice)
 (evil-goggles--advice-add 'evil-join-whitespace 'evil-goggles--evil-join-advice)
 (evil-goggles--advice-add 'evil-surround-region 'evil-goggles--evil-surround-region)
+(evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
+(evil-goggles--advice-add 'evil-commentary               'evil-goggles--evil-commentary-advice)
+(evil-goggles--advice-add 'evil-replace-with-register    'evil-goggles--evil-replace-with-register-advice)
 
 (provide 'evil-goggles)
 
