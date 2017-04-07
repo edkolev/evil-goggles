@@ -1,25 +1,39 @@
-;; goals:
-;; - delete with strikethrough preview
-;; - yank with 'region' previw
-;; - indent with 'underline' preview
-;; next goals:
-;; - one (advice) for all cases
-;; - make the above configurable
-;; next goals:
-;; -  configurable integration with plugins: evil-surround, evil-lion
-;; - '.' repeat with goggles
-;; next goals:
-;; - ex commands: evil-copy, evil-move
+;;; evil-goggles.el --- Add a visual hint to evil operations -*- lexical-binding: t; coding: utf-8 -*-
 
-;; implementation:
-;; - advise evil-delete, after
-;; - if (and called interactively, not visual state, not insert state, goggles off, more than one char in region)
-;;   - set goggles on
-;;   - show goggles
-;;   - call orig-fun
-;;   - set gogges off
-;; - else
-;;   - call (interactively?) orig-fun
+;; Copyright (C) 2017 edkolev
+
+;; Author: edkolev <evgenysw@gmail.com>
+;; URL: http://github.com/edkolev/evil-goggles
+;; Package-Requires: ((emacs "24") (evil "1.0.0"))
+;; Version: 0.0.1
+;; Keywords: emulations, evil, vim, visual
+
+;; This file is NOT part of GNU Emacs.
+
+;;; License:
+;;
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+;;
+;; Add a visual hint to evil operations
+;;
+;; Usage:
+;;
+;; (evil-goggles-mode)
+;;
+;;; Code:
 
 (defvar evil-goggles--on nil)
 (defvar evil-goggles-show-for 0.200) ;; .100 or .200 seem best
@@ -146,12 +160,11 @@
   (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--hooks))
 
 ;; default advice-d core evil functions
-(evil-goggles--advice-add 'evil-delete          'evil-goggles--evil-delete-advice)
-(evil-goggles--advice-add 'evil-indent          'evil-goggles--evil-indent-advice)
-(evil-goggles--advice-add 'evil-yank            'evil-goggles--evil-yank-advice)
-(evil-goggles--advice-add 'evil-join            'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-join-whitespace 'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-surround-region 'evil-goggles--evil-surround-region)
+(evil-goggles--advice-add 'evil-delete                   'evil-goggles--evil-delete-advice)
+(evil-goggles--advice-add 'evil-indent                   'evil-goggles--evil-indent-advice)
+(evil-goggles--advice-add 'evil-yank                     'evil-goggles--evil-yank-advice)
+(evil-goggles--advice-add 'evil-join                     'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-join-whitespace          'evil-goggles--evil-join-advice)
 (evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
 (evil-goggles--advice-add 'evil-commentary               'evil-goggles--evil-commentary-advice)
 (evil-goggles--advice-add 'evil-replace-with-register    'evil-goggles--evil-replace-with-register-advice)
