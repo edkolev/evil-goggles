@@ -56,12 +56,14 @@
    evil-goggles-default-face))
 
 (defun evil-goggles--show (beg end face)
+  "Show overlay in region from BEG to END with FACE."
   (let ((ov (evil-goggles--make-overlay beg end 'face face)))
     (unwind-protect
         (sit-for evil-goggles-show-for)
       (delete-overlay ov))))
 
 (defun evil-goggles--make-overlay (beg end &rest properties)
+  "Make overlay in region from BEG to END with PROPERTIES."
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'priority 9999)
     (overlay-put ov 'window (selected-window))
@@ -70,6 +72,7 @@
     ov))
 
 (defun evil-goggles--show-p (beg end)
+  "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-goggles--on)
        (not evil-inhibit-operator)
        (not evil-inhibit-operator-value)
@@ -83,14 +86,6 @@
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
-(defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
-  (evil-goggles--with-goggles beg end 'evil-delete
-    (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
-
-(defun evil-goggles--evil-indent-advice (orig-fun beg end)
-  (evil-goggles--with-goggles beg end 'evil-indent
-    (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
-
 (defmacro evil-goggles--with-goggles (beg end adviced-fun &rest body)
   (declare (indent defun) (debug t))
   `(if (evil-goggles--show-p ,beg ,end)
@@ -99,10 +94,64 @@
            (progn ,@body))
        (progn ,@body)))
 
-(defmacro evil-goggles--funcall-preserve-interactive (orig-fun &rest args)
+(defmacro evil-goggles--funcall-preserve-interactive (fun &rest args)
+  "Call FUN with ARGS with `funcall' or `funcall-interactively'."
   `(if (called-interactively-p 'any)
-       (funcall-interactively ,orig-fun ,@args)
-     (funcall ,orig-fun ,@args)))
+       (funcall-interactively ,fun ,@args)
+     (funcall ,fun ,@args)))
+
+(define-minor-mode evil-goggles-mode
+  "evil-goggles global minor mode."
+  :lighter " (⌐■-■)"
+  :global t
+  (cond
+   (evil-goggles-mode
+    (evil-goggles--advice-add-all))
+   (t
+    (evil-goggles--advice-remove-all)
+    )))
+
+(defvar evil-goggles--advices (make-hash-table))
+
+(defun evil-goggles--advice-add (fun advice-fun)
+  (when evil-goggles-mode
+    ;; clear any old advice
+    (let ((old-advice-fun (gethash fun evil-goggles--advices)))
+      (when old-advice-fun
+        (message "Replacing advice of %s" fun)
+        (advice-remove fun old-advice-fun)))
+
+    ;; add the new advice
+    (advice-add fun :around advice-fun))
+
+  ;; store the advice so it can be enabled/disabled by the mode
+  (puthash fun advice-fun evil-goggles--advices))
+
+(defun evil-goggles--advice-add-all ()
+  (maphash (lambda (advised-fun advice-fun) (advice-add advised-fun :around advice-fun)) evil-goggles--advices))
+
+(defun evil-goggles--advice-remove-all ()
+  (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--advices))
+
+;; advice-d core evil functions
+(evil-goggles--advice-add 'evil-delete                   'evil-goggles--evil-delete-advice)
+(evil-goggles--advice-add 'evil-indent                   'evil-goggles--evil-indent-advice)
+(evil-goggles--advice-add 'evil-yank                     'evil-goggles--evil-yank-advice)
+(evil-goggles--advice-add 'evil-join                     'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-join-whitespace          'evil-goggles--evil-join-advice)
+
+;; evil non-core packages
+(evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
+(evil-goggles--advice-add 'evil-commentary               'evil-goggles--evil-commentary-advice)
+(evil-goggles--advice-add 'evil-replace-with-register    'evil-goggles--evil-replace-with-register-advice)
+
+(defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
+  (evil-goggles--with-goggles beg end 'evil-delete
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
+
+(defun evil-goggles--evil-indent-advice (orig-fun beg end)
+  (evil-goggles--with-goggles beg end 'evil-indent
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
 (defun evil-goggles--evil-yank-advice (orig-fun beg end &optional type register yank-handler)
   (evil-goggles--with-goggles beg end 'evil-yank
@@ -128,49 +177,6 @@
 (defun evil-goggles--evil-replace-with-register-advice (orig-fun count beg &optional end type register)
   (evil-goggles--with-goggles beg end 'evil-replace-with-register
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
-
-(define-minor-mode evil-goggles-mode
-  "evil-goggles global minor mode."
-  :lighter " (⌐■-■)"
-  :global t
-  (cond
-   (evil-goggles-mode
-    (evil-goggles--advice-add-all))
-   (t
-    (evil-goggles--advice-remove-all)
-    )))
-
-(defvar evil-goggles--hooks (make-hash-table))
-
-(defun evil-goggles--advice-add (fun advice-fun)
-  (when evil-goggles-mode
-    ;; clear any old advice
-    (let ((old-advice-fun (gethash fun evil-goggles--hooks)))
-      (when old-advice-fun
-        (message "Replacing advice of %s" fun)
-        (advice-remove fun old-advice-fun)))
-
-    ;; add the new advice
-    (advice-add fun :around advice-fun))
-
-  ;; store the advice so it can be enabled/disabled by the mode
-  (puthash fun advice-fun evil-goggles--hooks))
-
-(defun evil-goggles--advice-add-all ()
-  (maphash (lambda (advised-fun advice-fun) (advice-add advised-fun :around advice-fun)) evil-goggles--hooks))
-
-(defun evil-goggles--advice-remove-all ()
-  (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--hooks))
-
-;; default advice-d core evil functions
-(evil-goggles--advice-add 'evil-delete                   'evil-goggles--evil-delete-advice)
-(evil-goggles--advice-add 'evil-indent                   'evil-goggles--evil-indent-advice)
-(evil-goggles--advice-add 'evil-yank                     'evil-goggles--evil-yank-advice)
-(evil-goggles--advice-add 'evil-join                     'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-join-whitespace          'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
-(evil-goggles--advice-add 'evil-commentary               'evil-goggles--evil-commentary-advice)
-(evil-goggles--advice-add 'evil-replace-with-register    'evil-goggles--evil-replace-with-register-advice)
 
 (provide 'evil-goggles)
 
