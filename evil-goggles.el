@@ -41,14 +41,14 @@
 
 (defcustom evil-goggles-default-face
   'region
-  "Deafult face for the overlay")
+  "Deafult face for the overlay.")
 
 (defcustom evil-goggles-faces-alist
   `(
     ( evil-delete . evil-ex-substitute-matches ) ;; isearch-fail
     ( evil-yank . evil-ex-substitute-replacement )
     )
-  "Association list of faces to use for different commands")
+  "Association list of faces to use for different commands.")
 
 (defun evil-goggles--face (command)
   "Return the configured face for COMMAND, or the default face."
@@ -90,7 +90,7 @@
 (defvar evil-goggles--on nil
   "When non-nil, the goggles overlay must not be displayed.
 
-Used to prevent displaying multiple overlays for the same command. For
+Used to prevent displaying multiple overlays for the same command.  For
 example, when the user executes `evil-delete', the overlay should be
 displayed, but when `evil-delete' calls internally `evil-yank', the
 overlay must not be displayed.")
@@ -127,12 +127,12 @@ displayed while its running."
     )))
 
 (defvar evil-goggles--advices (make-hash-table)
-  "Hast table with functions which should be advice-d when evil-goggles-mode is toggled.")
+  "Hast table with functions which should be advice-d when evil goggles mode is toggled.")
 
 (defun evil-goggles--advice-add (fun advice-fun)
   "Add advice around FUN with ADVICE-FUN.
 
-Toggling evil-goggles-mode will add/remove the advice"
+Toggling evil goggles mode will add/remove the advice"
   (when evil-goggles-mode
     ;; clear any old advice
     (let ((old-advice-fun (gethash fun evil-goggles--advices)))
@@ -146,9 +146,11 @@ Toggling evil-goggles-mode will add/remove the advice"
   (puthash fun advice-fun evil-goggles--advices))
 
 (defun evil-goggles--advice-add-all ()
+  "Add advice around the functions registered in variable `evil-goggles--advices'."
   (maphash (lambda (advised-fun advice-fun) (advice-add advised-fun :around advice-fun)) evil-goggles--advices))
 
 (defun evil-goggles--advice-remove-all ()
+  "Revemo advice around the functions registered in variable `evil-goggles--advices'."
   (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--advices))
 
 ;; advice-d core evil functions
@@ -165,18 +167,34 @@ Toggling evil-goggles-mode will add/remove the advice"
 (evil-goggles--advice-add 'evil-ex-global                'evil-goggles--evil-ex-global-advice)
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
+  "Around-advice for function `evil-delete`.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-delete
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
 (defun evil-goggles--evil-indent-advice (orig-fun beg end)
+  "Around-advice for function `evil-indent'.
+
+ORIG-FUN is the original function.
+BEG END are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-indent
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
 (defun evil-goggles--evil-yank-advice (orig-fun beg end &optional type register yank-handler)
+  "Around-advice for function `evil-yank'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-yank
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
 (defun evil-goggles--evil-join-advice (orig-fun beg end)
+  "Around-advice for function `evil-join'.
+
+ORIG-FUN is the original function.
+BEG END are the arguments of the original function."
   (let* ((beg-line (line-number-at-pos beg))
          (end-line (line-number-at-pos end))
          (line-count (- end-line beg-line)))
@@ -186,21 +204,37 @@ Toggling evil-goggles-mode will add/remove the advice"
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
 (defun evil-goggles--evil-surround-region-advice (orig-fun beg end &optional type char force-new-line)
+  "Around-advice for function `evil-surround-region'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-surround-region
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
 
 (defun evil-goggles--evil-commentary-advice (orig-fun beg end &optional type)
+  "Around-advice for function `evil-commentary'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-commentary
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
 (defun evil-goggles--evil-replace-with-register-advice (orig-fun count beg &optional end type register)
+  "Around-advice for function `evil-replace-with-register'.
+
+ORIG-FUN is the original function.
+COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-replace-with-register
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
+  "Around-advice for function `evil-ex-global'.
+
+ORIG-FUN is the original function.
+BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original function."
   (let* ((evil-goggles--on t)) ;; set to `t' to prevent showing the overlay
     (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
 
 (provide 'evil-goggles)
 
-;; evil-goggles.el end here
+;;; evil-goggles.el ends here
