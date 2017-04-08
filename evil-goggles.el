@@ -144,6 +144,7 @@
 (evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
 (evil-goggles--advice-add 'evil-commentary               'evil-goggles--evil-commentary-advice)
 (evil-goggles--advice-add 'evil-replace-with-register    'evil-goggles--evil-replace-with-register-advice)
+(evil-goggles--advice-add 'evil-ex-global                'evil-goggles--evil-ex-global-advice)
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
   (evil-goggles--with-goggles beg end 'evil-delete
@@ -177,6 +178,10 @@
 (defun evil-goggles--evil-replace-with-register-advice (orig-fun count beg &optional end type register)
   (evil-goggles--with-goggles beg end 'evil-replace-with-register
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
+
+(defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
+  (let* ((evil-goggles--on t)) ;; set to `t' to prevent showing the overlay
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
 
 (provide 'evil-goggles)
 
