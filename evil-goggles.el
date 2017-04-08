@@ -35,8 +35,13 @@
 ;;
 ;;; Code:
 
-(defvar evil-goggles--on nil)
-(defvar evil-goggles-show-for 0.200) ;; .100 or .200 seem best
+(defcustom evil-goggles-show-for 0.200
+  "Time if floating seconds that the goggles overlay should last."
+  :type 'number)
+
+(defcustom evil-goggles-default-face
+  'region
+  "Deafult face for the overlay")
 
 (defcustom evil-goggles-faces-alist
   `(
@@ -44,10 +49,6 @@
     ( evil-yank . evil-ex-substitute-replacement )
     )
   "Association list of faces to use for different commands")
-
-(defcustom evil-goggles-default-face
-  'region
-  "Deafult face for the overlay")
 
 (defun evil-goggles--face (command)
   "Return the configured face for COMMAND, or the default face."
@@ -86,13 +87,27 @@
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
+(defvar evil-goggles--on nil
+  "When non-nil, the goggles overlay must not be displayed.
+
+Used to prevent displaying multiple overlays for the same command. For
+example, when the user executes `evil-delete', the overlay should be
+displayed, but when `evil-delete' calls internally `evil-yank', the
+overlay must not be displayed.")
+
 (defmacro evil-goggles--with-goggles (beg end adviced-fun &rest body)
+  "Show goggles overlay from BEG to END if the conditions are met.
+
+ADVICED-FUN is used to lookup which face should the overlay use.
+The goggles overlay will be displayed briefly before BODY is executed.
+BODY will be executed but an overlay will not be allowed to be
+displayed while its running."
   (declare (indent defun) (debug t))
   `(if (evil-goggles--show-p ,beg ,end)
-         (let* ((evil-goggles--on t))
-           (evil-goggles--show ,beg ,end (evil-goggles--face ,adviced-fun))
-           (progn ,@body))
-       (progn ,@body)))
+       (let* ((evil-goggles--on t))
+         (evil-goggles--show ,beg ,end (evil-goggles--face ,adviced-fun))
+         (progn ,@body))
+     (progn ,@body)))
 
 (defmacro evil-goggles--funcall-preserve-interactive (fun &rest args)
   "Call FUN with ARGS with `funcall' or `funcall-interactively'."
@@ -111,14 +126,17 @@
     (evil-goggles--advice-remove-all)
     )))
 
-(defvar evil-goggles--advices (make-hash-table))
+(defvar evil-goggles--advices (make-hash-table)
+  "Hast table with functions which should be advice-d when evil-goggles-mode is toggled.")
 
 (defun evil-goggles--advice-add (fun advice-fun)
+  "Add advice around FUN with ADVICE-FUN.
+
+Toggling evil-goggles-mode will add/remove the advice"
   (when evil-goggles-mode
     ;; clear any old advice
     (let ((old-advice-fun (gethash fun evil-goggles--advices)))
       (when old-advice-fun
-        (message "Replacing advice of %s" fun)
         (advice-remove fun old-advice-fun)))
 
     ;; add the new advice
