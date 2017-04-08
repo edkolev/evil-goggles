@@ -43,11 +43,7 @@
   'region
   "Deafult face for the overlay.")
 
-(defcustom evil-goggles-faces-alist
-  `(
-    ( evil-delete . evil-ex-substitute-matches ) ;; isearch-fail
-    ( evil-yank . evil-ex-substitute-replacement )
-    )
+(defcustom evil-goggles-faces-alist nil
   "Association list of faces to use for different commands.")
 
 (defun evil-goggles--face (command)
