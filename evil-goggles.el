@@ -77,7 +77,9 @@
        (<= (point-min) beg end)
        (>= (point-max) end beg)
        (not (evil-visual-state-p))
-       (not (evil-insert-state-p))))
+       (not (evil-insert-state-p))
+       ;; don't show overlay when the region has nothing but whitespace
+       (not (string-match "^[ \t\n]+$" (buffer-substring-no-properties beg end)))))
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
   (evil-goggles--with-goggles beg end 'evil-delete
