@@ -50,14 +50,16 @@
   "Deafult face for the overlay")
 
 (defun evil-goggles--face (command)
+  "Return the configured face for COMMAND, or the default face."
   (or
    (assoc-default command evil-goggles-faces-alist)
    evil-goggles-default-face))
 
 (defun evil-goggles--show (beg end face)
   (let ((ov (evil-goggles--make-overlay beg end 'face face)))
-    (sit-for evil-goggles-show-for)
-    (delete-overlay ov)))
+    (unwind-protect
+        (sit-for evil-goggles-show-for)
+      (delete-overlay ov))))
 
 (defun evil-goggles--make-overlay (beg end &rest properties)
   (let ((ov (make-overlay beg end)))
