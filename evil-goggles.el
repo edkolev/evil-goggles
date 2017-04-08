@@ -69,6 +69,8 @@
 
 (defun evil-goggles--show-p (beg end)
   (and (not evil-goggles--on)
+       (not evil-inhibit-operator)
+       (not evil-inhibit-operator-value)
        (numberp beg)
        (numberp end)
        (> (- end beg) 1)
