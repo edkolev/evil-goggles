@@ -79,13 +79,6 @@
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))))
 
-(defun evil-goggles--generic-advice (beg end orig-fun args face)
-  (if (evil-goggles--show-p beg end)
-      (let* ((evil-goggles--on t))
-        (evil-goggles--show beg end face)
-        (apply orig-fun args))
-    (apply orig-fun args)))
-
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
   (evil-goggles--with-goggles beg end 'evil-delete
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
@@ -107,35 +100,30 @@
        (funcall-interactively ,orig-fun ,@args)
      (funcall ,orig-fun ,@args)))
 
-(defun evil-goggles--evil-yank-advice (orig-fun &rest args)
-  (let ((beg (nth 0 args))
-        (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-yank))))
+(defun evil-goggles--evil-yank-advice (orig-fun beg end &optional type register yank-handler)
+  (evil-goggles--with-goggles beg end 'evil-yank
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
-(defun evil-goggles--evil-join-advice (orig-fun &rest args)
-  (let* ((beg (nth 0 args))
-         (end (nth 1 args))
-         (beg-line (line-number-at-pos beg))
+(defun evil-goggles--evil-join-advice (orig-fun beg end)
+  (let* ((beg-line (line-number-at-pos beg))
          (end-line (line-number-at-pos end))
          (line-count (- end-line beg-line)))
     (if (> line-count 1) ;; don't show goggles for single lines ("J"/"gJ" without count)
-        (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-join))
-      (apply orig-fun args))))
+        (evil-goggles--with-goggles beg end 'evil-join
+          (evil-goggles--funcall-preserve-interactive orig-fun beg end))
+      (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
-(defun evil-goggles--evil-surround-region-advice (orig-fun &rest args)
-  (let ((beg (nth 0 args))
-        (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-surround))))
+(defun evil-goggles--evil-surround-region-advice (orig-fun beg end &optional type char force-new-line)
+  (evil-goggles--with-goggles beg end 'evil-surround-region
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
 
-(defun evil-goggles--evil-commentary-advice (orig-fun &rest args)
-  (let ((beg (nth 0 args))
-        (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-commentary))))
+(defun evil-goggles--evil-commentary-advice (orig-fun beg end &optional type)
+  (evil-goggles--with-goggles beg end 'evil-commentary
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
-(defun evil-goggles--evil-replace-with-register-advice (orig-fun &rest args)
-  (let ((beg (nth 1 args))
-        (end (nth 2 args)))
-    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-replace-with-register))))
+(defun evil-goggles--evil-replace-with-register-advice (orig-fun count beg &optional end type register)
+  (evil-goggles--with-goggles beg end 'evil-replace-with-register
+    (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
