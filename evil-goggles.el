@@ -87,11 +87,8 @@
     (apply orig-fun args)))
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
-  (if (evil-goggles--show-p beg end)
-      (let* ((evil-goggles--on t))
-        (evil-goggles--show beg end (evil-goggles--face 'evil-delete))
-        (funcall-interactively orig-fun beg end type register yank-handler))
-    (funcall-interactively orig-fun beg end type register yank-handler)))
+  (evil-goggles--with-goggles beg end 'evil-delete
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
 (defun evil-goggles--evil-indent-advice (orig-fun beg end)
   (evil-goggles--with-goggles beg end 'evil-indent
