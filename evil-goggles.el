@@ -93,10 +93,22 @@
         (funcall-interactively orig-fun beg end type register yank-handler))
     (funcall-interactively orig-fun beg end type register yank-handler)))
 
-(defun evil-goggles--evil-indent-advice (orig-fun &rest args)
-  (let ((beg (nth 0 args))
-        (end (nth 1 args)))
-    (evil-goggles--generic-advice beg end orig-fun args (evil-goggles--face 'evil-indent))))
+(defun evil-goggles--evil-indent-advice (orig-fun beg end)
+  (evil-goggles--with-goggles beg end 'evil-indent
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
+
+(defmacro evil-goggles--with-goggles (beg end adviced-fun &rest body)
+  (declare (indent defun) (debug t))
+  `(if (evil-goggles--show-p ,beg ,end)
+         (let* ((evil-goggles--on t))
+           (evil-goggles--show ,beg ,end (evil-goggles--face ,adviced-fun))
+           (progn ,@body))
+       (progn ,@body)))
+
+(defmacro evil-goggles--funcall-preserve-interactive (orig-fun &rest args)
+  `(if (called-interactively-p 'any)
+       (funcall-interactively ,orig-fun ,@args)
+     (funcall ,orig-fun ,@args)))
 
 (defun evil-goggles--evil-yank-advice (orig-fun &rest args)
   (let ((beg (nth 0 args))
