@@ -155,6 +155,8 @@ Toggling evil goggles mode will add/remove the advice"
 (evil-goggles--advice-add 'evil-yank                     'evil-goggles--evil-yank-advice)
 (evil-goggles--advice-add 'evil-join                     'evil-goggles--evil-join-advice)
 (evil-goggles--advice-add 'evil-join-whitespace          'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-paste-after              'evil-goggles--evil-paste-after-advice)
+(evil-goggles--advice-add 'evil-paste-before             'evil-goggles--evil-paste-before-advice)
 
 ;; evil non-core packages
 (evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
@@ -230,6 +232,39 @@ ORIG-FUN is the original function.
 BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original function."
   (let* ((evil-goggles--on t)) ;; set to `t' to prevent showing the overlay
     (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
+
+(defun evil-goggles--evil-paste-after-advice (orig-fun count &optional register yank-handler)
+  "Around-advice for function `evil-paste-after'.
+
+ORIG-FUN is the original function.
+COUNT REGISTER YANK-HANDLER are the arguments of the original function."
+  (let ((was-in-normal-state (evil-normal-state-p)))
+    (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
+    (when was-in-normal-state
+      (evil-goggles--evil-paste-show 'evil-paste-after))))
+
+(defun evil-goggles--evil-paste-before-advice (orig-fun count &optional register yank-handler)
+  "Around-advice for function `evil-paste-before'.
+
+ORIG-FUN is the original function.
+COUNT REGISTER YANK-HANDLER are the arguments of the original function."
+  (let ((was-in-normal-state (evil-normal-state-p)))
+    (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
+    (when was-in-normal-state
+      (evil-goggles--evil-paste-show 'evil-paste-before))))
+
+(defun evil-goggles--evil-paste-show (adviced-fun)
+  "Helper fun to show the goggles overlay on the last pasted text.
+
+ADVICED-FUN is used to lookup the face for the overlay.
+The overlay region is derermined by evil's variable `evil-last-paste'"
+  (unless evil-goggles--on
+    (let* ((beg (nth 3 evil-last-paste))
+           (end (nth 4 evil-last-paste))
+           (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
+           (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
+      (when (and beg end)
+        (evil-goggles--show beg-corrected end (evil-goggles--face adviced-fun))))))
 
 (provide 'evil-goggles)
 
