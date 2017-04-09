@@ -150,19 +150,19 @@ Toggling evil goggles mode will add/remove the advice"
   (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--advices))
 
 ;; advice-d core evil functions
-(evil-goggles--advice-add 'evil-delete                   'evil-goggles--evil-delete-advice)
-(evil-goggles--advice-add 'evil-indent                   'evil-goggles--evil-indent-advice)
-(evil-goggles--advice-add 'evil-yank                     'evil-goggles--evil-yank-advice)
-(evil-goggles--advice-add 'evil-join                     'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-join-whitespace          'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-paste-after              'evil-goggles--evil-paste-after-advice)
-(evil-goggles--advice-add 'evil-paste-before             'evil-goggles--evil-paste-before-advice)
+(evil-goggles--advice-add 'evil-delete                'evil-goggles--evil-delete-advice)
+(evil-goggles--advice-add 'evil-indent                'evil-goggles--evil-indent-advice)
+(evil-goggles--advice-add 'evil-yank                  'evil-goggles--evil-yank-advice)
+(evil-goggles--advice-add 'evil-join                  'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-join-whitespace       'evil-goggles--evil-join-advice)
+(evil-goggles--advice-add 'evil-paste-after           'evil-goggles--evil-paste-after-advice)
+(evil-goggles--advice-add 'evil-paste-before          'evil-goggles--evil-paste-before-advice)
 
 ;; evil non-core packages
-(evil-goggles--advice-add 'evil-surround-region          'evil-goggles--evil-surround-region-advice)
-(evil-goggles--advice-add 'evil-commentary               'evil-goggles--evil-commentary-advice)
-(evil-goggles--advice-add 'evil-replace-with-register    'evil-goggles--evil-replace-with-register-advice)
-(evil-goggles--advice-add 'evil-ex-global                'evil-goggles--evil-ex-global-advice)
+(evil-goggles--advice-add 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
+(evil-goggles--advice-add 'evil-commentary            'evil-goggles--evil-commentary-advice)
+(evil-goggles--advice-add 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice)
+(evil-goggles--advice-add 'evil-ex-global             'evil-goggles--evil-ex-global-advice)
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
   "Around-advice for function `evil-delete`.
