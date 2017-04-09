@@ -46,6 +46,9 @@
 (defcustom evil-goggles-faces-alist nil
   "Association list of faces to use for different commands.")
 
+(defcustom evil-goggles-blacklist nil
+  "List of functions which should not display the goggles overlay.")
+
 (defun evil-goggles--face (command)
   "Return the configured face for COMMAND, or the default face."
   (or
@@ -143,7 +146,11 @@ Toggling evil goggles mode will add/remove the advice"
 
 (defun evil-goggles--advice-add-all ()
   "Add advice around the functions registered in variable `evil-goggles--advices'."
-  (maphash (lambda (advised-fun advice-fun) (advice-add advised-fun :around advice-fun)) evil-goggles--advices))
+  (maphash
+   (lambda (advised-fun advice-fun)
+     (unless (memq advised-fun evil-goggles-blacklist)
+       (advice-add advised-fun :around advice-fun)))
+   evil-goggles--advices))
 
 (defun evil-goggles--advice-remove-all ()
   "Revemo advice around the functions registered in variable `evil-goggles--advices'."
