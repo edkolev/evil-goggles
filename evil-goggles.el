@@ -74,7 +74,6 @@
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-goggles--on)
-       (not evil-inhibit-operator)
        (not evil-inhibit-operator-value)
        (numberp beg)
        (numberp end)
