@@ -244,20 +244,22 @@ BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original funct
 
 ORIG-FUN is the original function.
 COUNT REGISTER YANK-HANDLER are the arguments of the original function."
-  (let ((was-in-normal-state (evil-normal-state-p)))
-    (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
+  (let ((was-in-normal-state (evil-normal-state-p))
+        (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
     (when was-in-normal-state
-      (evil-goggles--evil-paste-show 'evil-paste-after))))
+      (evil-goggles--evil-paste-show 'evil-paste-after))
+    orig-fun-result))
 
 (defun evil-goggles--evil-paste-before-advice (orig-fun count &optional register yank-handler)
   "Around-advice for function `evil-paste-before'.
 
 ORIG-FUN is the original function.
 COUNT REGISTER YANK-HANDLER are the arguments of the original function."
-  (let ((was-in-normal-state (evil-normal-state-p)))
-    (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
+  (let ((was-in-normal-state (evil-normal-state-p))
+        (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
     (when was-in-normal-state
-      (evil-goggles--evil-paste-show 'evil-paste-before))))
+      (evil-goggles--evil-paste-show 'evil-paste-before))
+    orig-fun-result))
 
 (defun evil-goggles--evil-paste-show (adviced-fun)
   "Helper fun to show the goggles overlay on the last pasted text.
