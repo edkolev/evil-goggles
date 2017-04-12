@@ -35,19 +35,27 @@
 ;;
 ;;; Code:
 
+(require 'evil)
+
 (defcustom evil-goggles-show-for 0.200
   "Time if floating seconds that the goggles overlay should last."
-  :type 'number)
+  :type 'number
+  :group 'evil-goggles)
 
-(defcustom evil-goggles-default-face
-  'region
-  "Deafult face for the overlay.")
+(defcustom evil-goggles-default-face 'region
+  "Deafult face for the overlay."
+  :type 'sexp
+  :group 'evil-goggles)
 
 (defcustom evil-goggles-faces-alist nil
-  "Association list of faces to use for different commands.")
+  "Association list of faces to use for different commands."
+  :type 'boolean
+  :group 'evil-goggles)
 
 (defcustom evil-goggles-blacklist nil
-  "List of functions which should not display the goggles overlay.")
+  "List of functions which should not display the goggles overlay."
+  :type 'boolean
+  :group 'evil-goggles)
 
 (defun evil-goggles--face (command)
   "Return the configured face for COMMAND, or the default face."
@@ -71,6 +79,14 @@
       (overlay-put ov (pop properties) (pop properties)))
     ov))
 
+(defvar evil-goggles--on nil
+  "When non-nil, the goggles overlay must not be displayed.
+
+Used to prevent displaying multiple overlays for the same command.  For
+example, when the user executes `evil-delete', the overlay should be
+displayed, but when `evil-delete' calls internally `evil-yank', the
+overlay must not be displayed.")
+
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-goggles--on)
@@ -84,14 +100,6 @@
        (not (evil-insert-state-p))
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
-
-(defvar evil-goggles--on nil
-  "When non-nil, the goggles overlay must not be displayed.
-
-Used to prevent displaying multiple overlays for the same command.  For
-example, when the user executes `evil-delete', the overlay should be
-displayed, but when `evil-delete' calls internally `evil-yank', the
-overlay must not be displayed.")
 
 (defmacro evil-goggles--with-goggles (beg end adviced-fun &rest body)
   "Show goggles overlay from BEG to END if the conditions are met.
