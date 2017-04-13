@@ -127,56 +127,44 @@ displayed while its running."
   :global t
   (cond
    (evil-goggles-mode
-    (evil-goggles--advice-add-all))
+    ;; evil core functions
+
+    (evil-goggles--advice-add 'evil-delete                'evil-goggles--evil-delete-advice)
+    (evil-goggles--advice-add 'evil-indent                'evil-goggles--evil-indent-advice)
+    (evil-goggles--advice-add 'evil-yank                  'evil-goggles--evil-yank-advice)
+    (evil-goggles--advice-add 'evil-join                  'evil-goggles--evil-join-advice)
+    (evil-goggles--advice-add 'evil-join-whitespace       'evil-goggles--evil-join-advice)
+    (evil-goggles--advice-add 'evil-paste-after           'evil-goggles--evil-paste-after-advice)
+    (evil-goggles--advice-add 'evil-paste-before          'evil-goggles--evil-paste-before-advice)
+
+    ;; evil non-core packages
+    (evil-goggles--advice-add 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
+    (evil-goggles--advice-add 'evil-commentary            'evil-goggles--evil-commentary-advice)
+    (evil-goggles--advice-add 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice)
+    (evil-goggles--advice-add 'evil-ex-global             'evil-goggles--evil-ex-global-advice))
    (t
-    (evil-goggles--advice-remove-all)
-    )))
+    (advice-remove 'evil-delete                'evil-goggles--evil-delete-advice)
+    (advice-remove 'evil-indent                'evil-goggles--evil-indent-advice)
+    (advice-remove 'evil-yank                  'evil-goggles--evil-yank-advice)
+    (advice-remove 'evil-join                  'evil-goggles--evil-join-advice)
+    (advice-remove 'evil-join-whitespace       'evil-goggles--evil-join-advice)
+    (advice-remove 'evil-paste-after           'evil-goggles--evil-paste-after-advice)
+    (advice-remove 'evil-paste-before          'evil-goggles--evil-paste-before-advice)
+    (advice-remove 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
+    (advice-remove 'evil-commentary            'evil-goggles--evil-commentary-advice)
+    (advice-remove 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice)
+    (advice-remove 'evil-ex-global             'evil-goggles--evil-ex-global-advice))))
 
-(defvar evil-goggles--advices (make-hash-table)
-  "Hast table with functions which should be advice-d when evil goggles mode is toggled.")
+(defun evil-goggles--advice-add (adviced-fun advice)
+  "Add advice around ADVICED-FUN with ADVICE.
 
-(defun evil-goggles--advice-add (fun advice-fun)
-  "Add advice around FUN with ADVICE-FUN.
+This function doesn't do anyting if FUN is in variable
+`evil-goggles-blacklist'"
+  (unless (memq adviced-fun evil-goggles-blacklist)
+    (advice-add adviced-fun :around advice)))
 
-Toggling evil goggles mode will add/remove the advice"
-  (when evil-goggles-mode
-    ;; clear any old advice
-    (let ((old-advice-fun (gethash fun evil-goggles--advices)))
-      (when old-advice-fun
-        (advice-remove fun old-advice-fun)))
-
-    ;; add the new advice
-    (advice-add fun :around advice-fun))
-
-  ;; store the advice so it can be enabled/disabled by the mode
-  (puthash fun advice-fun evil-goggles--advices))
-
-(defun evil-goggles--advice-add-all ()
-  "Add advice around the functions registered in variable `evil-goggles--advices'."
-  (maphash
-   (lambda (advised-fun advice-fun)
-     (unless (memq advised-fun evil-goggles-blacklist)
-       (advice-add advised-fun :around advice-fun)))
-   evil-goggles--advices))
-
-(defun evil-goggles--advice-remove-all ()
-  "Revemo advice around the functions registered in variable `evil-goggles--advices'."
-  (maphash (lambda (advised-fun advice-fun) (advice-remove advised-fun advice-fun)) evil-goggles--advices))
-
-;; advice-d core evil functions
-(evil-goggles--advice-add 'evil-delete                'evil-goggles--evil-delete-advice)
-(evil-goggles--advice-add 'evil-indent                'evil-goggles--evil-indent-advice)
-(evil-goggles--advice-add 'evil-yank                  'evil-goggles--evil-yank-advice)
-(evil-goggles--advice-add 'evil-join                  'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-join-whitespace       'evil-goggles--evil-join-advice)
-(evil-goggles--advice-add 'evil-paste-after           'evil-goggles--evil-paste-after-advice)
-(evil-goggles--advice-add 'evil-paste-before          'evil-goggles--evil-paste-before-advice)
-
-;; evil non-core packages
-(evil-goggles--advice-add 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
-(evil-goggles--advice-add 'evil-commentary            'evil-goggles--evil-commentary-advice)
-(evil-goggles--advice-add 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice)
-(evil-goggles--advice-add 'evil-ex-global             'evil-goggles--evil-ex-global-advice)
+;; core ends here; below are functions which use the core to display
+;; the visual hint
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
   "Around-advice for function `evil-delete`.
