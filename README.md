@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/edkolev/evil-goggles.svg?branch=master)](https://travis-ci.org/edkolev/evil-goggles)
+
 evil-goggles
 =========
 
