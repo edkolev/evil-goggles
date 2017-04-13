@@ -18,6 +18,16 @@
      (evil-delete (point-min) (point-max))
      "")))
 
+(ert-deftest evil-test-last-insert-register ()
+  "Test last insertion register."
+  (evil-test-buffer
+   "[l]ine 1\n"
+   ("GiABC" [escape])
+   "line 1\nAB[C]"
+   ("gg\".P")
+   "AB[C]line 1\nABC"))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code below is copied from evil-tests.el
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

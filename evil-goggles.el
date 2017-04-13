@@ -263,11 +263,11 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
 ADVICED-FUN is used to lookup the face for the overlay.
 The overlay region is derermined by evil's variable `evil-last-paste'"
   (unless evil-goggles--on
-    (let* ((beg (nth 3 evil-last-paste))
-           (end (nth 4 evil-last-paste))
-           (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
-           (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
-      (when (and beg end)
+    (when evil-last-paste
+      (let* ((beg (nth 3 evil-last-paste))
+             (end (nth 4 evil-last-paste))
+             (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
+             (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
         (evil-goggles--show beg-corrected end (evil-goggles--face adviced-fun))))))
 
 (provide 'evil-goggles)
