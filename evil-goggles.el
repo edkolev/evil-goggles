@@ -136,12 +136,13 @@ displayed while its running."
     (evil-goggles--advice-add 'evil-join-whitespace       'evil-goggles--evil-join-advice)
     (evil-goggles--advice-add 'evil-paste-after           'evil-goggles--evil-paste-after-advice)
     (evil-goggles--advice-add 'evil-paste-before          'evil-goggles--evil-paste-before-advice)
+    (evil-goggles--advice-add 'evil-ex-global             'evil-goggles--evil-ex-global-advice)
+    (evil-goggles--advice-add 'evil-fill-and-move         'evil-goggles--evil-fill-and-move-advice)
 
     ;; evil non-core packages
     (evil-goggles--advice-add 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
     (evil-goggles--advice-add 'evil-commentary            'evil-goggles--evil-commentary-advice)
-    (evil-goggles--advice-add 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice)
-    (evil-goggles--advice-add 'evil-ex-global             'evil-goggles--evil-ex-global-advice))
+    (evil-goggles--advice-add 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice))
    (t
     (advice-remove 'evil-delete                'evil-goggles--evil-delete-advice)
     (advice-remove 'evil-indent                'evil-goggles--evil-indent-advice)
@@ -150,10 +151,12 @@ displayed while its running."
     (advice-remove 'evil-join-whitespace       'evil-goggles--evil-join-advice)
     (advice-remove 'evil-paste-after           'evil-goggles--evil-paste-after-advice)
     (advice-remove 'evil-paste-before          'evil-goggles--evil-paste-before-advice)
+    (advice-remove 'evil-ex-global             'evil-goggles--evil-ex-global-advice)
+    (advice-remove 'evil-fill-and-move         'evil-goggles--evil-fill-and-move-advice)
+
     (advice-remove 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
     (advice-remove 'evil-commentary            'evil-goggles--evil-commentary-advice)
-    (advice-remove 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice)
-    (advice-remove 'evil-ex-global             'evil-goggles--evil-ex-global-advice))))
+    (advice-remove 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice))))
 
 (defun evil-goggles--advice-add (adviced-fun advice)
   "Add advice around ADVICED-FUN with ADVICE.
@@ -268,6 +271,15 @@ The overlay region is derermined by evil's variable `evil-last-paste'"
            (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
            (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
       (evil-goggles--show beg-corrected end (evil-goggles--face adviced-fun)))))
+
+(defun evil-goggles--evil-fill-and-move-advice (orig-fun beg end)
+  "Around-advice for function `evil-fill-and-move'.
+
+ORIG-FUN is the original function.
+BEG END arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-fill-and-move
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
+
 
 (provide 'evil-goggles)
 
