@@ -49,7 +49,7 @@ Installation
 
 `(evil-goggles-mode)`
 
-## Supported edit actions
+## edit actions with hint
 
 - delete
 - yank
@@ -58,11 +58,11 @@ Installation
 - join
 - format (`gq` operator)
 
-### evil plugins
+### evil plugins with hint
 
-- ![evil-surround](https://github.com/timcharper/evil-surround)
-- ![evil-commentary](https://github.com/linktohack/evil-commentary)
-- ![evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
+- [evil-surround](https://github.com/timcharper/evil-surround)
+- [evil-commentary](https://github.com/linktohack/evil-commentary)
+- [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
 
 Customization
 -------------

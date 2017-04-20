@@ -121,9 +121,15 @@ displayed while its running."
        (funcall-interactively ,fun ,@args)
      (funcall ,fun ,@args)))
 
+(defcustom evil-goggles-lighter
+  " EG"
+  ;; " (⌐■-■)"
+  "String used on the mode-line."
+  :type 'string)
+
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
-  :lighter " (⌐■-■)"
+  :lighter evil-goggles-lighter
   :global t
   (cond
    (evil-goggles-mode
