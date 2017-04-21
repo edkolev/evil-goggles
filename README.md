@@ -6,10 +6,14 @@ evil-goggles
 This package displays a visual hint when editing text in
 `evil-mode`.
 
-For example `yy` will briefly highlight the line to
-indicate it has just been yanked, `diw` will highlight the "inner word"
-right before deleting it, `p` and `P` will highlight the newly pasted
-text for a short moment.
+![change-bw-quotes](https://cloud.githubusercontent.com/assets/1532071/25258968/e140b104-264b-11e7-8097-ed40456698d6.gif)
+![delete-line](https://cloud.githubusercontent.com/assets/1532071/25258971/e14c4a78-264b-11e7-8943-6b2197cf9a98.gif)
+![disappear-on-input](https://cloud.githubusercontent.com/assets/1532071/25258970/e14bb46e-264b-11e7-814d-e64d8a26a308.gif)
+![join-lines](https://cloud.githubusercontent.com/assets/1532071/25258972/e14d6412-264b-11e7-8d20-9c930c78c179.gif)
+![maybe](https://cloud.githubusercontent.com/assets/1532071/25258973/e14e166e-264b-11e7-8ffb-7fafccc38324.gif)
+![maybe2](https://cloud.githubusercontent.com/assets/1532071/25258969/e14a718a-264b-11e7-8d0e-221b84ecdeac.gif)
+![paste-line](https://cloud.githubusercontent.com/assets/1532071/25258974/e156c200-264b-11e7-88ce-1316add482ca.gif)
+![yank-line](https://cloud.githubusercontent.com/assets/1532071/25258975/e16109a4-264b-11e7-89da-b44dab56ffd9.gif)
 
 Installation
 ------------
@@ -29,11 +33,19 @@ Installation
 
 `(evil-goggles-mode)`
 
-Examples
---------
+Supported edit actions
+----------------------
 
-...
+- delete
+- yank
+- paste with `p` and `P`
+- indent (`=` operator)
+- join
+- format (`gq` operator)
 
+- evil surround
+- evil commentary
+- evil replace with register
 
 Customization
 -------------
