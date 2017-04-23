@@ -37,7 +37,7 @@
 
 (require 'evil)
 
-(defcustom evil-goggles-show-for 0.200
+(defcustom evil-goggles-duration 0.200
   "Time if floating seconds that the goggles overlay should last."
   :type 'number
   :group 'evil-goggles)
@@ -67,7 +67,7 @@
   "Show overlay in region from BEG to END with FACE."
   (let ((ov (evil-goggles--make-overlay beg end 'face face)))
     (unwind-protect
-        (sit-for evil-goggles-show-for)
+        (sit-for evil-goggles-duration)
       (delete-overlay ov))))
 
 (defun evil-goggles--make-overlay (beg end &rest properties)
