@@ -9,7 +9,7 @@ evil-goggles
 ![yank-paste-delete](https://cloud.githubusercontent.com/assets/1532071/25314631/88a27184-2850-11e7-9272-7e1aaa3729bf.gif)
 
 
-![change](https://cloud.githubusercontent.com/assets/1532071/25314630/889cfc04-2850-11e7-9414-f9b351bbecb7.gif)
+![change](https://cloud.githubusercontent.com/assets/1532071/25314980/2df8fbbc-2856-11e7-926f-8d23bcbda934.gif)
 
 
 ![join-lines](https://cloud.githubusercontent.com/assets/1532071/25258972/e14d6412-264b-11e7-8d20-9c930c78c179.gif)
