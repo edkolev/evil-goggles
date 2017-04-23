@@ -3,8 +3,7 @@
 evil-goggles
 =========
 
-This package displays a visual hint when editing text in
-`evil-mode`.
+`evil-goggles-mode` displays a visual hint when editing text with [evil](https://github.com/emacs-evil/evil).
 
 
 ![yank-line](https://cloud.githubusercontent.com/assets/1532071/25258975/e16109a4-264b-11e7-89da-b44dab56ffd9.gif)
@@ -23,9 +22,6 @@ This package displays a visual hint when editing text in
 
 
 ![maybe](https://cloud.githubusercontent.com/assets/1532071/25258973/e14e166e-264b-11e7-8ffb-7fafccc38324.gif)
-
-
-![maybe2](https://cloud.githubusercontent.com/assets/1532071/25258969/e14a718a-264b-11e7-8d0e-221b84ecdeac.gif)
 
 
 ![disappear-on-input](https://cloud.githubusercontent.com/assets/1532071/25258970/e14bb46e-264b-11e7-814d-e64d8a26a308.gif)
@@ -49,42 +45,46 @@ Installation
 
 `(evil-goggles-mode)`
 
-## edit actions with hint
+### edit actions with hint
 
-- delete
-- yank
-- paste with `p` and `P`
-- indent (`=` operator)
-- join
-- format (`gq` operator)
+- delete `evil-delete`
+- yank `evil-yank`
+- paste with `p` and `P` `evil-paste-before` and `evil-paste-after`
+- indent (`=` operator) `evil-indent`
+- join `evil-join` and `evil-join-whitespace`
+- format (`gq` operator) `evil-fill-and-move`
 
 ### evil plugins with hint
 
-- [evil-surround](https://github.com/timcharper/evil-surround)
-- [evil-commentary](https://github.com/linktohack/evil-commentary)
-- [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
+- [evil-surround](https://github.com/timcharper/evil-surround) `evil-surround-region`
+- [evil-commentary](https://github.com/linktohack/evil-commentary) `evil-commentary`
+- [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister) `evil-replace-with-register`
 
 Customization
 -------------
 
-- By default, the `region` face is used for all overlays. To use different faces:
+- The appearance of the overlay can be configured with `evil-goggles-default-face`. By default, the `region` face is used for every action. To get a list of available faces on emacs start, start a fresh emacs and run `M-x list-faces-display`.
+```
+;; default is 'region, you can try `isearch-fail
+(setq evil-goggles-default-face 'highlight)
+```
+- To use different faces per edit action:
 ```emacs-lisp
 (require 'diff-mode) ;; load diff-* faces
-  (setq evil-goggles-faces-alist `(
-                                   ( evil-delete . diff-removed ) ;; isearch-fail
-                                   ( evil-yank . diff-changed )
-                                   ( evil-paste-after . diff-added )
-                                   ( evil-paste-before . diff-added )
-                                   ))
+(setq evil-goggles-faces-alist `(
+                                 ( evil-delete . diff-removed )
+                                 ( evil-yank . diff-changed )
+                                 ( evil-paste-after . diff-added )
+                                 ( evil-paste-before . diff-added )))
 ```
 
-- `evil-goggles-show-for` 0.200
-- `evil-goggles-default-face` 'region
-- `evil-goggles-faces-alist` nil
-``` emacs-lisp
-  (setq evil-goggles-faces-alist (
-    ( evil-delete . evil-ex-substitute-matches ) ;; isearch-fail
-    ( evil-yank . evil-ex-substitute-replacement )
-    ))
+- The duration the overlay is configured with `evil-goggles-duration`:
 ```
-- `evil-goggles-blacklist` nil
+(setq evil-goggles-duration 0.100) ;; default is 0.200 
+```
+
+- To disable when the hint on certain actions, configure `evil-goggles-blacklist`
+```
+;; to disable the hint when yanking or deleting
+(setq evil-goggles-blacklist `(evil-yank evil-delete)
+```
