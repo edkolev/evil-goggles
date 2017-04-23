@@ -3,28 +3,22 @@
 evil-goggles
 =========
 
-`evil-goggles-mode` displays a visual hint when editing text with [evil](https://github.com/emacs-evil/evil).
+`evil-goggles-mode` displays a visual hint when editing with [evil](https://github.com/emacs-evil/evil).
 
 
-![yank-line](https://cloud.githubusercontent.com/assets/1532071/25258975/e16109a4-264b-11e7-89da-b44dab56ffd9.gif)
+![yank-paste-delete](https://cloud.githubusercontent.com/assets/1532071/25314631/88a27184-2850-11e7-9272-7e1aaa3729bf.gif)
 
 
-![paste-line](https://cloud.githubusercontent.com/assets/1532071/25258974/e156c200-264b-11e7-88ce-1316add482ca.gif)
-
-
-![delete-line](https://cloud.githubusercontent.com/assets/1532071/25258971/e14c4a78-264b-11e7-8943-6b2197cf9a98.gif)
+![change](https://cloud.githubusercontent.com/assets/1532071/25314630/889cfc04-2850-11e7-9414-f9b351bbecb7.gif)
 
 
 ![join-lines](https://cloud.githubusercontent.com/assets/1532071/25258972/e14d6412-264b-11e7-8d20-9c930c78c179.gif)
 
 
-![change-bw-quotes](https://cloud.githubusercontent.com/assets/1532071/25258968/e140b104-264b-11e7-8097-ed40456698d6.gif)
+![indent-region](https://cloud.githubusercontent.com/assets/1532071/25314629/889ae018-2850-11e7-9c9b-579edda38771.gif)
 
 
-![maybe](https://cloud.githubusercontent.com/assets/1532071/25258973/e14e166e-264b-11e7-8ffb-7fafccc38324.gif)
-
-
-![disappear-on-input](https://cloud.githubusercontent.com/assets/1532071/25258970/e14bb46e-264b-11e7-814d-e64d8a26a308.gif)
+![fast-replace](https://cloud.githubusercontent.com/assets/1532071/25314628/889ab1c4-2850-11e7-9cf5-c801b8293583.gif)
 
 
 Installation
