@@ -4,7 +4,7 @@
 
 ;; Author: edkolev <evgenysw@gmail.com>
 ;; URL: http://github.com/edkolev/evil-goggles
-;; Package-Requires: ((emacs "24") (evil "1.0.0"))
+;; Package-Requires: ((emacs "25") (evil "1.0.0"))
 ;; Version: 0.0.1
 ;; Keywords: emulations, evil, vim, visual
 
@@ -27,7 +27,8 @@
 
 ;;; Commentary:
 ;;
-;; Add a visual hint to evil operations
+;; Add a visual hint to evil edit operations such as yank, delete,
+;; paste, etc.
 ;;
 ;; Usage:
 ;;
