@@ -126,6 +126,7 @@ displayed while its running."
   " EG"
   ;; " (⌐■-■)"
   "String used on the mode-line."
+  :group 'evil-goggles
   :type 'string)
 
 (define-minor-mode evil-goggles-mode
