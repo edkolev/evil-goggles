@@ -24,7 +24,7 @@ evil-goggles
 Installation
 ------------
 
-#### with [use-package](https://github.com/jwiegley/use-package)
+#### with [use-package](https://github.com/jwiegley/use-package) from [Melpa](melpa.org)
 ``` emacs-lisp
 ;; NOTE: this doesn't work yet, package is not on Melpa
 (use-package evil-goggles
@@ -33,7 +33,7 @@ Installation
   (evil-goggles-mode))
 ```
 
-#### without [use-package](https://github.com/jwiegley/use-package)
+#### without [use-package](https://github.com/jwiegley/use-package) from [Melpa](melpa.org)
 
 `M-x package-install RET evil-goggles RET`, then add in `init.el`:
 
