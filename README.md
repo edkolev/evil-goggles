@@ -6,7 +6,7 @@ evil-goggles
 `evil-goggles-mode` displays a visual hint when editing with [evil](https://github.com/emacs-evil/evil).
 
 
-![yank-paste-delete](https://cloud.githubusercontent.com/assets/1532071/25314631/88a27184-2850-11e7-9272-7e1aaa3729bf.gif)
+![yank-paste-delete](https://cloud.githubusercontent.com/assets/1532071/25412512/ece4e108-29d7-11e7-90ba-834923c05a02.gif)
 
 
 ![change](https://cloud.githubusercontent.com/assets/1532071/25314980/2df8fbbc-2856-11e7-926f-8d23bcbda934.gif)
