@@ -39,7 +39,9 @@ Installation
 
 `(evil-goggles-mode)`
 
-### edit actions with hint
+## Actions with visual hint
+
+#### edit actions with hint
 
 - delete `evil-delete`
 - yank `evil-yank`
@@ -48,7 +50,7 @@ Installation
 - join `evil-join` and `evil-join-whitespace`
 - format (`gq` operator) `evil-fill-and-move`
 
-### evil plugins with hint
+#### evil plugins with hint
 
 - [evil-surround](https://github.com/timcharper/evil-surround) `evil-surround-region`
 - [evil-commentary](https://github.com/linktohack/evil-commentary) `evil-commentary`
@@ -58,7 +60,7 @@ Customization
 -------------
 
 - The appearance of the overlay can be configured with `evil-goggles-default-face`. By default, the `region` face is used for every action. To get a list of available faces on emacs start, start a fresh emacs and run `M-x list-faces-display`.
-```
+```emacs-lisp
 ;; default is 'region, you can try `isearch-fail
 (setq evil-goggles-default-face 'highlight)
 ```
@@ -72,13 +74,13 @@ Customization
                                  ( evil-paste-before . diff-added )))
 ```
 
-- The duration the overlay is configured with `evil-goggles-duration`:
-```
+- The duration of the overlay is configured with `evil-goggles-duration`:
+```emacs-lisp
 (setq evil-goggles-duration 0.100) ;; default is 0.200 
 ```
 
-- To disable when the hint on certain actions, configure `evil-goggles-blacklist`
-```
+- To disable the hint on certain actions, configure `evil-goggles-blacklist`
+```emacs-lisp
 ;; to disable the hint when yanking or deleting
 (setq evil-goggles-blacklist `(evil-yank evil-delete)
 ```
