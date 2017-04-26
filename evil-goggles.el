@@ -129,6 +129,7 @@ displayed while its running."
   :group 'evil-goggles
   :type 'string)
 
+;;;###autoload
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
   :lighter evil-goggles-lighter
