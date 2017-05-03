@@ -43,9 +43,9 @@
   :type 'number
   :group 'evil-goggles)
 
-(defcustom evil-goggles-default-face 'region
-  "Deafult face for the overlay."
-  :type 'sexp
+(defface evil-goggles-face
+  '((t (:inherit region)))
+  "Evil-goggles face to use for highlighting different actions."
   :group 'evil-goggles)
 
 (defcustom evil-goggles-faces-alist nil
@@ -62,7 +62,7 @@
   "Return the configured face for COMMAND, or the default face."
   (or
    (assoc-default command evil-goggles-faces-alist)
-   evil-goggles-default-face))
+   'evil-goggles-face))
 
 (defun evil-goggles--show (beg end face)
   "Show overlay in region from BEG to END with FACE."
