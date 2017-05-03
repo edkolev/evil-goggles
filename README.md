@@ -58,10 +58,15 @@ Installation
 Customization
 -------------
 
-- The appearance of the overlay can be configured with `evil-goggles-default-face`. By default, the `region` face is used for every action. To get a list of available faces on emacs start, start a fresh emacs and run `M-x list-faces-display`.
+- The appearance of the overlay can be configured with `evil-goggles-face`. By default, inherit from the `region` face and using for every action.
 ```emacs-lisp
-;; default is 'region, you can try `isearch-fail
-(setq evil-goggles-default-face 'highlight)
+;; If you want to customize only background
+;; You can get a color name with `list-colors-diplay', or use hex value
+(set-face-background 'evil-goggles-face "LightSkyBlue")
+;; Advanced settings can be done with `custom-theme-set-faces'
+(custom-theme-set-faces
+   'zenburn ; Use your theme name
+   '(evil-goggles-face ((t (:background "dimgray" :foreground "green" :bold t)))))
 ```
 - To use different faces per edit action:
 ```emacs-lisp
