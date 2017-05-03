@@ -26,7 +26,6 @@ Installation
 
 #### with [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
 ``` emacs-lisp
-;; NOTE: this doesn't work yet, package is not on Melpa
 (use-package evil-goggles
   :ensure t
   :config
@@ -76,7 +75,7 @@ Customization
 
 - The duration of the overlay is configured with `evil-goggles-duration`:
 ```emacs-lisp
-(setq evil-goggles-duration 0.100) ;; default is 0.200 
+(setq evil-goggles-duration 0.100) ;; default is 0.200
 ```
 
 - To disable the hint on certain actions, configure `evil-goggles-blacklist`
