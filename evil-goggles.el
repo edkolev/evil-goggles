@@ -100,6 +100,7 @@ overlay must not be displayed.")
        (>= (point-max) end beg)
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))
+       (not (eq evil-this-type 'block))
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
