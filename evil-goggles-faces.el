@@ -34,6 +34,11 @@
   "Face for paste action"
   :group 'evil-goggles-faces)
 
+(defface evil-goggles-shift-face
+  '((t (:inherit region)))
+  "Face for paste action"
+  :group 'evil-goggles-faces)
+
 ;; non-core
 
 (defface evil-goggles-surround-face

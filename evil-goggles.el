@@ -243,6 +243,21 @@ The overlay region is derermined by evil's variable `evil-last-paste'"
            (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
       (evil-goggles--show beg-corrected end 'evil-goggles-paste-face))))
 
+;; shift left & right
+
+(defcustom evil-goggles-enable-shift t
+  "If non-nil, enable shift left/right support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-shift-advice (orig-fun beg end &optional count preserve-empty)
+  "Around-advice for function `evil-shift-left` and `evil-shift-right`.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-shift-face
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
+
 ;; ex global
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
@@ -336,6 +351,10 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-paste-after :around 'evil-goggles--evil-paste-after-advice)
       (advice-add 'evil-paste-before :around 'evil-goggles--evil-paste-before-advice))
 
+    (when evil-goggles-enable-shift
+      (advice-add 'evil-shift-left :around 'evil-goggles--evil-shift-advice)
+      (advice-add 'evil-shift-right :around 'evil-goggles--evil-shift-advice))
+
     ;; make sure :global and :v don't show the goggles overlay
     (advice-add 'evil-ex-global :around 'evil-goggles--evil-ex-global-advice)
 
@@ -358,6 +377,8 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-fill-and-move 'evil-goggles--evil-fill-and-move-advice)
     (advice-remove 'evil-paste-after 'evil-goggles--evil-paste-after-advice)
     (advice-remove 'evil-paste-before 'evil-goggles--evil-paste-before-advice)
+    (advice-remove 'evil-shift-left 'evil-goggles--evil-shift-advice)
+    (advice-remove 'evil-shift-right 'evil-goggles--evil-shift-advice)
 
     (advice-remove 'evil-ex-global 'evil-goggles--evil-ex-global-advice)
 
