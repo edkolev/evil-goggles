@@ -149,6 +149,8 @@ displayed while its running."
     (evil-goggles--advice-add 'evil-paste-before    'evil-goggles--evil-paste-before-advice)
     (evil-goggles--advice-add 'evil-ex-global       'evil-goggles--evil-ex-global-advice)
     (evil-goggles--advice-add 'evil-fill-and-move   'evil-goggles--evil-fill-and-move-advice)
+    (evil-goggles--advice-add 'evil-shift-left      'evil-goggles--evil-shift-left-advice)
+    (evil-goggles--advice-add 'evil-shift-right     'evil-goggles--evil-shift-right-advice)
 
     ;; undo/redo
     ;; (evil-goggles--advice-add 'primitive-undo       'evil-goggles--primitive-undo)
@@ -167,6 +169,8 @@ displayed while its running."
     (advice-remove 'evil-paste-before    'evil-goggles--evil-paste-before-advice)
     (advice-remove 'evil-ex-global       'evil-goggles--evil-ex-global-advice)
     (advice-remove 'evil-fill-and-move   'evil-goggles--evil-fill-and-move-advice)
+    (advice-remove 'evil-shift-left      'evil-goggles--evil-shift-left-advice)
+    (advice-remove 'evil-shift-right     'evil-goggles--evil-shift-right-advice)
 
     (advice-remove 'evil-surround-region       'evil-goggles--evil-surround-region-advice)
     (advice-remove 'evil-commentary            'evil-goggles--evil-commentary-advice)
@@ -294,7 +298,21 @@ BEG END are arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-fill-and-move
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
+(defun evil-goggles--evil-shift-left-advice (orig-fun beg end &optional count preserve-empty)
+  "Around-advice for function `evil-shift-left`.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-shift-left
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
+
+(defun evil-goggles--evil-shift-right-advice (orig-fun beg end &optional count preserve-empty)
+  "Around-advice for function `evil-shift-right`.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-shift-right
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
 
 (provide 'evil-goggles)
-
 ;;; evil-goggles.el ends here
