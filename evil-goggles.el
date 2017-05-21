@@ -192,6 +192,16 @@ BEG END are the arguments of the original function."
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
+;; ex global
+
+(defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
+  "Around-advice for function `evil-ex-global'.
+
+ORIG-FUN is the original function.
+BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original function."
+  (let* ((evil-goggles--on t)) ;; set to `t' to prevent showing the overlay
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
+
 ;; surround
 
 (defcustom evil-goggles-enable-surround t
@@ -268,6 +278,9 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-join :around 'evil-goggles--evil-join-advice)
       (advice-add 'evil-join-whitespace :around 'evil-goggles--evil-join-advice))
 
+    ;; make sure :global and :v don't show the goggles overlay
+    (advice-add 'evil-ex-global :around 'evil-goggles--evil-ex-global-advice)
+
     ;; evil non-core functions
 
     (when evil-goggles-enable-surround
@@ -279,7 +292,18 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (when evil-goggles-enable-replace-with-register
       (advice-add 'evil-replace-with-register :around 'evil-goggles--evil-replace-with-register-advice)))
    (t
-    (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice))))
+    (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice)
+    (advice-remove 'evil-indent 'evil-goggles--evil-indent-advice)
+    (advice-remove 'evil-yank 'evil-goggles--evil-yank-advice)
+    (advice-remove 'evil-join 'evil-goggles--evil-join-advice)
+    (advice-remove 'evil-join-whitespace 'evil-goggles--evil-join-advice)
+
+    (advice-remove 'evil-ex-global 'evil-goggles--evil-ex-global-advice)
+
+    ;; evil non-core functions
+    (advice-remove 'evil-surround-region 'evil-goggles--evil-surround-region-advice)
+    (advice-remove 'evil-commentary 'evil-goggles--evil-commentary-advice)
+    (advice-remove 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice))))
 
 (provide 'evil-goggles)
 
