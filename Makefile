@@ -4,7 +4,7 @@ bemacs = $(emacs) -batch -l test/elpa.el
 update:
 	$(emacs) -batch -l test/make-update.el
 
-compile:
+compile: clean
 	$(bemacs) -l test/make-compile.el
 
 test:
