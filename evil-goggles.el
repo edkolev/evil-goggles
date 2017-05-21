@@ -127,6 +127,8 @@ displayed while its running."
 
 ;;; core ends here ;;;
 
+;; delete
+
 (defcustom evil-goggles-enable-delete t
   "If non-nil, enable delete support"
   :type 'boolean
@@ -140,6 +142,8 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
   (evil-goggles--with-goggles beg end 'evil-goggles-delete-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
+;; indent
+
 (defcustom evil-goggles-enable-indent t
   "If non-nil, enable indent support"
   :type 'boolean
@@ -152,6 +156,86 @@ ORIG-FUN is the original function.
 BEG END are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-goggles-indent-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
+
+;; yank
+
+(defcustom evil-goggles-enable-yank t
+  "If non-nil, enable yank support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-yank-advice (orig-fun beg end &optional type register yank-handler)
+  "Around-advice for function `evil-yank'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-yank-face
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
+
+;; join
+
+(defcustom evil-goggles-enable-join t
+  "If non-nil, enable join support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-join-advice (orig-fun beg end)
+  "Around-advice for function `evil-join'.
+
+ORIG-FUN is the original function.
+BEG END are the arguments of the original function."
+  (let* ((beg-line (line-number-at-pos beg))
+         (end-line (line-number-at-pos end))
+         (line-count (- end-line beg-line)))
+    (if (> line-count 1) ;; don't show goggles for single lines ("J"/"gJ" without count)
+        (evil-goggles--with-goggles beg end 'evil-goggles-join-face
+          (evil-goggles--funcall-preserve-interactive orig-fun beg end))
+      (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
+
+;; surround
+
+(defcustom evil-goggles-enable-surround t
+  "If non-nil, enable surround support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-surround-region-advice (orig-fun beg end &optional type char force-new-line)
+  "Around-advice for function `evil-surround-region'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-surround-face
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
+
+;; commentary
+
+(defcustom evil-goggles-enable-commentary t
+  "If non-nil, enable commentary support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-commentary-advice (orig-fun beg end &optional type)
+  "Around-advice for function `evil-commentary'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-commentary-face
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
+
+;; replace with register
+
+(defcustom evil-goggles-enable-replace-with-register t
+  "If non-nil, enable replace with register support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-replace-with-register-advice (orig-fun count beg &optional end type register)
+  "Around-advice for function `evil-replace-with-register'.
+
+ORIG-FUN is the original function.
+COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-replace-with-register-face
+    (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 ;;; mode defined below ;;;
 
@@ -170,10 +254,30 @@ BEG END are the arguments of the original function."
    (evil-goggles-mode
 
     ;; evil core functions
+
     (when evil-goggles-enable-delete
       (advice-add 'evil-delete :around 'evil-goggles--evil-delete-advice))
+
     (when evil-goggles-enable-indent
-      (advice-add 'evil-indent :around 'evil-goggles--evil-indent-advice)))
+      (advice-add 'evil-indent :around 'evil-goggles--evil-indent-advice))
+
+    (when evil-goggles-enable-yank
+      (advice-add 'evil-yank :around 'evil-goggles--evil-yank-advice))
+
+    (when evil-goggles-enable-join
+      (advice-add 'evil-join :around 'evil-goggles--evil-join-advice)
+      (advice-add 'evil-join-whitespace :around 'evil-goggles--evil-join-advice))
+
+    ;; evil non-core functions
+
+    (when evil-goggles-enable-surround
+      (advice-add 'evil-surround-region :around 'evil-goggles--evil-surround-region-advice))
+
+    (when evil-goggles-enable-commentary
+      (advice-add 'evil-commentary :around 'evil-goggles--evil-commentary-advice))
+
+    (when evil-goggles-enable-replace-with-register
+      (advice-add 'evil-replace-with-register :around 'evil-goggles--evil-replace-with-register-advice)))
    (t
     (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice))))
 
