@@ -192,6 +192,57 @@ BEG END are the arguments of the original function."
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
+(defcustom evil-goggles-enable-fill-and-move t
+  "If non-nil, enable fill and move (reformat) support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-fill-and-move-advice (orig-fun beg end)
+  "Around-advice for function `evil-fill-and-move'.
+
+ORIG-FUN is the original function.
+BEG END are arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-fill-and-move-face
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
+
+(defcustom evil-goggles-enable-paste t
+  "If non-nil, enable paste support"
+  :type 'boolean
+  :group 'evil-goggles)
+
+(defun evil-goggles--evil-paste-after-advice (orig-fun count &optional register yank-handler)
+  "Around-advice for function `evil-paste-after'.
+
+ORIG-FUN is the original function.
+COUNT REGISTER YANK-HANDLER are the arguments of the original function."
+  (let ((was-in-normal-state (evil-normal-state-p))
+        (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
+    (when was-in-normal-state
+      (evil-goggles--evil-paste-show))
+    orig-fun-result))
+
+(defun evil-goggles--evil-paste-before-advice (orig-fun count &optional register yank-handler)
+  "Around-advice for function `evil-paste-before'.
+
+ORIG-FUN is the original function.
+COUNT REGISTER YANK-HANDLER are the arguments of the original function."
+  (let ((was-in-normal-state (evil-normal-state-p))
+        (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
+    (when was-in-normal-state
+      (evil-goggles--evil-paste-show))
+    orig-fun-result))
+
+(defun evil-goggles--evil-paste-show ()
+  "Helper fun to show the goggles overlay on the last pasted text.
+
+The overlay region is derermined by evil's variable `evil-last-paste'"
+  (unless (or evil-goggles--on (null evil-last-paste))
+    (let* ((beg (nth 3 evil-last-paste))
+           (end (nth 4 evil-last-paste))
+           (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
+           (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
+      (evil-goggles--show beg-corrected end 'evil-goggles-paste-face))))
+
 ;; ex global
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
@@ -278,6 +329,13 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-join :around 'evil-goggles--evil-join-advice)
       (advice-add 'evil-join-whitespace :around 'evil-goggles--evil-join-advice))
 
+    (when evil-goggles-enable-fill-and-move
+      (advice-add 'evil-fill-and-move :around 'evil-goggles--evil-fill-and-move-advice))
+
+    (when evil-goggles-enable-paste
+      (advice-add 'evil-paste-after :around 'evil-goggles--evil-paste-after-advice)
+      (advice-add 'evil-paste-before :around 'evil-goggles--evil-paste-before-advice))
+
     ;; make sure :global and :v don't show the goggles overlay
     (advice-add 'evil-ex-global :around 'evil-goggles--evil-ex-global-advice)
 
@@ -297,6 +355,9 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-yank 'evil-goggles--evil-yank-advice)
     (advice-remove 'evil-join 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-join-whitespace 'evil-goggles--evil-join-advice)
+    (advice-remove 'evil-fill-and-move 'evil-goggles--evil-fill-and-move-advice)
+    (advice-remove 'evil-paste-after 'evil-goggles--evil-paste-after-advice)
+    (advice-remove 'evil-paste-before 'evil-goggles--evil-paste-before-advice)
 
     (advice-remove 'evil-ex-global 'evil-goggles--evil-ex-global-advice)
 

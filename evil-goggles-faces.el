@@ -24,13 +24,22 @@
   "Face for join action"
   :group 'evil-goggles-faces)
 
+(defface evil-goggles-fill-and-move-face
+  '((t (:inherit region)))
+  "Face for fill and move (reformat) action"
+  :group 'evil-goggles-faces)
+
+(defface evil-goggles-paste-face
+  '((t (:inherit diff-added)))
+  "Face for paste action"
+  :group 'evil-goggles-faces)
+
 ;; non-core
 
 (defface evil-goggles-surround-face
   '((t (:inherit region)))
   "Face for surround action"
   :group 'evil-goggles-faces)
-
 
 (defface evil-goggles-commentary-face
   '((t (:inherit region)))
