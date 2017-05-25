@@ -37,7 +37,6 @@
 ;;; Code:
 
 (require 'evil)
-(require 'evil-goggles-faces)
 
 (defcustom evil-goggles-duration 0.200
   "Time if floating seconds that the goggles overlay should last."
@@ -125,14 +124,31 @@ displayed while its running."
        (funcall-interactively ,fun ,@args)
      (funcall ,fun ,@args)))
 
+(defmacro evil-goggles--define-switch-and-face (switch-name switch-doc face-name face-doc)
+  "Syntax sugar for defining a custom on/off variable and a custom face.
+
+SWITCH-NAME is the name of the on/off variable.
+SWITCH-DOC is the docstring for SWITCH-NAME.
+FACE-NAME is the name of the custom face.
+FACE-DOC is the docstring for FACE-NAME."
+  (declare (indent 4) (debug t))
+  `(progn
+     (defcustom ,switch-name t
+       ,switch-doc
+       :type 'boolean
+       :group 'evil-goggles)
+     (defface ,face-name
+       '((t (:inherit region)))
+       ,face-doc
+       :group 'evil-goggles-faces)))
+
 ;;; core ends here ;;;
 
 ;; delete
 
-(defcustom evil-goggles-enable-delete t
-  "If non-nil, enable delete support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-delete "If non-nil, enable delete support"
+    evil-goggles-delete-face "Face for delete action")
 
 (defun evil-goggles--evil-delete-advice (orig-fun beg end &optional type register yank-handler)
   "Around-advice for function `evil-delete`.
@@ -144,10 +160,9 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
 
 ;; indent
 
-(defcustom evil-goggles-enable-indent t
-  "If non-nil, enable indent support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-indent "If non-nil, enable indent support"
+    evil-goggles-indent-face "Face for indent action")
 
 (defun evil-goggles--evil-indent-advice (orig-fun beg end)
   "Around-advice for function `evil-indent'.
@@ -159,10 +174,9 @@ BEG END are the arguments of the original function."
 
 ;; yank
 
-(defcustom evil-goggles-enable-yank t
-  "If non-nil, enable yank support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-yank "If non-nil, enable yank support"
+    evil-goggles-yank-face "Face for yank action")
 
 (defun evil-goggles--evil-yank-advice (orig-fun beg end &optional type register yank-handler)
   "Around-advice for function `evil-yank'.
@@ -174,10 +188,9 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
 
 ;; join
 
-(defcustom evil-goggles-enable-join t
-  "If non-nil, enable join support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-join "If non-nil, enable join support"
+    evil-goggles-join-face "Face for join action")
 
 (defun evil-goggles--evil-join-advice (orig-fun beg end)
   "Around-advice for function `evil-join'.
@@ -192,10 +205,11 @@ BEG END are the arguments of the original function."
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
-(defcustom evil-goggles-enable-fill-and-move t
-  "If non-nil, enable fill and move (reformat) support"
-  :type 'boolean
-  :group 'evil-goggles)
+;; indent (fill and move)
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-fill-and-move "If non-nil, enable fill and move (reformat) support"
+    evil-goggles-fill-and-move-face "Face for fill and move (reformat) action")
 
 (defun evil-goggles--evil-fill-and-move-advice (orig-fun beg end)
   "Around-advice for function `evil-fill-and-move'.
@@ -205,10 +219,11 @@ BEG END are arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-goggles-fill-and-move-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
-(defcustom evil-goggles-enable-paste t
-  "If non-nil, enable paste support"
-  :type 'boolean
-  :group 'evil-goggles)
+;; paste before and after
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-paste "If non-nil, enable paste support"
+    evil-goggles-paste-face "Face for paste action")
 
 (defun evil-goggles--evil-paste-after-advice (orig-fun count &optional register yank-handler)
   "Around-advice for function `evil-paste-after'.
@@ -245,10 +260,9 @@ The overlay region is derermined by evil's variable `evil-last-paste'"
 
 ;; shift left & right
 
-(defcustom evil-goggles-enable-shift t
-  "If non-nil, enable shift left/right support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-shift "If non-nil, enable shift left/right support"
+    evil-goggles-shift-face "Face for paste action")
 
 (defun evil-goggles--evil-shift-advice (orig-fun beg end &optional count preserve-empty)
   "Around-advice for function `evil-shift-left` and `evil-shift-right`.
@@ -270,10 +284,9 @@ BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original funct
 
 ;; surround
 
-(defcustom evil-goggles-enable-surround t
-  "If non-nil, enable surround support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-surround "If non-nil, enable surround support"
+    evil-goggles-surround-face "Face for surround action")
 
 (defun evil-goggles--evil-surround-region-advice (orig-fun beg end &optional type char force-new-line)
   "Around-advice for function `evil-surround-region'.
@@ -285,10 +298,9 @@ BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original fun
 
 ;; commentary
 
-(defcustom evil-goggles-enable-commentary t
-  "If non-nil, enable commentary support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-commentary "If non-nil, enable commentary support"
+    evil-goggles-commentary-face "Face for commentary action")
 
 (defun evil-goggles--evil-commentary-advice (orig-fun beg end &optional type)
   "Around-advice for function `evil-commentary'.
@@ -300,10 +312,9 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ;; replace with register
 
-(defcustom evil-goggles-enable-replace-with-register t
-  "If non-nil, enable replace with register support"
-  :type 'boolean
-  :group 'evil-goggles)
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-replace-with-register "If non-nil, enable replace with register support"
+    evil-goggles-replace-with-register-face "Face for replace with register action")
 
 (defun evil-goggles--evil-replace-with-register-advice (orig-fun count beg &optional end type register)
   "Around-advice for function `evil-replace-with-register'.
