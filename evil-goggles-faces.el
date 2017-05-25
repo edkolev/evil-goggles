@@ -1,11 +1,8 @@
 
-;; load diff-mode faces
-(require 'diff-mode)
-
 ;; evil core
 
 (defface evil-goggles-delete-face
-  '((t (:inherit diff-removed)))
+  '((t (:inherit region)))
   "Face for delete action"
   :group 'evil-goggles-faces)
 
@@ -30,7 +27,7 @@
   :group 'evil-goggles-faces)
 
 (defface evil-goggles-paste-face
-  '((t (:inherit diff-added)))
+  '((t (:inherit region)))
   "Face for paste action"
   :group 'evil-goggles-faces)
 
