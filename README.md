@@ -29,7 +29,12 @@ Installation
 (use-package evil-goggles
   :ensure t
   :config
-  (evil-goggles-mode))
+  (evil-goggles-mode)
+
+  ;; optionally use diff-mode's faces so, for example,
+  ;; deleted text will be highlighed with red color (as defined by the color theme)
+  ;; (evil-goggles-use-diff-faces)
+  )
 ```
 
 #### without [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
@@ -42,35 +47,49 @@ Installation
 
 #### edit actions with hint
 
-- delete `evil-delete`
-- yank `evil-yank`
-- paste with `p` and `P` `evil-paste-before` and `evil-paste-after`
-- indent (`=` operator) `evil-indent`
-- join `evil-join` and `evil-join-whitespace`
-- format (`gq` operator) `evil-fill-and-move`
+- delete
+- yank
+- paste
+- indent (`=` operator)
+- join
+- format (`gq` operator)
+- shift left and right (`>`, `<` operators)
 
 #### evil plugins with hint
 
-- [evil-surround](https://github.com/timcharper/evil-surround) `evil-surround-region`
-- [evil-commentary](https://github.com/linktohack/evil-commentary) `evil-commentary`
-- [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister) `evil-replace-with-register`
+- surround [evil-surround](https://github.com/timcharper/evil-surround)
+- commentary [evil-commentary](https://github.com/linktohack/evil-commentary)
+- replace with register [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
 
 Customization
 -------------
 
-- The appearance of the overlay can be configured with `evil-goggles-default-face`. By default, the `region` face is used for every action. To get a list of available faces on emacs start, start a fresh emacs and run `M-x list-faces-display`.
+- The appearance of the default overlay can be configured with `evil-goggles-default-face`. By default, the `region` face is used for every action. To get a list of available faces on emacs start, start a fresh emacs and run `M-x list-faces-display`.
 ```emacs-lisp
-;; default is 'region, you can try `isearch-fail
-(setq evil-goggles-default-face 'highlight)
+;; default is 'region, you can try 'isearch-fail
+(custom-set-faces
+ '(evil-goggles-default-face ((t (:inherit 'isearch-fail)))))
 ```
 - To use different faces per edit action:
 ```emacs-lisp
 (require 'diff-mode) ;; load diff-* faces
-(setq evil-goggles-faces-alist `(
-                                 ( evil-delete . diff-removed )
-                                 ( evil-yank . diff-changed )
-                                 ( evil-paste-after . diff-added )
-                                 ( evil-paste-before . diff-added )))
+(custom-set-faces
+ '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
+ '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
+ '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))))
+ 
+;; list of all evil-goggles-* faces:
+;;
+;; evil-goggles-delete-face
+;; evil-goggles-indent-face
+;; evil-goggles-yank-face
+;; evil-goggles-join-face
+;; evil-goggles-fill-and-move-face
+;; evil-goggles-paste-face
+;; evil-goggles-shift-face
+;; evil-goggles-surround-face
+;; evil-goggles-commentary-face
+;; evil-goggles-replace-with-register-face
 ```
 
 - The duration of the overlay is configured with `evil-goggles-duration`:
@@ -78,8 +97,21 @@ Customization
 (setq evil-goggles-duration 0.100) ;; default is 0.200
 ```
 
-- To disable the hint on certain actions, configure `evil-goggles-blacklist`
+- To disable the hint on certain actions
 ```emacs-lisp
 ;; to disable the hint when yanking or deleting
-(setq evil-goggles-blacklist `(evil-yank evil-delete)
+(setq evil-goggles-enabe-paste nil)
+
+;; list of all on/off variables:
+;;
+;; evil-goggles-enable-delete
+;; evil-goggles-enable-indent
+;; evil-goggles-enable-yank
+;; evil-goggles-enable-join
+;; evil-goggles-enable-fill-and-move
+;; evil-goggles-enable-paste
+;; evil-goggles-enable-shift
+;; evil-goggles-enable-surround
+;; evil-goggles-enable-commentary
+;; evil-goggles-enable-replace-with-register
 ```
