@@ -128,7 +128,7 @@ FACE-DOC is the docstring for FACE-NAME."
   (declare (indent 4) (debug t))
   `(progn
      (defcustom ,switch-name t
-       ,switch-doc
+       ,(concat switch-doc "\nThis variable must be set before `evil-goggles-mode' is enabled")
        :type 'boolean
        :group 'evil-goggles)
      (defface ,face-name
