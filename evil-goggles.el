@@ -58,12 +58,6 @@
   :type 'boolean
   :group 'evil-goggles)
 
-(defun evil-goggles--face (command)
-  "Return the configured face for COMMAND, or the default face."
-  (or
-   (assoc-default command evil-goggles-faces-alist)
-   'evil-goggles-default-face))
-
 (defun evil-goggles--show (beg end face)
   "Show overlay in region from BEG to END with FACE."
   (let ((ov (evil-goggles--make-overlay beg end 'face face)))
@@ -138,9 +132,16 @@ FACE-DOC is the docstring for FACE-NAME."
        :type 'boolean
        :group 'evil-goggles)
      (defface ,face-name
-       '((t (:inherit region)))
+       '((t (:inherit evil-goggles-default-face)))
        ,face-doc
        :group 'evil-goggles-faces)))
+
+(defun evil-goggles-use-diff-faces ()
+  (require 'diff-mode) ;; load diff-* faces
+  (custom-set-faces
+   '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
+   '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
+   '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))))
 
 ;;; core ends here ;;;
 
