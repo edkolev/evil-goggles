@@ -136,6 +136,10 @@ FACE-DOC is the docstring for FACE-NAME."
        ,face-doc
        :group 'evil-goggles-faces)))
 
+;;; core ends here ;;;
+
+;; helper function to inherit from diff-mode's faces
+
 (defun evil-goggles-use-diff-faces ()
   "Load `diff-mode' and use its faces for evil-goggles mode."
   (require 'diff-mode) ;; load diff-* faces
@@ -143,8 +147,6 @@ FACE-DOC is the docstring for FACE-NAME."
    '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
    '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
    '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))))
-
-;;; core ends here ;;;
 
 ;; delete
 

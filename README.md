@@ -73,22 +73,20 @@ By default, all goggles' faces inherit `evil-goggles-default-face`, which in tur
 
 - To change the default face:
 ```emacs-lisp
-;; default is 'region, you can try 'isearch-fail
-;; to get a list of available faces on your emacs, run `M-x list-faces-display`
 (custom-set-faces
- '(evil-goggles-default-face ((t (:inherit 'isearch-fail)))))
+ '(evil-goggles-default-face ((t (:inherit 'highlight))))) ;; default is to inherit 'region
+;; run `M-x list-faces-display` in a fresh emacs to get a list of faces on your emacs
 ```
 
 - To use different faces per edit action:
 ```emacs-lisp
-(require 'diff-mode) ;; load diff-* faces
 (custom-set-faces
- '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
- '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
- '(evil-goggles-yank-face ((t (:inherit 'diff-changed)))))
+ '(evil-goggles-delete-face ((t (:inherit 'shadow))))
+ '(evil-goggles-paste-face ((t (:inherit 'lazy-highlight))))
+ '(evil-goggles-yank-face ((t (:inherit 'isearch-fail)))))
 ```
 
-- This package defines the following faces:
+- The following faces are defined by evil-goggles:
 ```
 evil-goggles-default-face - inherits from `region` by default
 
