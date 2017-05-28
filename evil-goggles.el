@@ -137,6 +137,7 @@ FACE-DOC is the docstring for FACE-NAME."
        :group 'evil-goggles-faces)))
 
 (defun evil-goggles-use-diff-faces ()
+  "Load `diff-mode' and use its faces for evil-goggles mode."
   (require 'diff-mode) ;; load diff-* faces
   (custom-set-faces
    '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
