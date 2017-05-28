@@ -85,7 +85,7 @@ By default, all goggles' faces inherit `evil-goggles-default-face`, which in tur
 (custom-set-faces
  '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
  '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
- '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))))
+ '(evil-goggles-yank-face ((t (:inherit 'diff-changed)))))
 ```
 
 - This package defines the following faces:
@@ -111,10 +111,10 @@ evil-goggles-replace-with-register-face
 (setq evil-goggles-duration 0.100) ;; default is 0.200
 ```
 
-- To disable the hint on certain actions
+- To disable the hint on certain actions modify these variable before `evil-goggles-mode` is started:
 ```emacs-lisp
 ;; to disable the hint when pasting:
-(setq evil-goggles-enabe-paste nil)
+(setq evil-goggles-enable-paste nil)
 
 ;; list of all on/off variables, their default value is `t`:
 ;;
