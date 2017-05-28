@@ -1,10 +1,14 @@
 [![Build Status](https://travis-ci.org/edkolev/evil-goggles.svg?branch=master)](https://travis-ci.org/edkolev/evil-goggles)
+[![MELPA](https://melpa.org/packages/evil-goggles-badge.svg)](https://melpa.org/#/evil-goggles)
 
 evil-goggles
-=========
+============
+
+![evil-goggles](https://cloud.githubusercontent.com/assets/1532071/26526401/2d10961e-4382-11e7-8c40-5b7fb3a79756.jpg)
 
 `evil-goggles-mode` displays a visual hint when editing with [evil](https://github.com/emacs-evil/evil).
 
+## Preview
 
 ![yank-paste-delete](https://cloud.githubusercontent.com/assets/1532071/25412512/ece4e108-29d7-11e7-90ba-834923c05a02.gif)
 
@@ -20,9 +24,7 @@ evil-goggles
 
 ![fast-replace](https://cloud.githubusercontent.com/assets/1532071/25314628/889ab1c4-2850-11e7-9cf5-c801b8293583.gif)
 
-
-Installation
-------------
+## Installation
 
 #### with [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
 ``` emacs-lisp
@@ -31,9 +33,11 @@ Installation
   :config
   (evil-goggles-mode)
 
-  ;; optionally use diff-mode's faces so, for example,
-  ;; deleted text will be highlighed with red color (as defined by the color theme)
-  ;; (evil-goggles-use-diff-faces)
+  ;; optionally use diff-mode's faces; as a result, deleted text
+  ;; will be highlighed with `diff-removed` face which is typically
+  ;; some red color (as defined by the color theme)
+  ;; other faces such as `diff-added` will be used for other actions
+  (evil-goggles-use-diff-faces)
   )
 ```
 
@@ -61,15 +65,20 @@ Installation
 - commentary [evil-commentary](https://github.com/linktohack/evil-commentary)
 - replace with register [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
 
-Customization
--------------
+## Customizations
 
-- The appearance of the default overlay can be configured with `evil-goggles-default-face`. By default, the `region` face is used for every action. To get a list of available faces on emacs start, start a fresh emacs and run `M-x list-faces-display`.
+#### Appearance Customization
+
+By default, all goggles' faces inherit `evil-goggles-default-face`, which in turn inherits emacs' `region` face.
+
+- To change the default face:
 ```emacs-lisp
 ;; default is 'region, you can try 'isearch-fail
+;; to get a list of available faces on your emacs, run `M-x list-faces-display`
 (custom-set-faces
  '(evil-goggles-default-face ((t (:inherit 'isearch-fail)))))
 ```
+
 - To use different faces per edit action:
 ```emacs-lisp
 (require 'diff-mode) ;; load diff-* faces
@@ -77,20 +86,25 @@ Customization
  '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
  '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
  '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))))
- 
-;; list of all evil-goggles-* faces:
-;;
-;; evil-goggles-delete-face
-;; evil-goggles-indent-face
-;; evil-goggles-yank-face
-;; evil-goggles-join-face
-;; evil-goggles-fill-and-move-face
-;; evil-goggles-paste-face
-;; evil-goggles-shift-face
-;; evil-goggles-surround-face
-;; evil-goggles-commentary-face
-;; evil-goggles-replace-with-register-face
 ```
+
+- This package defines the following faces:
+```
+evil-goggles-default-face - inherits from `region` by default
+
+evil-goggles-delete-face - this, and the others below, inherit from `evil-goggles-default-face`
+evil-goggles-indent-face
+evil-goggles-yank-face
+evil-goggles-join-face
+evil-goggles-fill-and-move-face
+evil-goggles-paste-face
+evil-goggles-shift-face
+evil-goggles-surround-face
+evil-goggles-commentary-face
+evil-goggles-replace-with-register-face
+```
+
+#### Other Customizations
 
 - The duration of the overlay is configured with `evil-goggles-duration`:
 ```emacs-lisp
@@ -99,10 +113,10 @@ Customization
 
 - To disable the hint on certain actions
 ```emacs-lisp
-;; to disable the hint when yanking or deleting
+;; to disable the hint when pasting:
 (setq evil-goggles-enabe-paste nil)
 
-;; list of all on/off variables:
+;; list of all on/off variables, their default value is `t`:
 ;;
 ;; evil-goggles-enable-delete
 ;; evil-goggles-enable-indent
@@ -115,3 +129,8 @@ Customization
 ;; evil-goggles-enable-commentary
 ;; evil-goggles-enable-replace-with-register
 ```
+
+## Recent Significant Changes
+
+- [May 28, 2017] Switched to using custom faces per action, deprecate `evil-goggles-faces-alist`
+- [May 28, 2017] Switched to using per-action on/off custom variables, deprecate `evil-goggles-blacklist`
