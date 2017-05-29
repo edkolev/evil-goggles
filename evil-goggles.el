@@ -48,11 +48,6 @@
   "Evil-goggles generic face."
   :group 'evil-goggles)
 
-(defcustom evil-goggles-faces-alist nil
-  "Association list of faces to use for different commands."
-  :type 'boolean
-  :group 'evil-goggles)
-
 (defcustom evil-goggles-blacklist nil
   "List of functions which should not display the goggles overlay."
   :type 'boolean
