@@ -37,8 +37,7 @@ evil-goggles
   ;; will be highlighed with `diff-removed` face which is typically
   ;; some red color (as defined by the color theme)
   ;; other faces such as `diff-added` will be used for other actions
-  (evil-goggles-use-diff-faces)
-  )
+  (evil-goggles-use-diff-faces))
 ```
 
 #### without [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
