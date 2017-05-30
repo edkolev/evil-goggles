@@ -129,5 +129,5 @@ evil-goggles-replace-with-register-face
 
 ## Recent Significant Changes
 
-- [May 28, 2017] Switched to using custom faces per action, deprecate `evil-goggles-faces-alist`
-- [May 28, 2017] Switched to using per-action on/off custom variables, deprecate `evil-goggles-blacklist`
+- [May 28, 2017] Switched to using custom faces per action, deprecated `evil-goggles-faces-alist`
+- [May 28, 2017] Switched to using per-action on/off custom variables, deprecated `evil-goggles-blacklist`
