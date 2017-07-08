@@ -99,6 +99,7 @@ evil-goggles-shift-face
 evil-goggles-surround-face
 evil-goggles-commentary-face
 evil-goggles-replace-with-register-face
+evil-goggles-set-marker-face
 ```
 
 #### Other Customizations
@@ -125,6 +126,7 @@ evil-goggles-replace-with-register-face
 ;; evil-goggles-enable-surround
 ;; evil-goggles-enable-commentary
 ;; evil-goggles-enable-replace-with-register
+;; evil-goggles-enable-set-marker
 ```
 
 ## Recent Significant Changes

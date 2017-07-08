@@ -283,6 +283,32 @@ BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original functio
   (evil-goggles--with-goggles beg end 'evil-goggles-shift-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
 
+;; set mark
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-set-marker "If non-nil, enable set mark support"
+    evil-goggles-set-marker-face "Face for set mark action")
+
+(defun evil-goggles--evil-set-marker-advice (orig-fun char &optional pos advance)
+  "Around-advice for function `evil-set-marker`.
+
+ORIG-FUN is the original function.
+CHAR POS ADVANCE are the arguments of the original function."
+  ;; call orig-fun
+  (evil-goggles--funcall-preserve-interactive orig-fun char pos advance)
+  ;; maybe show the goggles overlay
+  (when (<= ?a char ?z)
+    (save-excursion
+      (when pos
+        (goto-char pos))
+      (let ((beg (save-excursion
+                   (move-beginning-of-line nil)
+                   (point)))
+            (end (1+ (save-excursion
+                       (move-end-of-line nil)
+                       (point)))))
+        (evil-goggles--show beg end 'evil-goggles-set-marker-face)))))
+
 ;; ex global
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
@@ -377,6 +403,9 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-shift-left :around 'evil-goggles--evil-shift-advice)
       (advice-add 'evil-shift-right :around 'evil-goggles--evil-shift-advice))
 
+    (when evil-goggles-enable-set-marker
+      (advice-add 'evil-set-marker :around 'evil-goggles--evil-set-marker-advice))
+
     ;; make sure :global and :v don't show the goggles overlay
     (advice-add 'evil-ex-global :around 'evil-goggles--evil-ex-global-advice)
 
@@ -401,6 +430,7 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-paste-before 'evil-goggles--evil-paste-before-advice)
     (advice-remove 'evil-shift-left 'evil-goggles--evil-shift-advice)
     (advice-remove 'evil-shift-right 'evil-goggles--evil-shift-advice)
+    (advice-remove 'evil-set-marker 'evil-goggles--evil-set-marker-advice)
 
     (advice-remove 'evil-ex-global 'evil-goggles--evil-ex-global-advice)
 
