@@ -232,7 +232,7 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
   (let ((was-in-normal-state (evil-normal-state-p))
         (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
     (when was-in-normal-state
-      (evil-goggles--evil-paste-show))
+      (evil-goggles--evil-paste-show register yank-handler))
     orig-fun-result))
 
 (defun evil-goggles--evil-paste-before-advice (orig-fun count &optional register yank-handler)
@@ -243,19 +243,31 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
   (let ((was-in-normal-state (evil-normal-state-p))
         (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
     (when was-in-normal-state
-      (evil-goggles--evil-paste-show))
+      (evil-goggles--evil-paste-show register yank-handler))
     orig-fun-result))
 
-(defun evil-goggles--evil-paste-show ()
+(defun evil-goggles--evil-paste-show (register yank-handler)
   "Helper fun to show the goggles overlay on the last pasted text.
 
 The overlay region is derermined by evil's variable `evil-last-paste'"
-  (unless (or evil-goggles--on (null evil-last-paste))
-    (let* ((beg (nth 3 evil-last-paste))
-           (end (nth 4 evil-last-paste))
+  (message "evil-goggles--evil-paste-block-p: %s" (evil-goggles--evil-paste-block-p register yank-handler))
+  (unless (or evil-goggles--on (evil-goggles--evil-paste-block-p register yank-handler))
+    ;; TODO show the goggles overlay when the pasted text is a block
+    (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
+           (end (save-excursion (evil-goto-mark ?\]) (point)))
            (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
            (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
       (evil-goggles--show beg-corrected end 'evil-goggles-paste-face))))
+
+(defun evil-goggles--evil-paste-block-p (register yank-handler)
+  (let* ((text (if register
+                   (evil-get-register register)
+                 (current-kill 0)))
+         (yh (or yank-handler
+                 (when (stringp text)
+                   (car-safe (get-text-property
+                              0 'yank-handler text))))))
+    (eq yh 'evil-yank-block-handler)))
 
 ;; shift left & right
 
