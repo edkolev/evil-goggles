@@ -13,4 +13,7 @@ test:
 clean:
 	rm -f *.elc
 
-.PHONY: update compile test clean
+checkdoc:
+	$(bemacs) -l test/make-checkdoc.el
+
+.PHONY: update compile test clean checkdoc
