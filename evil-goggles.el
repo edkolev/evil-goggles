@@ -249,8 +249,9 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
 (defun evil-goggles--evil-paste-show (register yank-handler)
   "Helper fun to show the goggles overlay on the last pasted text.
 
-The overlay region is derermined by evil's variable `evil-last-paste'"
-  (message "evil-goggles--evil-paste-block-p: %s" (evil-goggles--evil-paste-block-p register yank-handler))
+The overlay region is derermined by evil's marks [ and ]
+Argument REGISTER is the evil register.
+Argument YANK-HANDLER is the yank hanler."
   (unless (or evil-goggles--on (evil-goggles--evil-paste-block-p register yank-handler))
     ;; TODO show the goggles overlay when the pasted text is a block
     (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
@@ -260,6 +261,10 @@ The overlay region is derermined by evil's variable `evil-last-paste'"
       (evil-goggles--show beg-corrected end 'evil-goggles-paste-face))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
+  "Return t if the paste was a vertical block.
+
+Argument REGISTER is the evil register.
+Argument YANK-HANDLER is the yank hanler."
   (let* ((text (if register
                    (evil-get-register register)
                  (current-kill 0)))
