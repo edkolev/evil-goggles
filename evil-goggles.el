@@ -60,6 +60,18 @@
         (sit-for evil-goggles-duration)
       (delete-overlay ov))))
 
+(defun evil-goggles--show-block (beg end face)
+  "Show overlay in blcok from BEG to END with FACE."
+  (let ((ovs))
+    (unwind-protect
+        (progn
+          ;; create multiple overlays, one for each line in the block
+          (evil-apply-on-block (lambda (line-beg line-end)
+                                 (add-to-list 'ovs (evil-goggles--make-overlay line-beg line-end 'face face)))
+                               beg end nil)
+          (sit-for evil-goggles-duration))
+      (mapcar 'delete-overlay ovs))))
+
 (defun evil-goggles--make-overlay (beg end &rest properties)
   "Make overlay in region from BEG to END with PROPERTIES."
   (let ((ov (make-overlay beg end)))
@@ -252,13 +264,15 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
 The overlay region is derermined by evil's marks [ and ]
 Argument REGISTER is the evil register.
 Argument YANK-HANDLER is the yank hanler."
-  (unless (or evil-goggles--on (evil-goggles--evil-paste-block-p register yank-handler))
-    ;; TODO show the goggles overlay when the pasted text is a block
+  (unless evil-goggles--on
     (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
            (end (save-excursion (evil-goto-mark ?\]) (point)))
            (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
-           (beg-corrected (if is-beg-at-eol (1+ beg) beg) ))
-      (evil-goggles--show beg-corrected end 'evil-goggles-paste-face))))
+           (beg-corrected (if is-beg-at-eol (1+ beg) beg))
+           (show-fn (if (evil-goggles--evil-paste-block-p register yank-handler)
+                        'evil-goggles--show-block
+                      'evil-goggles--show)))
+      (funcall show-fn beg-corrected end 'evil-goggles-paste-face))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
   "Return t if the paste was a vertical block.
