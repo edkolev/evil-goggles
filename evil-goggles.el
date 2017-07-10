@@ -54,6 +54,15 @@
   :group 'evil-goggles)
 
 (defun evil-goggles--show (beg end face)
+  "Show overlay in region from BEG to END with FACE.
+
+If variable `evil-this-type' is 'block, the overlay will be a block,
+otherwise - a region."
+  (if (eq evil-this-type 'block)
+      (evil-goggles--show-block beg end face)
+    (evil-goggles--show-region beg end face)))
+
+(defun evil-goggles--show-region (beg end face)
   "Show overlay in region from BEG to END with FACE."
   (let ((ov (evil-goggles--make-overlay beg end 'face face)))
     (unwind-protect
@@ -101,7 +110,6 @@ overlay must not be displayed.")
        (>= (point-max) end beg)
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))
-       (not (eq evil-this-type 'block))
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
