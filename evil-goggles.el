@@ -110,6 +110,8 @@ overlay must not be displayed.")
        (>= (point-max) end beg)
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))
+       ;; don't show overlay when evil-mc has multiple fake cursors
+       (not (and (fboundp 'evil-mc-has-cursors-p) (evil-mc-has-cursors-p)))
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
