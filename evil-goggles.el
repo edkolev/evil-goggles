@@ -163,7 +163,9 @@ FACE-DOC is the docstring for FACE-NAME."
   (custom-set-faces
    '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
    '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
-   '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))))
+   '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))
+   '(evil-goggles-undo-redo-remove-face ((t (:inherit 'diff-removed))))
+   '(evil-goggles-undo-redo-add-face ((t (:inherit 'diff-added))))))
 
 ;; delete
 
@@ -206,6 +208,54 @@ ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-goggles-yank-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
+
+;; undo & redo
+
+(defcustom evil-goggles-enable-undo nil  ;; experimental, disabled by default
+  "If non-nil, enable undo support.
+This variable must be set before `evil-goggles-mode' is enabled"
+  :type 'boolean :group 'evil-goggles)
+
+(defcustom evil-goggles-enable-redo nil ;; experimental, disabled by default
+  "If non-nil, enable redo support
+This variable must be set before `evil-goggles-mode' is enabled"
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-undo-redo-add-face
+  '((t
+     (:inherit evil-goggles-default-face)))
+  "Face for undo/redo add action" :group 'evil-goggles-faces)
+
+(defface evil-goggles-undo-redo-remove-face
+  '((t
+     (:inherit evil-goggles-default-face)))
+  "Face for undo/redo remove action" :group 'evil-goggles-faces)
+
+(defun evil-goggles--undo-tree-undo--undo-tree-redo (orig-fun &optional arg)
+  "Advice for function `undo-tree-undo` and function `undo-tree-redo`."
+  (unwind-protect
+      (progn
+        (add-hook 'before-change-functions #'evil-goggles--before-change)
+        (add-hook 'after-change-functions #'evil-goggles--after-change)
+        (evil-goggles--funcall-preserve-interactive orig-fun arg))
+    (remove-hook 'before-change-functions #'evil-goggles--before-change)
+    (remove-hook 'after-change-functions #'evil-goggles--after-change)))
+
+(defun evil-goggles--before-change (beg end)
+  ;; (message "evil-goggles--after-change: from %s to %s" beg end)
+  ;; if beg and end are different, text will be removed
+  (let ((text-will-be-removed (not (eq beg end))))
+    (when (and text-will-be-removed
+               (evil-goggles--show-p beg end))
+      (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))))
+
+(defun evil-goggles--after-change (beg end _length)
+  ;; (message "evil-goggles--after-change: from %s to %s, len %s after change undo" beg end _length)
+  ;; if beg and end are different, text will be added
+  (let ((text-was-added (not (eq beg end))))
+    (when (and text-was-added
+               (evil-goggles--show-p beg end))
+      (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face))))
 
 ;; join
 
@@ -388,7 +438,11 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 ORIG-FUN is the original function.
 COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-goggles-replace-with-register-face
-    (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
+    (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register))
+
+  ;; good good
+
+  (evil-goggles--show beg (point) 'diff-added))
 
 ;;; mode defined below ;;;
 
@@ -416,6 +470,11 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
 
     (when evil-goggles-enable-yank
       (advice-add 'evil-yank :around 'evil-goggles--evil-yank-advice))
+
+    (when evil-goggles-enable-undo
+      (advice-add 'undo-tree-undo :around 'evil-goggles--undo-tree-undo--undo-tree-redo))
+    (when evil-goggles-enable-redo
+      (advice-add 'undo-tree-redo :around 'evil-goggles--undo-tree-undo--undo-tree-redo))
 
     (when evil-goggles-enable-join
       (advice-add 'evil-join :around 'evil-goggles--evil-join-advice)
@@ -452,6 +511,8 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice)
     (advice-remove 'evil-indent 'evil-goggles--evil-indent-advice)
     (advice-remove 'evil-yank 'evil-goggles--evil-yank-advice)
+    (advice-remove 'undo-tree-undo 'evil-goggles--undo-tree-undo--undo-tree-redo)
+    (advice-remove 'undo-tree-redo 'evil-goggles--undo-tree-undo--undo-tree-redo)
     (advice-remove 'evil-join 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-join-whitespace 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-fill-and-move 'evil-goggles--evil-fill-and-move-advice)
