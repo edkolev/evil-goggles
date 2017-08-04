@@ -270,8 +270,38 @@ N and LIST are the arguments of the original function."
   "Process LIST and return the first item if it's only one, or nil."
   (let* ((processed-list
           (cl-remove-if #'null (mapcar #'evil-goggles--undo-elt list))))
-    (when (eq 1 (length processed-list))
-      (car processed-list))))
+    (message "processed-list %s" processed-list)
+    (cond
+     ;; if there's only item in the list, return it
+     ((eq 1 (length processed-list))
+      (car processed-list))
+
+     ;; check if first and second region are connected:
+     ;; if we have: ((text-added 2 6) (text-added 1 2))
+     ;; then return: ((text-added 1 6))
+     ;;
+     ;; or, if we have: ((text-removed 1 2) (text-removed 2 6))
+     ;; then return: ((text-removed 1 6))
+     ;;
+     ;; TODO this could be more generic, it could work for any number of items in processed-list
+     ;; for example, this should be handled as well:
+     ;;    ((text-added 43 46) (text-added 22 43) (text-added 1 22))
+     ;; should become:
+     ;;    ((text-added 1 46))
+     ((and (eq 2 (length processed-list))
+           (eq (caadr processed-list) (caar processed-list)))
+      (let (
+            (change-type (caadr processed-list))
+            (start-of-first-region  (nth 1 (nth 0 processed-list)))
+            (end-of-first-region    (nth 2 (nth 0 processed-list)))
+            (start-of-second-region (nth 1 (nth 1 processed-list)))
+            (end-of-second-region   (nth 2 (nth 1 processed-list))))
+        (message "here1 %s %s" start-of-first-region end-of-second-region)
+        (cond
+         ((eq start-of-first-region end-of-second-region)
+          `(,change-type ,start-of-second-region ,end-of-first-region))
+         ((eq end-of-first-region start-of-second-region)
+          `(,change-type ,start-of-first-region ,end-of-second-region))))))))
 
 (defun evil-goggles--undo-elt (undo-elt)
   "Process UNDO-ELT.
