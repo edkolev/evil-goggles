@@ -37,6 +37,8 @@
 ;;; Code:
 
 (require 'evil)
+;; TODO try not to depend on cl-lib
+(require 'cl-lib)
 
 (defcustom evil-goggles-duration 0.200
   "Time if floating seconds that the goggles overlay should last."
@@ -164,8 +166,8 @@ FACE-DOC is the docstring for FACE-NAME."
    '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
    '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
    '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))
-   '(evil-goggles-undo-redo-remove-face ((t (:inherit 'diff-removed))))
-   '(evil-goggles-undo-redo-add-face ((t (:inherit 'diff-added))))))
+   '(evil-goggles-undo-redo-remove-face ((t (:inherit 'diff-refine-removed))))
+   '(evil-goggles-undo-redo-add-face ((t (:inherit 'diff-refine-added))))))
 
 ;; delete
 
@@ -217,7 +219,7 @@ This variable must be set before `evil-goggles-mode' is enabled"
   :type 'boolean :group 'evil-goggles)
 
 (defcustom evil-goggles-enable-redo nil ;; experimental, disabled by default
-  "If non-nil, enable redo support
+  "If non-nil, enable redo support.
 This variable must be set before `evil-goggles-mode' is enabled"
   :type 'boolean :group 'evil-goggles)
 
@@ -231,31 +233,48 @@ This variable must be set before `evil-goggles-mode' is enabled"
      (:inherit evil-goggles-default-face)))
   "Face for undo/redo remove action" :group 'evil-goggles-faces)
 
-(defun evil-goggles--undo-tree-undo--undo-tree-redo (orig-fun &optional arg)
-  "Advice for function `undo-tree-undo` and function `undo-tree-redo`."
+(defun evil-goggles--undo-tree-undo-advice (orig-fun &optional arg)
+  "Advice for function `undo-tree-undo` and function `undo-tree-redo`.
+
+ORIG-FUN is the original function.
+ARG are the arguments of the original function."
   (unwind-protect
       (progn
-        (add-hook 'before-change-functions #'evil-goggles--before-change)
-        (add-hook 'after-change-functions #'evil-goggles--after-change)
-        (evil-goggles--funcall-preserve-interactive orig-fun arg))
-    (remove-hook 'before-change-functions #'evil-goggles--before-change)
-    (remove-hook 'after-change-functions #'evil-goggles--after-change)))
+        (advice-add 'primitive-undo :around 'evil-goggles--primitive-undo-advice)
+        (funcall orig-fun arg))
+    (advice-remove 'primitive-undo 'evil-goggles--primitive-undo-advice)))
 
-(defun evil-goggles--before-change (beg end)
-  ;; (message "evil-goggles--after-change: from %s to %s" beg end)
-  ;; if beg and end are different, text will be removed
-  (let ((text-will-be-removed (not (eq beg end))))
-    (when (and text-will-be-removed
-               (evil-goggles--show-p beg end))
-      (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))))
+(defun evil-goggles--primitive-undo-advice (orig-fun n list)
+  (let* ((ulist (cl-remove-if #'null (mapcar #'evil-goggles--undo-elt list)))
+         (ulist-len (length ulist))
+         (single-text-block-was-removed
+          (and (eq 1 ulist-len) (eq 'text-removed (caar ulist))))
+         (single-text-block-was-inserted
+          (and (eq 1 ulist-len) (eq 'text-added (caar ulist))))
+         (uelt (car ulist))
+         (beg (nth 1 uelt))
+         (end (nth 2 uelt)))
 
-(defun evil-goggles--after-change (beg end _length)
-  ;; (message "evil-goggles--after-change: from %s to %s, len %s after change undo" beg end _length)
-  ;; if beg and end are different, text will be added
-  (let ((text-was-added (not (eq beg end))))
-    (when (and text-was-added
-               (evil-goggles--show-p beg end))
+    ;; show hint on the text which will be removed before undo/redo removes it
+    (when (and single-text-block-was-inserted (evil-goggles--show-p beg end))
+      (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))
+
+    (funcall orig-fun n list)
+
+    ;; show hint on the text which will be added after undo/redo addes it
+    (when (and single-text-block-was-removed (evil-goggles--show-p beg end))
       (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face))))
+
+(defun evil-goggles--undo-elt (elt)
+  (pcase elt
+    ;; (BEG . END) means text added
+    (`(,(and beg (pred integerp)) . ,(and end (pred integerp)))
+     `(text-added ,beg ,end))
+    ;; (TEXT . POSITION) means text inserted
+    (`(,(and text (pred stringp)) . ,(and pos (pred integerp)))
+     (list 'text-removed pos (+ pos (length text))))
+    ;; All others return nil
+    (_ nil)))
 
 ;; join
 
@@ -472,9 +491,9 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-yank :around 'evil-goggles--evil-yank-advice))
 
     (when evil-goggles-enable-undo
-      (advice-add 'undo-tree-undo :around 'evil-goggles--undo-tree-undo--undo-tree-redo))
+      (advice-add 'undo-tree-undo :around 'evil-goggles--undo-tree-undo-advice))
     (when evil-goggles-enable-redo
-      (advice-add 'undo-tree-redo :around 'evil-goggles--undo-tree-undo--undo-tree-redo))
+      (advice-add 'undo-tree-redo :around 'evil-goggles--undo-tree-undo-advice))
 
     (when evil-goggles-enable-join
       (advice-add 'evil-join :around 'evil-goggles--evil-join-advice)
@@ -511,8 +530,8 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice)
     (advice-remove 'evil-indent 'evil-goggles--evil-indent-advice)
     (advice-remove 'evil-yank 'evil-goggles--evil-yank-advice)
-    (advice-remove 'undo-tree-undo 'evil-goggles--undo-tree-undo--undo-tree-redo)
-    (advice-remove 'undo-tree-redo 'evil-goggles--undo-tree-undo--undo-tree-redo)
+    (advice-remove 'undo-tree-undo 'evil-goggles--undo-tree-undo-advice)
+    (advice-remove 'undo-tree-redo 'evil-goggles--undo-tree-undo-advice)
     (advice-remove 'evil-join 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-join-whitespace 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-fill-and-move 'evil-goggles--evil-fill-and-move-advice)
