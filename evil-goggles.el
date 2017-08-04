@@ -250,7 +250,6 @@ ARG is the arguments of the original function."
 ORIG-FUN is the original function.
 N and LIST are the arguments of the original function."
   (let ((undo-item (evil-goggles--get-undo-item list)))
-
     ;; show hint on the text which will be removed before undo/redo removes it
     (pcase undo-item
       (`(text-added ,beg ,end)
@@ -267,7 +266,13 @@ N and LIST are the arguments of the original function."
          (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face))))))
 
 (defun evil-goggles--get-undo-item (list)
-  "Process LIST and return the first item if it's only one, or nil."
+  "Process LIST.
+
+The LIST is the input variable to function primitive-undo.
+
+This function tries to return a single list, either:
+('text-added beg end), or:
+('text-removed beg end)"
   (let* ((processed-list
           (cl-remove-if #'null (mapcar #'evil-goggles--undo-elt list))))
     (message "processed-list %s" processed-list)
@@ -288,6 +293,9 @@ N and LIST are the arguments of the original function."
      ;;    ((text-added 43 46) (text-added 22 43) (text-added 1 22))
      ;; should become:
      ;;    ((text-added 1 46))
+
+     ;; TODO how can this be handled, reprodcued with Otext<esc>u:
+     ;;    ((text-added 1 5) (text-added 1 2))
      ((and (eq 2 (length processed-list))
            (eq (caadr processed-list) (caar processed-list)))
       (let (
