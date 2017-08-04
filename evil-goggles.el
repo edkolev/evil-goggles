@@ -237,7 +237,7 @@ This variable must be set before `evil-goggles-mode' is enabled"
   "Advice for function `undo-tree-undo` and function `undo-tree-redo`.
 
 ORIG-FUN is the original function.
-ARG are the arguments of the original function."
+ARG is the arguments of the original function."
   (unwind-protect
       (progn
         (advice-add 'primitive-undo :around 'evil-goggles--primitive-undo-advice)
@@ -245,6 +245,10 @@ ARG are the arguments of the original function."
     (advice-remove 'primitive-undo 'evil-goggles--primitive-undo-advice)))
 
 (defun evil-goggles--primitive-undo-advice (orig-fun n list)
+  "Advice for function `primitive-undo`.
+
+ORIG-FUN is the original function.
+N and LIST are the arguments of the original function."
   (let ((undo-item (evil-goggles--get-undo-item list)))
 
     ;; show hint on the text which will be removed before undo/redo removes it
@@ -269,8 +273,11 @@ ARG are the arguments of the original function."
     (when (eq 1 (length processed-list))
       (car processed-list))))
 
-(defun evil-goggles--undo-elt (elt)
-  (pcase elt
+(defun evil-goggles--undo-elt (undo-elt)
+  "Process UNDO-ELT.
+
+Return a list: either ('text-added beg end) or ('text-removed beg end)"
+  (pcase undo-elt
     ;; (BEG . END) means text added
     (`(,(and beg (pred integerp)) . ,(and end (pred integerp)))
      `(text-added ,beg ,end))
