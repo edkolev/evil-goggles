@@ -245,25 +245,29 @@ ARG are the arguments of the original function."
     (advice-remove 'primitive-undo 'evil-goggles--primitive-undo-advice)))
 
 (defun evil-goggles--primitive-undo-advice (orig-fun n list)
-  (let* ((ulist (cl-remove-if #'null (mapcar #'evil-goggles--undo-elt list)))
-         (ulist-len (length ulist))
-         (single-text-block-was-removed
-          (and (eq 1 ulist-len) (eq 'text-removed (caar ulist))))
-         (single-text-block-was-inserted
-          (and (eq 1 ulist-len) (eq 'text-added (caar ulist))))
-         (uelt (car ulist))
-         (beg (nth 1 uelt))
-         (end (nth 2 uelt)))
+  (let ((undo-item (evil-goggles--get-undo-item list)))
 
     ;; show hint on the text which will be removed before undo/redo removes it
-    (when (and single-text-block-was-inserted (evil-goggles--show-p beg end))
-      (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))
+    (pcase undo-item
+      (`(text-added ,beg ,end)
+       (when (evil-goggles--show-p beg end)
+         (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))))
 
+    ;; call the undo/redo function
     (funcall orig-fun n list)
 
     ;; show hint on the text which will be added after undo/redo addes it
-    (when (and single-text-block-was-removed (evil-goggles--show-p beg end))
-      (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face))))
+    (pcase undo-item
+      (`(text-removed ,beg ,end)
+       (when (evil-goggles--show-p beg end)
+         (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face))))))
+
+(defun evil-goggles--get-undo-item (list)
+  "Process LIST and return the first item if it's only one, or nil."
+  (let* ((processed-list
+          (cl-remove-if #'null (mapcar #'evil-goggles--undo-elt list))))
+    (when (eq 1 (length processed-list))
+      (car processed-list))))
 
 (defun evil-goggles--undo-elt (elt)
   (pcase elt
