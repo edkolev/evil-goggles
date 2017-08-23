@@ -594,11 +594,8 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-surround-region :around 'evil-goggles--evil-surround-region-advice))
 
     (when evil-goggles-enable-commentary
-      (cond
-       ((fboundp 'evil-commentary)
-	(advice-add 'evil-commentary :around 'evil-goggles--evil-commentary-advice))
-       ((fboundp 'evilnc-comment-operator)
-	(advice-add 'evilnc-comment-operator :around 'evil-goggles--evil-commentary-advice))))
+	(advice-add 'evil-commentary :around 'evil-goggles--evil-commentary-advice)
+	(advice-add 'evilnc-comment-operator :around 'evil-goggles--evil-commentary-advice))
 
     (when evil-goggles-enable-replace-with-register
       (advice-add 'evil-replace-with-register :around 'evil-goggles--evil-replace-with-register-advice)))
