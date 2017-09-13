@@ -16,4 +16,10 @@ clean:
 checkdoc:
 	$(bemacs) -l test/make-checkdoc.el
 
-.PHONY: update compile test clean checkdoc
+wget-evil-tests:
+	curl "https://raw.githubusercontent.com/emacs-evil/evil/49965280b97d7ba8b913f4bf6ff86662e2263c4e/evil-tests.el" --output test/evil-tests.el
+
+evil-test:
+	$(emacs) -nw -Q -l test/elpa.el -l test/make-evil-test.el
+
+.PHONY: update compile test clean checkdoc evil-test wget-evil-tests
