@@ -22,4 +22,7 @@ wget-evil-tests:
 evil-test:
 	$(emacs) -nw -Q -l test/elpa.el -l test/make-evil-test.el
 
-.PHONY: update compile test clean checkdoc evil-test wget-evil-tests
+evil-test-batch:
+	$(bemacs) -l test/make-evil-test.el
+
+.PHONY: update compile test clean checkdoc evil-test wget-evil-tests evil-test-batch

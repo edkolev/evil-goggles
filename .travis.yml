@@ -14,5 +14,4 @@ script:
   - make update
   - make compile
   - make test
-  - make wget-evil-tests
-  - make evil-test
+  - make evil-test-batch
