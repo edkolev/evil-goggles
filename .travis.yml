@@ -14,4 +14,3 @@ script:
   - make update
   - make compile
   - make test
-  - make evil-test-batch
