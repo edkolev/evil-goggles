@@ -66,7 +66,8 @@ evil-goggles
 #### evil plugins with hint
 
 - surround [evil-surround](https://github.com/timcharper/evil-surround)
-- comment [evil-commentary](https://github.com/linktohack/evil-commentary) and [evil-nerd-commenter](https://github.com/redguardtoo/evil-nerd-commenter)
+- commentary [evil-commentary](https://github.com/linktohack/evil-commentary)
+- nerd-commenter [evil-nerd-commenter](https://github.com/redguardtoo/evil-nerd-commenter)
 - replace with register [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
 
 ## Customizations
@@ -103,6 +104,7 @@ evil-goggles-paste-face
 evil-goggles-shift-face
 evil-goggles-surround-face
 evil-goggles-commentary-face
+evil-goggles-nerd-commenter-face
 evil-goggles-replace-with-register-face
 evil-goggles-set-marker-face
 evil-goggles-undo-redo-add-face
@@ -133,6 +135,7 @@ evil-goggles-undo-redo-change-face
 ;; evil-goggles-enable-shift
 ;; evil-goggles-enable-surround
 ;; evil-goggles-enable-commentary
+;; evil-goggles-enable-nerd-commenter
 ;; evil-goggles-enable-replace-with-register
 ;; evil-goggles-enable-set-marker
 ;; evil-goggles-enable-undo

@@ -516,6 +516,20 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-goggles-commentary-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
+;; nerd-commenter
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-nerd-commenter "If non-nil, enable nerd-commenter support"
+    evil-goggles-nerd-commenter-face "Face for nerd-commenter action")
+
+(defun evil-goggles--evil-nerd-commenter-advice (orig-fun beg end &optional type)
+  "Around-advice for function `evilnc-comment-operator'.
+
+ORIG-FUN is the original function.
+BEG END &OPTIONAL TYPE are the arguments of the original function."
+  (evil-goggles--with-goggles beg end 'evil-goggles-nerd-commenter-face
+    (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
+
 ;; replace with register
 
 (evil-goggles--define-switch-and-face
@@ -594,8 +608,10 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-surround-region :around 'evil-goggles--evil-surround-region-advice))
 
     (when evil-goggles-enable-commentary
-	(advice-add 'evil-commentary :around 'evil-goggles--evil-commentary-advice)
-	(advice-add 'evilnc-comment-operator :around 'evil-goggles--evil-commentary-advice))
+      (advice-add 'evil-commentary :around 'evil-goggles--evil-commentary-advice))
+
+    (when evil-goggles-enable-nerd-commenter
+      (advice-add 'evilnc-comment-operator :around 'evil-goggles--evil-nerd-commenter-advice))
 
     (when evil-goggles-enable-replace-with-register
       (advice-add 'evil-replace-with-register :around 'evil-goggles--evil-replace-with-register-advice)))
@@ -619,7 +635,7 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     ;; evil non-core functions
     (advice-remove 'evil-surround-region 'evil-goggles--evil-surround-region-advice)
     (advice-remove 'evil-commentary 'evil-goggles--evil-commentary-advice)
-    (advice-remove 'evilnc-comment-operator 'evil-goggles--evil-commentary-advice)
+    (advice-remove 'evilnc-comment-operator 'evil-goggles--evil-nerd-commenter-advice)
     (advice-remove 'evil-replace-with-register 'evil-goggles--evil-replace-with-register-advice))))
 
 (provide 'evil-goggles)
