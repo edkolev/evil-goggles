@@ -22,6 +22,9 @@ evil-goggles
 ![indent-region](https://cloud.githubusercontent.com/assets/1532071/25314629/889ae018-2850-11e7-9c9b-579edda38771.gif)
 
 
+![undo-redo](https://user-images.githubusercontent.com/1532071/30509413-ce64fc84-9ab8-11e7-9f33-107c1a62f653.gif)
+
+
 ![fast-replace](https://cloud.githubusercontent.com/assets/1532071/25314628/889ab1c4-2850-11e7-9cf5-c801b8293583.gif)
 
 ## Installation
@@ -57,6 +60,8 @@ evil-goggles
 - join
 - format (`gq` operator)
 - shift left and right (`>`, `<` operators)
+- undo
+- redo
 
 #### evil plugins with hint
 
@@ -100,6 +105,9 @@ evil-goggles-surround-face
 evil-goggles-commentary-face
 evil-goggles-replace-with-register-face
 evil-goggles-set-marker-face
+evil-goggles-undo-redo-add-face
+evil-goggles-undo-redo-remove-face
+evil-goggles-undo-redo-change-face
 ```
 
 #### Other Customizations
@@ -127,9 +135,12 @@ evil-goggles-set-marker-face
 ;; evil-goggles-enable-commentary
 ;; evil-goggles-enable-replace-with-register
 ;; evil-goggles-enable-set-marker
+;; evil-goggles-enable-undo
+;; evil-goggles-enable-redo
 ```
 
 ## Recent Significant Changes
 
 - [May 28, 2017] Switched to using custom faces per action, deprecated `evil-goggles-faces-alist`
 - [May 28, 2017] Switched to using per-action on/off custom variables, deprecated `evil-goggles-blacklist`
+- [Sep 16, 2017] Add support for undo/redo
