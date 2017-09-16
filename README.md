@@ -66,7 +66,7 @@ evil-goggles
 #### evil plugins with hint
 
 - surround [evil-surround](https://github.com/timcharper/evil-surround)
-- commentary [evil-commentary](https://github.com/linktohack/evil-commentary)
+- comment [evil-commentary](https://github.com/linktohack/evil-commentary) and [evil-nerd-commenter](https://github.com/redguardtoo/evil-nerd-commenter)
 - replace with register [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
 
 ## Customizations
