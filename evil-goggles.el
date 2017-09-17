@@ -45,7 +45,9 @@
   :group 'evil-goggles)
 
 (defcustom evil-goggles-pulse nil
-  "If t, the overlay hint will pulse rather than appear and disapper."
+  "If t, the overlay hint will pulse rather than appear and disapper.
+
+This option is experimental."
   :type 'boolean
   :group 'evil-goggles)
 

@@ -83,6 +83,12 @@ By default, all goggles' faces inherit `evil-goggles-default-face`, which in tur
 ;; run `M-x list-faces-display` in a fresh emacs to get a list of faces on your emacs
 ```
 
+- To pulse the visual hint, rather than just show and hide it (experimental):
+
+``` emacs-lisp
+(setq evil-goggles-pulse t)
+```
+
 - To use different faces per edit action:
 ```emacs-lisp
 (custom-set-faces
