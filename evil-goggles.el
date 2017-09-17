@@ -166,12 +166,12 @@ FACE-DOC is the docstring for FACE-NAME."
   "Load `diff-mode' and use its faces for evil-goggles mode."
   (require 'diff-mode) ;; load diff-* faces
   (custom-set-faces
-   '(evil-goggles-delete-face ((t (:inherit 'diff-removed))))
-   '(evil-goggles-paste-face ((t (:inherit 'diff-added))))
-   '(evil-goggles-yank-face ((t (:inherit 'diff-changed))))
-   '(evil-goggles-undo-redo-remove-face ((t (:inherit 'diff-removed))))
-   '(evil-goggles-undo-redo-add-face ((t (:inherit 'diff-added))))
-   '(evil-goggles-undo-redo-change-face ((t (:inherit 'diff-changed))))))
+   '(evil-goggles-delete-face ((t (:inherit diff-removed))))
+   '(evil-goggles-paste-face ((t (:inherit diff-added))))
+   '(evil-goggles-yank-face ((t (:inherit diff-changed))))
+   '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
+   '(evil-goggles-undo-redo-add-face ((t (:inherit diff-added))))
+   '(evil-goggles-undo-redo-change-face ((t (:inherit diff-changed))))))
 
 ;; delete
 
