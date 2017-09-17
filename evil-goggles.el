@@ -49,10 +49,6 @@
   "Evil-goggles generic face."
   :group 'evil-goggles)
 
-(defcustom evil-goggles-blacklist nil
-  "List of functions which should not display the goggles overlay."
-  :type 'boolean
-  :group 'evil-goggles)
 
 (defun evil-goggles--show (beg end face)
   "Show overlay in region from BEG to END with FACE.
