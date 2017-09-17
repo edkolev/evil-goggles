@@ -287,14 +287,11 @@ This function tries to return a single list, either:
  ('text-removed beg end)"
   (let* ((processed-list
           (evil-goggles--combine-undo-list (cl-remove-if #'null (mapcar #'evil-goggles--undo-elt list)))))
-    ;; (message "processed-list %s, list %s" processed-list list)
-    ;; (message "combined undo-list %s" processed-list)
     ;; if there's only item in the list, return it; otherwise - nil
     (when (eq 1 (length processed-list))
       (car processed-list))))
 
 (defun evil-goggles--combine-undo-list (input)
-  ;; (message "input undo-list ::: %s" input)
   (let* ((last (car input))
          (result (list last)))
     (dolist (this (cdr input) (nreverse result))
