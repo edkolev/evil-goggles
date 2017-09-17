@@ -44,10 +44,8 @@
   :type 'number
   :group 'evil-goggles)
 
-(defcustom evil-goggles-pulse (display-graphic-p)
-  "If t, the overlay hint will pulse rather than appear and disapper.
-
-Default is t for graphic displays, nil otherwise"
+(defcustom evil-goggles-pulse nil
+  "If t, the overlay hint will pulse rather than appear and disapper."
   :type 'boolean
   :group 'evil-goggles)
 
