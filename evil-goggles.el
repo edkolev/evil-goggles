@@ -44,11 +44,24 @@
   :type 'number
   :group 'evil-goggles)
 
-(defface evil-goggles-default-face
-  '((t (:inherit region)))
-  "Evil-goggles generic face."
+(defcustom evil-goggles-pulse (display-graphic-p)
+  "If t, the overlay hint will pulse rather than appear and disapper.
+
+Default is t for graphic displays, nil otherwise"
+  :type 'boolean
   :group 'evil-goggles)
 
+(defface evil-goggles-default-face
+  '((t (:inherit region)))
+  "Evil-goggles default face."
+  :group 'evil-goggles)
+
+(defface evil-goggles--pulse-face nil
+  "Temporary face used when pulsing.
+
+This is needed because the pulse package expects to receive a face, it
+can't work with input such as (backgound . \"red\")."
+  :group 'evil-goggles)
 
 (defun evil-goggles--show (beg end face)
   "Show overlay in region from BEG to END with FACE.
@@ -59,24 +72,51 @@ otherwise - a region."
       (evil-goggles--show-block beg end face)
     (evil-goggles--show-region beg end face)))
 
+(autoload 'pulse-momentary-highlight-overlay "pulse")
+
 (defun evil-goggles--show-region (beg end face)
-  "Show overlay in region from BEG to END with FACE."
-  (let ((ov (evil-goggles--make-overlay beg end 'face face)))
+  "Show overlay in region from BEG to END with FACE.
+
+The overlay will either pulse if variable `evil-goggles-pulse' is t or
+appear and disappear."
+  (let ((ov (evil-goggles--make-overlay beg end))
+        (bg (evil-goggles--face-background face)))
     (unwind-protect
-        (sit-for evil-goggles-duration)
+        (progn
+          (if evil-goggles-pulse
+              (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
+            (overlay-put ov 'face `(:background ,bg))) ;; just put the background color on the overlay
+          (sit-for evil-goggles-duration))
       (delete-overlay ov))))
+
+(defun evil-goggles--pulse-overlay (ov background)
+  "Pulse the overlay OV with the BACKGROUND color."
+  (let* ((pulse-delay 0.03)
+         (pulse-iterations (round evil-goggles-duration pulse-delay)))
+    (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
+    (set-face-attribute 'evil-goggles--pulse-face nil :background background)
+    (pulse-momentary-highlight-overlay ov 'evil-goggles--pulse-face)))
 
 (defun evil-goggles--show-block (beg end face)
   "Show overlay in blcok from BEG to END with FACE."
-  (let ((ovs))
+  (let ((ovs)
+        (overlay-face `(:background ,(evil-goggles--face-background face))))
     (unwind-protect
         (progn
           ;; create multiple overlays, one for each line in the block
           (evil-apply-on-block (lambda (line-beg line-end)
-                                 (add-to-list 'ovs (evil-goggles--make-overlay line-beg line-end 'face face)))
+                                 (add-to-list 'ovs
+                                              (evil-goggles--make-overlay line-beg line-end 'face overlay-face)))
                                beg end nil)
           (sit-for evil-goggles-duration))
       (mapcar 'delete-overlay ovs))))
+
+(defun evil-goggles--face-background (face)
+  "Return the background of FACE or use a fallback.
+
+If the given FACE doesn't have a background, then fallback to the
+background of 'evil-goggles-default-face, then 'region."
+  (face-background face nil '(evil-goggles-default-face region)))
 
 (defun evil-goggles--make-overlay (beg end &rest properties)
   "Make overlay in region from BEG to END with PROPERTIES."
