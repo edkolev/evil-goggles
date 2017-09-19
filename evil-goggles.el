@@ -57,7 +57,7 @@ This option is experimental."
   :group 'evil-goggles)
 
 (defface evil-goggles--pulse-face nil
-  "Temporary face used when pulsing.
+  "Temporary face used when pulsing, should not be modified.
 
 This is needed because the pulse package expects to receive a face, it
 can't work with input such as (backgound . \"red\")."
@@ -77,8 +77,8 @@ otherwise - a region."
 (defun evil-goggles--show-region (beg end face)
   "Show overlay in region from BEG to END with FACE.
 
-The overlay will either pulse if variable `evil-goggles-pulse' is t or
-appear and disappear."
+The overlay will pulse if variable `evil-goggles-pulse' is t,
+otherwise it will just appear and disappear."
   (let ((ov (evil-goggles--make-overlay beg end))
         (bg (evil-goggles--face-background face)))
     (unwind-protect
