@@ -85,7 +85,7 @@ appear and disappear."
         (progn
           (if evil-goggles-pulse
               (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
-            (overlay-put ov 'face `(:background ,bg))) ;; just put the background color on the overlay
+            (overlay-put ov 'face face)) ;; just put the face on the overlay
           (sit-for evil-goggles-duration))
       (delete-overlay ov))))
 
