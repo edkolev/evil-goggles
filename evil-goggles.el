@@ -587,10 +587,7 @@ ORIG-FUN is the original function.
 COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
   (evil-goggles--with-goggles beg end 'evil-goggles-replace-with-register-face
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register))
-
-  ;; good good
-
-  (evil-goggles--show beg (point) 'diff-added))
+    (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 ;;; mode defined below ;;;
 
