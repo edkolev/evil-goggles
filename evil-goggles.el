@@ -163,8 +163,8 @@ displayed while its running."
   `(if (evil-goggles--show-p ,beg ,end)
        (let* ((evil-goggles--on t))
          (evil-goggles--show ,beg ,end ,overlay-face)
-         (progn ,@body))
-     (progn ,@body)))
+         ,@body)
+     ,@body))
 
 (defun evil-goggles--funcall-interactively (f &rest args)
   "Call F with ARGS interactively.
