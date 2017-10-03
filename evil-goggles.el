@@ -446,7 +446,7 @@ BEG END are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END are arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-fill-and-move-face
+  (evil-goggles--with-after-goggles beg end 'evil-goggles-fill-and-move-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
 ;; paste before and after
@@ -610,8 +610,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-replace-with-register-face
-    (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register))
+  (evil-goggles--with-after-goggles beg end 'evil-goggles-nerd-commenter-face
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 ;;; mode defined below ;;;
