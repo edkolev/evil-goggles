@@ -156,15 +156,40 @@ overlay must not be displayed.")
   "Show goggles overlay from BEG to END if the conditions are met.
 
 OVERLAY-FACE is the face to use for the overlay.
-The goggles overlay will be displayed briefly before BODY is executed.
+The goggles overlay will be displayed before BODY is executed.
 BODY will be executed but an overlay will not be allowed to be
 displayed while its running."
   (declare (indent defun) (debug t))
   `(if (evil-goggles--show-p ,beg ,end)
-       (let* ((evil-goggles--on t))
+       (let ((evil-goggles--on t))
          (evil-goggles--show ,beg ,end ,overlay-face)
          ,@body)
      ,@body))
+
+(defmacro evil-goggles--with-after-goggles (beg end overlay-face &rest body)
+  "Add an overlay from BEG to END, make it visible with OVERLAY-FACE after BODY."
+  (declare (indent defun) (debug t))
+  `(if (evil-goggles--show-p ,beg ,end)
+       (let ((evil-goggles--on t)
+             (ov (evil-goggles--make-overlay ,beg ,end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
+             (bg (evil-goggles--face-background ,overlay-face)))
+         (unwind-protect
+             (progn
+               (if evil-goggles-pulse
+                   (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
+                 (overlay-put ov 'face ,overlay-face)) ;; just put the face on the overlay
+               ,@body
+               (sit-for evil-goggles-duration))
+           (delete-overlay ov)))
+     ,@body))
+
+(defun evil-goggles--overlay-insert-behind-hook (o afterp beg end &optional len)
+  (when afterp
+    (if (zerop len)
+        (progn
+          (setq len (- end beg))
+          (move-overlay o (overlay-start o) (+ len (overlay-end o))))
+      (move-overlay o (overlay-start o) (- (overlay-end o) len) ))))
 
 (defun evil-goggles--funcall-interactively (f &rest args)
   "Call F with ARGS interactively.
