@@ -518,7 +518,7 @@ Argument YANK-HANDLER is the yank hanler."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-shift-face
+  (evil-goggles--with-after-goggles beg end 'evil-goggles-shift-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
 
 ;; set mark
