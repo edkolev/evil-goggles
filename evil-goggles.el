@@ -274,7 +274,7 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
 
 ORIG-FUN is the original function.
 BEG END are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-indent-face
+  (evil-goggles--with-after-goggles beg end 'evil-goggles-indent-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
 ;; yank
