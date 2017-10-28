@@ -435,7 +435,7 @@ BEG END are the arguments of the original function."
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
-;; indent (fill and move)
+;; reformat (fill and move)
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-fill-and-move "If non-nil, enable fill and move (reformat) support"
