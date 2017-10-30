@@ -386,7 +386,6 @@ This variable must be set before `evil-goggles-mode' is enabled" :type 'number :
 (defcustom evil-goggles-undo-redo-change-duration evil-goggles-duration "Duration of hint on undo/redo changing
 This variable must be set before `evil-goggles-mode' is enabled" :type 'number :group 'evil-goggles)
 
-This variable must be set before `evil-goggles-mode' is enabled" :type 'boolean :group 'evil-goggles)
 (defface evil-goggles-undo-redo-add-face
   '((t
      (:inherit evil-goggles-default-face)))
