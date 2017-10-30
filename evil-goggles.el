@@ -145,7 +145,7 @@ background of 'evil-goggles-default-face, then 'region."
 Used to prevent displaying multiple overlays for the same command.  For
 example, when the user executes `evil-delete', the overlay should be
 displayed, but when `evil-delete' calls internally `evil-yank', the
-overlay must not be displayed.")
+overlay must not be re-displayed.")
 
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
@@ -439,7 +439,7 @@ N and LIST are the arguments of the original function."
     (pcase undo-item
       (`(text-added ,beg ,end)
        (when (evil-goggles--show-p beg end)
-         (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))))
+         (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration))))
 
     ;; call the undo/redo function
     (funcall orig-fun n list)
@@ -448,10 +448,10 @@ N and LIST are the arguments of the original function."
     (pcase undo-item
       (`(text-removed ,beg ,end)
        (when (evil-goggles--show-p beg end)
-         (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face)))
+         (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration)))
       (`(text-changed ,beg ,end)
        (when (evil-goggles--show-p beg end)
-         (evil-goggles--show beg end 'evil-goggles-undo-redo-change-face))))))
+         (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration))))))
 
 (defun evil-goggles--get-undo-item (list)
   "Process LIST.
@@ -593,7 +593,7 @@ Argument YANK-HANDLER is the yank hanler."
            (beg-corrected (if is-beg-at-eol (1+ beg) beg)))
       (if (evil-goggles--evil-paste-block-p register yank-handler)
           (evil-goggles--show-block-overlay beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration)
-        (evil-goggles--show-overlay beg-corrected end 'evil-goggles-paste-face (or evil-goggles-paste-duration evil-goggles-duration))))))
+        (evil-goggles--with-before-goggles2 beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration)))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
   "Return t if the paste was a vertical block.
