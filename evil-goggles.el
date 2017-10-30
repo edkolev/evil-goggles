@@ -89,10 +89,11 @@ otherwise it will just appear and disappear."
           (sit-for evil-goggles-duration))
       (delete-overlay ov))))
 
-(defun evil-goggles--pulse-overlay (ov background)
+;; TODO dur should not be optional
+(defun evil-goggles--pulse-overlay (ov background &optional dur)
   "Pulse the overlay OV with the BACKGROUND color."
   (let* ((pulse-delay 0.03)
-         (pulse-iterations (round evil-goggles-duration pulse-delay)))
+         (pulse-iterations (round (or dur evil-goggles-duration) pulse-delay)))
     (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
     (set-face-attribute 'evil-goggles--pulse-face nil :background background)
     (pulse-momentary-highlight-overlay ov 'evil-goggles--pulse-face)))
@@ -190,6 +191,72 @@ displayed while its running."
           (setq len (- end beg))
           (move-overlay o (overlay-start o) (+ len (overlay-end o))))
       (move-overlay o (overlay-start o) (- (overlay-end o) len) ))))
+
+(defmacro evil-goggles--with-after-goggles2 (beg end face dur &rest body)
+  (declare (indent 4) (debug t))
+  `(evil-goggles--with-hint-on ,beg ,end (progn ,@body)
+     (evil-goggles--show-overlay ,beg ,end ,face ,dur
+       ,@body)))
+
+(defun evil-goggles--show-or-pulse-overlay (ov face dur)
+  (if evil-goggles-pulse
+      (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur) ;; pulse the overlay
+    (overlay-put ov 'face face))) ;; just put the face on the overlay
+
+(defmacro evil-goggles--with-hint-on (beg end body1 &rest body2)
+  (declare (indent 3) (debug t))
+  `(if (and (not evil-goggles--on) (evil-goggles--show-p ,beg ,end))
+       (let ((evil-goggles--on t))
+         ,@body2)
+     ,body1))
+
+(defmacro evil-goggles--with-no-hint (&rest body)
+  (declare (indent 0) (debug t))
+  `(let ((evil-goggles--on t))
+     ,@body))
+
+(defmacro evil-goggles--with-before-goggles2 (beg end face dur &rest body)
+  (declare (indent 4) (debug t))
+  `(evil-goggles--with-hint-on ,beg ,end (progn ,@body)
+     (if (eq evil-this-type 'block)
+         (evil-goggles--show-block-overlay ,beg ,end ,face ,dur)
+       (evil-goggles--show-overlay ,beg ,end ,face ,dur))
+     ,@body))
+
+(defmacro evil-goggles--show-overlay (beg end face dur &rest body)
+  "Show overlay from BEG to END with face FACE for DUR seconds.
+
+If BODY is non-nil, run BODY before removing the overlay.  The overlay
+will be adjusted if BODY modifies the text in it."
+  (declare (indent 4) (debug t))
+  `(let ((ov (evil-goggles--make-overlay ,beg ,end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook))))
+    (unwind-protect
+        (progn
+          (evil-goggles--show-or-pulse-overlay ov ,face ,dur)
+          ,@body
+          (sit-for ,dur))
+      (delete-overlay ov))))
+
+(defun evil-goggles--show-block-overlay (beg end face dur)
+  "Show overlay from BEG to END with face FACE for DUR seconds.
+
+Pulsing the overlay isn't supported.
+Running code while the hint is on isn't supported."
+  ;; NOTE both of the limitation stated above can likely be addressed
+  ;; if needed
+  (let ((ovs)
+        (overlay-face `(:background ,(evil-goggles--face-background face)))) ;; TODO drop this var
+    (unwind-protect
+        (progn
+          ;; create multiple overlays, one for each line in the block
+          (evil-apply-on-block (lambda (line-beg line-end)
+                                 (add-to-list 'ovs
+                                              (evil-goggles--make-overlay line-beg line-end 'face overlay-face)))
+                               beg end nil)
+          ;; TODO add support for pulsing a vertical block
+          ;; (dolist (ov ovs) (evil-goggles--show-or-pulse-overlay ov face dur))
+          (sit-for evil-goggles-duration))
+      (mapcar 'delete-overlay ovs))))
 
 (defun evil-goggles--funcall-interactively (f &rest args)
   "Call F with ARGS interactively.
