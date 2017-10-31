@@ -82,7 +82,7 @@ can't work with input such as (backgound . \"red\")."
 This function returns immediately, it doesn't wait for the pulse
 animation to end."
   (let* ((pulse-delay 0.03)
-         (pulse-iterations (round (or dur evil-goggles-duration) pulse-delay)))
+         (pulse-iterations (round dur pulse-delay)))
     (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
     (set-face-attribute 'evil-goggles--pulse-face nil :background background)
     (pulse-momentary-highlight-overlay ov 'evil-goggles--pulse-face)))
@@ -220,7 +220,7 @@ Running code while the hint is on isn't supported."
                                beg end nil)
           ;; TODO add support for pulsing a vertical block
           ;; (dolist (ov ovs) (evil-goggles--show-or-pulse-overlay ov face dur))
-          (sit-for evil-goggles-duration))
+          (sit-for dur))
       (mapcar 'delete-overlay ovs))))
 
 (defun evil-goggles--funcall-interactively (f &rest args)
