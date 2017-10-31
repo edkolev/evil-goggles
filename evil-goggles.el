@@ -215,6 +215,7 @@ Running code while the hint is on isn't supported."
   ;; NOTE both of the limitation stated above can likely be addressed
   ;; if needed
   (let ((ovs)
+        (dur (or dur evil-goggles-duration))
         (overlay-face `(:background ,(evil-goggles--face-background face)))) ;; TODO drop this var
     (unwind-protect
         (progn
