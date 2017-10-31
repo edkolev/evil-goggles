@@ -651,7 +651,7 @@ BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original fun
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE are the arguments of the original function."
-  (evil-goggles--with-pre-hint beg end 'evil-goggles-commentary-face evil-goggles-commentary-duration
+  (evil-goggles--with-post-hint beg end 'evil-goggles-commentary-face evil-goggles-commentary-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
 ;; nerd-commenter
@@ -666,7 +666,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE are the arguments of the original function."
-  (evil-goggles--with-pre-hint beg end 'evil-goggles-nerd-commenter-face evil-goggles-nerd-commenter-duration
+  (evil-goggles--with-post-hint beg end 'evil-goggles-nerd-commenter-face evil-goggles-nerd-commenter-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
 ;; replace with register
