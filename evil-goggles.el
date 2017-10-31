@@ -68,60 +68,21 @@ This option is experimental."
   :group 'evil-goggles)
 
 (defface evil-goggles--pulse-face nil
-  "Temporary face used when pulsing, should not be modified.
+  "Temporary face used when pulsing, should not be customized.
 
 This is needed because the pulse package expects to receive a face, it
 can't work with input such as (backgound . \"red\")."
   :group 'evil-goggles)
 
-(defun evil-goggles--show (beg end face)
-  "Show overlay in region from BEG to END with FACE.
-
-If variable `evil-this-type' is 'block, the overlay will be a block,
-otherwise - a region."
-  (if (eq evil-this-type 'block)
-      (evil-goggles--show-block beg end face)
-    (evil-goggles--show-region beg end face)))
-
 (autoload 'pulse-momentary-highlight-overlay "pulse")
 
-(defun evil-goggles--show-region (beg end face)
-  "Show overlay in region from BEG to END with FACE.
-
-The overlay will pulse if variable `evil-goggles-pulse' is t,
-otherwise it will just appear and disappear."
-  (let ((ov (evil-goggles--make-overlay beg end))
-        (bg (evil-goggles--face-background face)))
-    (unwind-protect
-        (progn
-          (if evil-goggles-pulse
-              (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
-            (overlay-put ov 'face face)) ;; just put the face on the overlay
-          (sit-for evil-goggles-duration))
-      (delete-overlay ov))))
-
-;; TODO dur should not be optional
-(defun evil-goggles--pulse-overlay (ov background &optional dur)
+(defun evil-goggles--pulse-overlay (ov background dur)
   "Pulse the overlay OV with the BACKGROUND color."
   (let* ((pulse-delay 0.03)
          (pulse-iterations (round (or dur evil-goggles-duration) pulse-delay)))
     (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
     (set-face-attribute 'evil-goggles--pulse-face nil :background background)
     (pulse-momentary-highlight-overlay ov 'evil-goggles--pulse-face)))
-
-(defun evil-goggles--show-block (beg end face)
-  "Show overlay in blcok from BEG to END with FACE."
-  (let ((ovs)
-        (overlay-face `(:background ,(evil-goggles--face-background face))))
-    (unwind-protect
-        (progn
-          ;; create multiple overlays, one for each line in the block
-          (evil-apply-on-block (lambda (line-beg line-end)
-                                 (add-to-list 'ovs
-                                              (evil-goggles--make-overlay line-beg line-end 'face overlay-face)))
-                               beg end nil)
-          (sit-for evil-goggles-duration))
-      (mapcar 'delete-overlay ovs))))
 
 (defun evil-goggles--face-background (face)
   "Return the background of FACE or use a fallback.
@@ -149,8 +110,7 @@ overlay must not be re-displayed.")
 
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
-  (and (not evil-goggles--on)
-       (not evil-inhibit-operator-value)
+  (and (not evil-inhibit-operator-value)
        (bound-and-true-p evil-mode)
        (numberp beg)
        (numberp end)
@@ -163,37 +123,6 @@ overlay must not be re-displayed.")
        (not (and (fboundp 'evil-mc-has-cursors-p) (evil-mc-has-cursors-p)))
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
-
-(defmacro evil-goggles--with-goggles (beg end overlay-face &rest body)
-  "Show goggles overlay from BEG to END if the conditions are met.
-
-OVERLAY-FACE is the face to use for the overlay.
-The goggles overlay will be displayed before BODY is executed.
-BODY will be executed but an overlay will not be allowed to be
-displayed while its running."
-  (declare (indent defun) (debug t))
-  `(if (evil-goggles--show-p ,beg ,end)
-       (let ((evil-goggles--on t))
-         (evil-goggles--show ,beg ,end ,overlay-face)
-         ,@body)
-     ,@body))
-
-(defmacro evil-goggles--with-after-goggles (beg end overlay-face &rest body)
-  "Add an overlay from BEG to END, make it visible with OVERLAY-FACE after BODY."
-  (declare (indent defun) (debug t))
-  `(if (evil-goggles--show-p ,beg ,end)
-       (let ((evil-goggles--on t)
-             (ov (evil-goggles--make-overlay ,beg ,end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
-             (bg (evil-goggles--face-background ,overlay-face)))
-         (unwind-protect
-             (progn
-               (if evil-goggles-pulse
-                   (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
-                 (overlay-put ov 'face ,overlay-face)) ;; just put the face on the overlay
-               ,@body
-               (sit-for evil-goggles-duration))
-           (delete-overlay ov)))
-     ,@body))
 
 (defun evil-goggles--overlay-insert-behind-hook (o afterp beg end &optional len)
   (when afterp
@@ -438,8 +367,7 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be removed before undo/redo removes it
     (pcase undo-item
       (`(text-added ,beg ,end)
-       (when (evil-goggles--show-p beg end)
-         (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration))))
+       (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration)))
 
     ;; call the undo/redo function
     (funcall orig-fun n list)
@@ -447,11 +375,9 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be added after undo/redo addes it
     (pcase undo-item
       (`(text-removed ,beg ,end)
-       (when (evil-goggles--show-p beg end)
-         (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration)))
+       (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration))
       (`(text-changed ,beg ,end)
-       (when (evil-goggles--show-p beg end)
-         (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration))))))
+       (evil-goggles--with-before-goggles2 beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration)))))
 
 (defun evil-goggles--get-undo-item (list)
   "Process LIST.
