@@ -48,7 +48,7 @@ as when deleting."
   :group 'evil-goggles)
 
 ;; TODO better name
-(defcustom evil-goggles-duration2 0.400
+(defcustom evil-goggles-duration2 0.200
   "Time in floating seconds that the goggles overlay should last.
 
 This affects the hints which are displayed before the operation"
