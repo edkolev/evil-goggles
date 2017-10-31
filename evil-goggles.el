@@ -625,7 +625,7 @@ BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original funct
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original function."
-  (evil-goggles--with-pre-hint beg end 'evil-goggles-surround-face evil-goggles-surround-duration
+  (evil-goggles--with-post-hint beg end 'evil-goggles-surround-face evil-goggles-surround-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
 
 ;; commentary
