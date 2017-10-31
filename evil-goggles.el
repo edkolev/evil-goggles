@@ -43,7 +43,7 @@
   "Time in floating seconds that the goggles overlay should last.
 
 This affects the hints which are displayed before the operation, such
-as when deleting. "
+as when deleting."
   :type 'number
   :group 'evil-goggles)
 
@@ -77,7 +77,10 @@ can't work with input such as (backgound . \"red\")."
 (autoload 'pulse-momentary-highlight-overlay "pulse")
 
 (defun evil-goggles--pulse-overlay (ov background dur)
-  "Pulse the overlay OV with the BACKGROUND color."
+  "Pulse the overlay OV with the BACKGROUND color for DUR duration.
+
+This function returns immediately, it doesn't wait for the pulse
+animation to end."
   (let* ((pulse-delay 0.03)
          (pulse-iterations (round (or dur evil-goggles-duration) pulse-delay)))
     (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
@@ -124,26 +127,43 @@ overlay must not be re-displayed.")
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
-(defun evil-goggles--overlay-insert-behind-hook (o afterp beg end &optional len)
+(defun evil-goggles--overlay-insert-behind-hook (ov afterp beg end &optional len)
+  "Function which grows/shriks the overlay OV when its text changes.
+
+The OV, AFTERP, BEG, END, LEN arguments are specified by the calling
+convention for the insert-behind-hooks overlay property."
   (when afterp
     (if (zerop len)
         (progn
           (setq len (- end beg))
-          (move-overlay o (overlay-start o) (+ len (overlay-end o))))
-      (move-overlay o (overlay-start o) (- (overlay-end o) len) ))))
+          (move-overlay ov (overlay-start ov) (+ len (overlay-end ov))))
+      (move-overlay ov (overlay-start ov) (- (overlay-end ov) len) ))))
 
 (defmacro evil-goggles--with-after-goggles2 (beg end face dur &rest body)
+  "Show hint from BEG to END with face FACE for DUR seconds.
+
+BODY is executed after the hint is displayed but before it's
+removed.  As a result any changes BODY does on the text will be
+visualized by the hint."
   (declare (indent 4) (debug t))
   `(evil-goggles--with-hint-on ,beg ,end (progn ,@body)
      (evil-goggles--show-overlay ,beg ,end ,face (or ,dur evil-goggles-duration2)
        ,@body)))
 
 (defun evil-goggles--show-or-pulse-overlay (ov face dur)
+  "Show or pulse overlay OV with face FACE.
+
+DUR is used only when pulsing.
+The overlay is pulsed if variable `evil-goggles-pulse' is t."
   (if evil-goggles-pulse
-      (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur) ;; pulse the overlay
-    (overlay-put ov 'face face))) ;; just put the face on the overlay
+      (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur)
+    (overlay-put ov 'face face)))
 
 (defmacro evil-goggles--with-hint-on (beg end body1 &rest body2)
+  "Run one block of code if hint is visible, run the other if not.
+
+If hint is visible, check it's ok to display it from BEG to END.  If
+it's not, do BODY1, else BODY2."
   (declare (indent 3) (debug t))
   `(if (and (not evil-goggles--on) (evil-goggles--show-p ,beg ,end))
        (let ((evil-goggles--on t))
@@ -151,11 +171,16 @@ overlay must not be re-displayed.")
      ,body1))
 
 (defmacro evil-goggles--with-no-hint (&rest body)
+  "Do BODY with hints disabled."
   (declare (indent 0) (debug t))
   `(let ((evil-goggles--on t))
      ,@body))
 
+;; TODO naming - with-pre-hint
 (defmacro evil-goggles--with-before-goggles2 (beg end face dur &rest body)
+  "Show hint from BEG to END with face FACE for DUR sec, then do BODY.
+
+BODY is executed after the hint has been removed."
   (declare (indent 4) (debug t))
   `(evil-goggles--with-hint-on ,beg ,end (progn ,@body)
      (if (eq evil-this-type 'block)
@@ -213,12 +238,14 @@ so this package can work with Emacs 24"
      (funcall ,fun ,@args)))
 
 (defmacro evil-goggles--define-switch-face-duration (switch-name switch-doc face-name face-doc dur-name dur-doc)
-  "Syntax sugar for defining a custom on/off variable and a custom face.
+  "Helper macro defining an on/off var, a face, and duration var.
 
 SWITCH-NAME is the name of the on/off variable.
 SWITCH-DOC is the docstring for SWITCH-NAME.
 FACE-NAME is the name of the custom face.
-FACE-DOC is the docstring for FACE-NAME."
+FACE-DOC is the docstring for FACE-NAME.
+DUR-NAME is the name of the duration variable.
+DUR-DOC is the docstring for DUR-NAME."
   (declare (indent 7) (debug t))
   `(progn
      (defcustom ,switch-name t
@@ -328,7 +355,7 @@ This variable must be set before `evil-goggles-mode' is enabled"
   :type 'number :group 'evil-goggles)
 
 (defcustom evil-goggles-undo-redo-change-duration evil-goggles-duration
-  "Duration of hint on undo/redo changing
+  "Duration of hint on undo/redo changing.
 This variable must be set before `evil-goggles-mode' is enabled"
   :type 'number :group 'evil-goggles)
 
@@ -394,6 +421,10 @@ This function tries to return a single list, either:
       (car processed-list))))
 
 (defun evil-goggles--combine-undo-list (input)
+  "Combine elements in INPUT list.
+
+Each element is expected to be either '(text-added BEG END) or
+'(text-removed BEG END)."
   (let* ((last (car input))
          (result (list last)))
     (dolist (this (cdr input) (nreverse result))
