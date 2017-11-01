@@ -139,7 +139,7 @@ convention for the insert-behind-hooks overlay property."
           (move-overlay ov (overlay-start ov) (+ len (overlay-end ov))))
       (move-overlay ov (overlay-start ov) (- (overlay-end ov) len) ))))
 
-(defmacro evil-goggles--with-post-hint (beg end face dur &rest body)
+(defmacro evil-goggles--with-async-hint (beg end face dur &rest body)
   "Show hint from BEG to END with face FACE for DUR seconds.
 
 BODY is executed after the hint is displayed but before it's
@@ -177,7 +177,7 @@ it's not, do BODY1, else BODY2."
   `(let ((evil-goggles--on t))
      ,@body))
 
-(defmacro evil-goggles--with-pre-hint (beg end face dur &rest body)
+(defmacro evil-goggles--with-blocking-hint (beg end face dur &rest body)
   "Show hint from BEG to END with face FACE for DUR sec, then do BODY.
 
 BODY is executed after the hint has been removed."
@@ -204,8 +204,8 @@ will be adjusted if BODY modifies the text in it."
 
 (defun evil-goggles--show-hint (beg end face dur)
   "Show hint from BEG to END with face FACE for DUR sec."
-  ;; call evil-goggles--with-post-hint with no BODY
-  (evil-goggles--with-post-hint beg end face dur))
+  ;; call evil-goggles--with-async-hint with no BODY
+  (evil-goggles--with-async-hint beg end face dur))
 
 (defun evil-goggles--show-block-overlay (beg end face dur)
   "Show overlay from BEG to END with face FACE for DUR seconds.
@@ -305,7 +305,7 @@ DUR-DOC is the docstring for DUR-NAME."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
-  (evil-goggles--with-pre-hint beg end 'evil-goggles-delete-face evil-goggles-delete-duration
+  (evil-goggles--with-blocking-hint beg end 'evil-goggles-delete-face evil-goggles-delete-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
 ;; indent
@@ -320,7 +320,7 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
 
 ORIG-FUN is the original function.
 BEG END are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-indent-face evil-goggles-indent-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-indent-face evil-goggles-indent-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
 ;; yank
@@ -335,7 +335,7 @@ BEG END are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-yank-face evil-goggles-yank-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-yank-face evil-goggles-yank-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
 ;; undo & redo
@@ -400,7 +400,7 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be removed before undo/redo removes it
     (pcase undo-item
       (`(text-added ,beg ,end)
-       (evil-goggles--with-pre-hint beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration)))
+       (evil-goggles--with-blocking-hint beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration)))
 
     ;; call the undo/redo function
     (funcall orig-fun n list)
@@ -408,9 +408,9 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be added after undo/redo addes it
     (pcase undo-item
       (`(text-removed ,beg ,end)
-       (evil-goggles--with-pre-hint beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration))
+       (evil-goggles--with-blocking-hint beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration))
       (`(text-changed ,beg ,end)
-       (evil-goggles--with-pre-hint beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration)))))
+       (evil-goggles--with-blocking-hint beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration)))))
 
 (defun evil-goggles--get-undo-item (list)
   "Process LIST.
@@ -495,7 +495,7 @@ BEG END are the arguments of the original function."
          (end-line (line-number-at-pos end))
          (line-count (- end-line beg-line)))
     (if (> line-count 1) ;; don't show goggles for single lines ("J"/"gJ" without count)
-        (evil-goggles--with-pre-hint beg end 'evil-goggles-join-face evil-goggles-join-duration
+        (evil-goggles--with-blocking-hint beg end 'evil-goggles-join-face evil-goggles-join-duration
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
@@ -511,7 +511,7 @@ BEG END are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END are arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-fill-and-move-face evil-goggles-fill-and-move-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-fill-and-move-face evil-goggles-fill-and-move-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
 ;; paste before and after
@@ -573,7 +573,7 @@ Argument YANK-HANDLER is the yank hanler."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-shift-face evil-goggles-shift-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-shift-face evil-goggles-shift-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
 
 ;; set mark
@@ -625,7 +625,7 @@ BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original funct
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-surround-face evil-goggles-surround-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-surround-face evil-goggles-surround-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
 
 ;; commentary
@@ -640,7 +640,7 @@ BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original fun
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-commentary-face evil-goggles-commentary-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-commentary-face evil-goggles-commentary-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
 ;; nerd-commenter
@@ -655,7 +655,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-nerd-commenter-face evil-goggles-nerd-commenter-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-nerd-commenter-face evil-goggles-nerd-commenter-duration
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
 ;; replace with register
@@ -670,7 +670,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
-  (evil-goggles--with-post-hint beg end 'evil-goggles-nerd-commenter-face evil-goggles-replace-with-register-duration
+  (evil-goggles--with-async-hint beg end 'evil-goggles-nerd-commenter-face evil-goggles-replace-with-register-duration
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 ;;; mode defined below ;;;
