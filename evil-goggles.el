@@ -140,10 +140,10 @@ convention for the insert-behind-hooks overlay property."
       (move-overlay ov (overlay-start ov) (- (overlay-end ov) len) ))))
 
 (defmacro evil-goggles--with-async-hint (beg end face dur &rest body)
-  "Show hint from BEG to END with face FACE for DUR seconds.
+  "Show hint from BEG to END with face FACE for DUR sec, do BODY with hint on.
 
 BODY is executed after the hint is displayed but before it's
-removed.  As a result any changes BODY does on the text will be
+removed. As a result any changes BODY does on the text will be
 visualized by the hint."
   (declare (indent 4) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
@@ -178,9 +178,11 @@ it's not, do BODY1, else BODY2."
      ,@body))
 
 (defmacro evil-goggles--with-blocking-hint (beg end face dur &rest body)
-  "Show hint from BEG to END with face FACE for DUR sec, then do BODY.
+  "Show hint from BEG to END with face FACE for DUR sec, hide it, then do BODY.
 
-BODY is executed after the hint has been removed."
+BODY is executed after DUR sec, when the hint has been removed, hence
+the hint is \"blocking\" because BODY won't run until the hint has
+disappeared."
   (declare (indent 4) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
      (if (eq evil-this-type 'block)
