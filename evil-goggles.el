@@ -171,7 +171,7 @@ it's not, do BODY1, else BODY2."
          ,@body2)
      ,body1))
 
-(defmacro evil-goggles--with-no-hint (&rest body)
+(defmacro evil-goggles--with-disabled-hint (&rest body)
   "Do BODY with hints disabled."
   (declare (indent 0) (debug t))
   `(let ((evil-goggles--on t))
@@ -612,7 +612,7 @@ CHAR POS ADVANCE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original function."
-  (evil-goggles--with-no-hint
+  (evil-goggles--with-disabled-hint
     (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
 
 ;; surround
