@@ -350,17 +350,17 @@ This variable must be set before `evil-goggles-mode' is enabled"
 This variable must be set before `evil-goggles-mode' is enabled"
   :type 'boolean :group 'evil-goggles)
 
-(defcustom evil-goggles-undo-redo-add-duration evil-goggles-duration
+(defcustom evil-goggles-undo-redo-add-duration nil
   "Duration of hint on undo/redo adding.
 This variable must be set before `evil-goggles-mode' is enabled"
   :type 'number :group 'evil-goggles)
 
-(defcustom evil-goggles-undo-redo-remove-duration evil-goggles-duration
+(defcustom evil-goggles-undo-redo-remove-duration nil
   "Duration of hint on undo/redo removing.
 This variable must be set before `evil-goggles-mode' is enabled"
   :type 'number :group 'evil-goggles)
 
-(defcustom evil-goggles-undo-redo-change-duration evil-goggles-duration
+(defcustom evil-goggles-undo-redo-change-duration nil
   "Duration of hint on undo/redo changing.
 This variable must be set before `evil-goggles-mode' is enabled"
   :type 'number :group 'evil-goggles)
