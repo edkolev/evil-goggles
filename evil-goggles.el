@@ -536,21 +536,12 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
   (prog1
       (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
     (when (evil-normal-state-p)
-      (evil-goggles--evil-paste-show register yank-handler))))
-
-(defun evil-goggles--evil-paste-show (register yank-handler)
-  "Helper fun to show the goggles overlay on the last pasted text.
-
-The overlay region is derermined by evil's marks [ and ]
-Argument REGISTER is the evil register.
-Argument YANK-HANDLER is the yank hanler."
-  (unless evil-goggles--on
-    (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
-           (end (save-excursion (evil-goto-mark ?\]) (point)))
-           (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
-           (beg-corrected (if is-beg-at-eol (1+ beg) beg))
-           (use-block-hint (evil-goggles--evil-paste-block-p register yank-handler)))
-      (evil-goggles--show-hint beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration use-block-hint))))
+      (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
+             (end (save-excursion (evil-goto-mark ?\]) (point)))
+             (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
+             (beg-corrected (if is-beg-at-eol (1+ beg) beg))
+             (use-block-hint (evil-goggles--evil-paste-block-p register yank-handler)))
+        (evil-goggles--show-hint beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration use-block-hint)))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
   "Return t if the paste was a vertical block.
