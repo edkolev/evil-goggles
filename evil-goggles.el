@@ -49,18 +49,28 @@
 (require 'cl-lib)
 
 (defcustom evil-goggles-duration 0.200
-  "Time in floating seconds that the goggles overlay should last.
+  "Time in floating seconds the goggles hint should last.
 
-This affects the hints which are displayed before the operation, such
-as when deleting."
+See also `evil-goggles-async-duration' and `evil-goggles-blocking-duration'."
   :type 'number
   :group 'evil-goggles)
 
-;; TODO better name
-(defcustom evil-goggles-duration2 0.200
-  "Time in floating seconds that the goggles overlay should last.
+(defcustom evil-goggles-async-duration nil
+  "Time in floating seconds the async goggles hint should last.
 
-This affects the hints which are displayed before the operation"
+If nil, the value of `evil-goggles-duration' will be used.
+
+This affects the hints which are displayed before the operation."
+  :type 'number
+  :group 'evil-goggles)
+
+(defcustom evil-goggles-blocking-duration nil
+  "Time in floating seconds the blocking goggles hint should last.
+
+If nil, the value of `evil-goggles-duration' will be used.
+
+This affects the hints which are displayed before the operation, when
+the operation is executed after the hint disappears."
   :type 'number
   :group 'evil-goggles)
 
@@ -155,11 +165,11 @@ convention for the insert-behind-hooks overlay property."
   "Show hint from BEG to END with face FACE for DUR sec, do BODY with hint on.
 
 BODY is executed after the hint is displayed but before it's
-removed. As a result any changes BODY does on the text will be
+removed.  As a result any changes BODY does on the text will be
 visualized by the hint."
   (declare (indent 4) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
-     (evil-goggles--show-overlay ,beg ,end ,face (or ,dur evil-goggles-duration2)
+     (evil-goggles--show-overlay ,beg ,end ,face (or ,dur evil-goggles-async-duration evil-goggles-duration)
        ,@body)))
 
 (defun evil-goggles--show-or-pulse-overlay (ov face dur)
@@ -198,8 +208,8 @@ disappeared."
   (declare (indent 4) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
      (if (or (eq evil-this-type 'block) evil-goggles--force-block)
-         (evil-goggles--show-block-overlay ,beg ,end ,face (or ,dur evil-goggles-duration))
-       (evil-goggles--show-overlay ,beg ,end ,face (or ,dur evil-goggles-duration)))
+         (evil-goggles--show-block-overlay ,beg ,end ,face (or ,dur evil-goggles-blocking-duration evil-goggles-duration))
+       (evil-goggles--show-overlay ,beg ,end ,face (or ,dur evil-goggles-blocking-duration evil-goggles-duration)))
      ,@body))
 
 (defmacro evil-goggles--show-overlay (beg end face dur &rest body)
@@ -231,7 +241,7 @@ Running code while the hint is on isn't supported."
   ;; NOTE both of the limitation stated above can likely be addressed
   ;; if needed
   (let ((ovs)
-        (dur (or dur evil-goggles-duration))
+        (dur (or dur evil-goggles-blocking-duration evil-goggles-duration))
         (overlay-face `(:background ,(evil-goggles--face-background face)))) ;; TODO drop this var
     (unwind-protect
         (progn
