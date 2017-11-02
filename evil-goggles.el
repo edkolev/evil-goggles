@@ -111,6 +111,9 @@ example, when the user executes `evil-delete', the overlay should be
 displayed, but when `evil-delete' calls internally `evil-yank', the
 overlay must not be re-displayed.")
 
+(defvar evil-goggles--force-block nil
+  "When non-nil, force the hint about to be shown to be a block.")
+
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-inhibit-operator-value)
@@ -185,7 +188,7 @@ the hint is \"blocking\" because BODY won't run until the hint has
 disappeared."
   (declare (indent 4) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
-     (if (eq evil-this-type 'block)
+     (if (or (eq evil-this-type 'block) evil-goggles--force-block)
          (evil-goggles--show-block-overlay ,beg ,end ,face (or ,dur evil-goggles-duration))
        (evil-goggles--show-overlay ,beg ,end ,face (or ,dur evil-goggles-duration)))
      ,@body))
@@ -204,10 +207,12 @@ will be adjusted if BODY modifies the text in it."
           (sit-for ,dur))
       (delete-overlay ov))))
 
-(defun evil-goggles--show-hint (beg end face dur)
-  "Show hint from BEG to END with face FACE for DUR sec."
-  ;; call evil-goggles--with-async-hint with no BODY
-  (evil-goggles--with-async-hint beg end face dur))
+(defun evil-goggles--show-hint (beg end face dur &optional force-block)
+  "Show hint from BEG to END with face FACE for DUR sec.
+
+The hint will be a vertical block if FORCE-BLOCK is non-nil."
+  (let ((evil-goggles--force-block force-block))
+    (evil-goggles--with-blocking-hint beg end face dur)))
 
 (defun evil-goggles--show-block-overlay (beg end face dur)
   "Show overlay from BEG to END with face FACE for DUR seconds.
@@ -543,11 +548,9 @@ Argument YANK-HANDLER is the yank hanler."
     (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
            (end (save-excursion (evil-goto-mark ?\]) (point)))
            (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
-           (beg-corrected (if is-beg-at-eol (1+ beg) beg)))
-      (if (evil-goggles--evil-paste-block-p register yank-handler)
-          ;; TODO evil-goggles--show-block-overlay doesn't check if the --on var is t/nil
-          (evil-goggles--show-block-overlay beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration)
-        (evil-goggles--show-hint beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration)))))
+           (beg-corrected (if is-beg-at-eol (1+ beg) beg))
+           (use-block-hint (evil-goggles--evil-paste-block-p register yank-handler)))
+      (evil-goggles--show-hint beg-corrected end 'evil-goggles-paste-face evil-goggles-paste-duration use-block-hint))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
   "Return t if the paste was a vertical block.
