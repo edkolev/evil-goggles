@@ -34,6 +34,15 @@
 ;;
 ;; (evil-goggles-mode)
 ;;
+;;; Internal APIs:
+;;
+;; These functions should be used for displaying hints:
+;;
+;; - evil-goggles--with-async-hint
+;; - evil-goggles--with-blocking-hint
+;; - evil-goggles--with-disabled-hint
+;; - evil-goggles--show-hint
+;;
 ;;; Code:
 
 (require 'evil)
@@ -407,7 +416,7 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be removed before undo/redo removes it
     (pcase undo-item
       (`(text-added ,beg ,end)
-       (evil-goggles--with-blocking-hint beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration)))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-remove-face evil-goggles-undo-redo-remove-duration)))
 
     ;; call the undo/redo function
     (funcall orig-fun n list)
@@ -415,9 +424,9 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be added after undo/redo addes it
     (pcase undo-item
       (`(text-removed ,beg ,end)
-       (evil-goggles--with-blocking-hint beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-add-face evil-goggles-undo-redo-add-duration))
       (`(text-changed ,beg ,end)
-       (evil-goggles--with-blocking-hint beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration)))))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-change-face evil-goggles-undo-redo-change-duration)))))
 
 (defun evil-goggles--get-undo-item (list)
   "Process LIST.
