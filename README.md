@@ -171,6 +171,8 @@ evil-goggles-undo-redo-change-face
 
 - [May 28, 2017] Switched to using custom faces per action, deprecated `evil-goggles-faces-alist`
 - [May 28, 2017] Switched to using per-action on/off custom variables, deprecated `evil-goggles-blacklist`
+- [Aug 02, 2017] Add experimental support for undo/redo (no longer experimental since Sep 16, 2017)
 - [Sep 13, 2017] Emacs 24 support
-- [Sep 16, 2017] Add support for undo/redo, it's no longer experimental
+- [Sep 16, 2017] Support for undo/redo is no longer experimental
 - [Sep 17, 2017] Add experimental support for pulsing hints
+- [Nov 03, 2017] Add options `evil-goggles-async-duration` and `evil-goggles-blocking-duration`
