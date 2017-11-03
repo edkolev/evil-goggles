@@ -34,13 +34,43 @@
 ;;
 ;; (evil-goggles-mode)
 ;;
+;;; Internal APIs:
+;;
+;; These functions should be used for displaying hints:
+;;
+;; - evil-goggles--with-async-hint
+;; - evil-goggles--with-blocking-hint
+;; - evil-goggles--with-disabled-hint
+;; - evil-goggles--show-hint
+;;
 ;;; Code:
 
 (require 'evil)
 (require 'cl-lib)
 
 (defcustom evil-goggles-duration 0.200
-  "Time if floating seconds that the goggles overlay should last."
+  "Time in floating seconds the goggles hint should last.
+
+See also `evil-goggles-async-duration' and `evil-goggles-blocking-duration'."
+  :type 'number
+  :group 'evil-goggles)
+
+(defcustom evil-goggles-async-duration nil
+  "Time in floating seconds the async goggles hint should last.
+
+If nil, the value of `evil-goggles-duration' will be used.
+
+This affects the hints which are displayed before the operation."
+  :type 'number
+  :group 'evil-goggles)
+
+(defcustom evil-goggles-blocking-duration nil
+  "Time in floating seconds the blocking goggles hint should last.
+
+If nil, the value of `evil-goggles-duration' will be used.
+
+This affects the hints which are displayed before the operation, when
+the operation is executed after the hint disappears."
   :type 'number
   :group 'evil-goggles)
 
@@ -57,59 +87,24 @@ This option is experimental."
   :group 'evil-goggles)
 
 (defface evil-goggles--pulse-face nil
-  "Temporary face used when pulsing, should not be modified.
+  "Temporary face used when pulsing, should not be customized.
 
 This is needed because the pulse package expects to receive a face, it
 can't work with input such as (backgound . \"red\")."
   :group 'evil-goggles)
 
-(defun evil-goggles--show (beg end face)
-  "Show overlay in region from BEG to END with FACE.
-
-If variable `evil-this-type' is 'block, the overlay will be a block,
-otherwise - a region."
-  (if (eq evil-this-type 'block)
-      (evil-goggles--show-block beg end face)
-    (evil-goggles--show-region beg end face)))
-
 (autoload 'pulse-momentary-highlight-overlay "pulse")
 
-(defun evil-goggles--show-region (beg end face)
-  "Show overlay in region from BEG to END with FACE.
+(defun evil-goggles--pulse-overlay (ov background dur)
+  "Pulse the overlay OV with the BACKGROUND color for DUR duration.
 
-The overlay will pulse if variable `evil-goggles-pulse' is t,
-otherwise it will just appear and disappear."
-  (let ((ov (evil-goggles--make-overlay beg end))
-        (bg (evil-goggles--face-background face)))
-    (unwind-protect
-        (progn
-          (if evil-goggles-pulse
-              (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
-            (overlay-put ov 'face face)) ;; just put the face on the overlay
-          (sit-for evil-goggles-duration))
-      (delete-overlay ov))))
-
-(defun evil-goggles--pulse-overlay (ov background)
-  "Pulse the overlay OV with the BACKGROUND color."
+This function returns immediately, it doesn't wait for the pulse
+animation to end."
   (let* ((pulse-delay 0.03)
-         (pulse-iterations (round evil-goggles-duration pulse-delay)))
+         (pulse-iterations (round dur pulse-delay)))
     (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
     (set-face-attribute 'evil-goggles--pulse-face nil :background background)
     (pulse-momentary-highlight-overlay ov 'evil-goggles--pulse-face)))
-
-(defun evil-goggles--show-block (beg end face)
-  "Show overlay in blcok from BEG to END with FACE."
-  (let ((ovs)
-        (overlay-face `(:background ,(evil-goggles--face-background face))))
-    (unwind-protect
-        (progn
-          ;; create multiple overlays, one for each line in the block
-          (evil-apply-on-block (lambda (line-beg line-end)
-                                 (add-to-list 'ovs
-                                              (evil-goggles--make-overlay line-beg line-end 'face overlay-face)))
-                               beg end nil)
-          (sit-for evil-goggles-duration))
-      (mapcar 'delete-overlay ovs))))
 
 (defun evil-goggles--face-background (face)
   "Return the background of FACE or use a fallback.
@@ -133,12 +128,14 @@ background of 'evil-goggles-default-face, then 'region."
 Used to prevent displaying multiple overlays for the same command.  For
 example, when the user executes `evil-delete', the overlay should be
 displayed, but when `evil-delete' calls internally `evil-yank', the
-overlay must not be displayed.")
+overlay must not be re-displayed.")
+
+(defvar evil-goggles--force-block nil
+  "When non-nil, force the hint about to be shown to be a block.")
 
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
-  (and (not evil-goggles--on)
-       (not evil-inhibit-operator-value)
+  (and (not evil-inhibit-operator-value)
        (bound-and-true-p evil-mode)
        (numberp beg)
        (numberp end)
@@ -152,44 +149,113 @@ overlay must not be displayed.")
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
-(defmacro evil-goggles--with-goggles (beg end overlay-face &rest body)
-  "Show goggles overlay from BEG to END if the conditions are met.
+(defun evil-goggles--overlay-insert-behind-hook (ov afterp beg end &optional len)
+  "Function which grows/shriks the overlay OV when its text changes.
 
-OVERLAY-FACE is the face to use for the overlay.
-The goggles overlay will be displayed before BODY is executed.
-BODY will be executed but an overlay will not be allowed to be
-displayed while its running."
-  (declare (indent defun) (debug t))
-  `(if (evil-goggles--show-p ,beg ,end)
-       (let ((evil-goggles--on t))
-         (evil-goggles--show ,beg ,end ,overlay-face)
-         ,@body)
-     ,@body))
-
-(defmacro evil-goggles--with-after-goggles (beg end overlay-face &rest body)
-  "Add an overlay from BEG to END, make it visible with OVERLAY-FACE after BODY."
-  (declare (indent defun) (debug t))
-  `(if (evil-goggles--show-p ,beg ,end)
-       (let ((evil-goggles--on t)
-             (ov (evil-goggles--make-overlay ,beg ,end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
-             (bg (evil-goggles--face-background ,overlay-face)))
-         (unwind-protect
-             (progn
-               (if evil-goggles-pulse
-                   (evil-goggles--pulse-overlay ov bg) ;; pulse the overlay
-                 (overlay-put ov 'face ,overlay-face)) ;; just put the face on the overlay
-               ,@body
-               (sit-for evil-goggles-duration))
-           (delete-overlay ov)))
-     ,@body))
-
-(defun evil-goggles--overlay-insert-behind-hook (o afterp beg end &optional len)
+The OV, AFTERP, BEG, END, LEN arguments are specified by the calling
+convention for the insert-behind-hooks overlay property."
   (when afterp
     (if (zerop len)
         (progn
           (setq len (- end beg))
-          (move-overlay o (overlay-start o) (+ len (overlay-end o))))
-      (move-overlay o (overlay-start o) (- (overlay-end o) len) ))))
+          (move-overlay ov (overlay-start ov) (+ len (overlay-end ov))))
+      (move-overlay ov (overlay-start ov) (- (overlay-end ov) len) ))))
+
+(defmacro evil-goggles--with-async-hint (beg end face &rest body)
+  "Show hint from BEG to END with face FACE, do BODY with hint on.
+
+BODY is executed after the hint is displayed but before it's
+removed.  As a result any changes BODY does on the text will be
+visualized by the hint.
+
+The hint is displayed for `evil-goggles-async-duration' seconds if
+non-nil, else for `evil-goggles-duration' seconds."
+  (declare (indent 4) (debug t))
+  `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
+     (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-async-duration evil-goggles-duration)
+       ,@body)))
+
+(defun evil-goggles--show-or-pulse-overlay (ov face dur)
+  "Show or pulse overlay OV with face FACE.
+
+DUR is used only when pulsing.
+The overlay is pulsed if variable `evil-goggles-pulse' is t."
+  (if evil-goggles-pulse
+      (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur)
+    (overlay-put ov 'face face)))
+
+(defmacro evil-goggles--if-hint-on (beg end body1 &rest body2)
+  "Run one block of code if hint is visible, run the other if not.
+
+If hint is visible, check it's ok to display it from BEG to END.  If
+it's not, do BODY1, else BODY2."
+  (declare (indent 3) (debug t)) ;; TODO indent like `if'
+  `(if (and (not evil-goggles--on) (evil-goggles--show-p ,beg ,end))
+       (let ((evil-goggles--on t))
+         ,@body2)
+     ,body1))
+
+(defmacro evil-goggles--with-disabled-hint (&rest body)
+  "Do BODY with hints disabled."
+  (declare (indent 0) (debug t))
+  `(let ((evil-goggles--on t))
+     ,@body))
+
+(defmacro evil-goggles--with-blocking-hint (beg end face &rest body)
+  "Show hint from BEG to END with face FACE, hide it, then do BODY.
+
+BODY is executed after the hint has been removed, hence the hint is
+\"blocking\" because BODY won't run until the hint has disappeared.
+
+The hint is displayed for `evil-goggles-blocking-duration' seconds if
+non-nil, else for `evil-goggles-duration' seconds."
+  (declare (indent 4) (debug t))
+  `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
+     (if (or (eq evil-this-type 'block) evil-goggles--force-block)
+         (evil-goggles--show-block-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration))
+       (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration)))
+     ,@body))
+
+(defmacro evil-goggles--show-overlay (beg end face dur &rest body)
+  "Show overlay from BEG to END with face FACE for DUR seconds.
+
+If BODY is non-nil, run BODY before removing the overlay.  The overlay
+will be adjusted if BODY modifies the text in it."
+  (declare (indent 4) (debug t))
+  `(let ((ov (evil-goggles--make-overlay ,beg ,end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook))))
+    (unwind-protect
+        (progn
+          (evil-goggles--show-or-pulse-overlay ov ,face ,dur)
+          ,@body
+          (sit-for ,dur))
+      (delete-overlay ov))))
+
+(defun evil-goggles--show-hint (beg end face &optional force-block)
+  "Show hint from BEG to END with face FACE for DUR sec.
+
+The hint will be a vertical block if FORCE-BLOCK is non-nil."
+  (let ((evil-goggles--force-block force-block))
+    (evil-goggles--with-blocking-hint beg end face)))
+
+(defun evil-goggles--show-block-overlay (beg end face dur)
+  "Show overlay from BEG to END with face FACE for DUR seconds.
+
+Pulsing the overlay isn't supported.
+Running code while the hint is on isn't supported."
+  ;; NOTE both of the limitation stated above can likely be addressed
+  ;; if needed
+  (let ((ovs))
+    (unwind-protect
+        (progn
+          ;; create multiple overlays, one for each line in the block
+          (evil-apply-on-block (lambda (line-beg line-end)
+                                 (add-to-list 'ovs
+                                              (evil-goggles--make-overlay line-beg line-end 'face face)))
+                               beg end nil)
+          ;; TODO add support for pulsing a vertical block
+          ;; (dolist (ov ovs) (evil-goggles--show-or-pulse-overlay ov face dur))
+          (sit-for dur))
+      (mapcar 'delete-overlay ovs))))
 
 (defun evil-goggles--funcall-interactively (f &rest args)
   "Call F with ARGS interactively.
@@ -206,13 +272,15 @@ so this package can work with Emacs 24"
      (funcall ,fun ,@args)))
 
 (defmacro evil-goggles--define-switch-and-face (switch-name switch-doc face-name face-doc)
-  "Syntax sugar for defining a custom on/off variable and a custom face.
+  "Helper macro defining an on/off var, a face, and duration var.
 
 SWITCH-NAME is the name of the on/off variable.
 SWITCH-DOC is the docstring for SWITCH-NAME.
 FACE-NAME is the name of the custom face.
-FACE-DOC is the docstring for FACE-NAME."
-  (declare (indent 4) (debug t))
+FACE-DOC is the docstring for FACE-NAME.
+DUR-NAME is the name of the duration variable.
+DUR-DOC is the docstring for DUR-NAME."
+  (declare (indent 7) (debug t))
   `(progn
      (defcustom ,switch-name t
        ,(concat switch-doc "\nThis variable must be set before `evil-goggles-mode' is enabled")
@@ -249,7 +317,7 @@ FACE-DOC is the docstring for FACE-NAME."
    '(evil-goggles-undo-redo-remove-face ((t (:inherit magit-diff-removed))))
    '(evil-goggles-undo-redo-add-face    ((t (:inherit magit-diff-added))))))
 
-;; delete
+;;; delete
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-delete "If non-nil, enable delete support"
@@ -260,10 +328,10 @@ FACE-DOC is the docstring for FACE-NAME."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-delete-face
+  (evil-goggles--with-blocking-hint beg end 'evil-goggles-delete-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
-;; indent
+;;; indent
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-indent "If non-nil, enable indent support"
@@ -274,10 +342,10 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
 
 ORIG-FUN is the original function.
 BEG END are the arguments of the original function."
-  (evil-goggles--with-after-goggles beg end 'evil-goggles-indent-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-indent-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
-;; yank
+;;; yank
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-yank "If non-nil, enable yank support"
@@ -288,10 +356,10 @@ BEG END are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-yank-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-yank-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
-;; undo & redo
+;;; undo & redo
 
 (defcustom evil-goggles-enable-undo t
   "If non-nil, enable undo support.
@@ -338,8 +406,7 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be removed before undo/redo removes it
     (pcase undo-item
       (`(text-added ,beg ,end)
-       (when (evil-goggles--show-p beg end)
-         (evil-goggles--show beg end 'evil-goggles-undo-redo-remove-face))))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-remove-face)))
 
     ;; call the undo/redo function
     (funcall orig-fun n list)
@@ -347,11 +414,9 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be added after undo/redo addes it
     (pcase undo-item
       (`(text-removed ,beg ,end)
-       (when (evil-goggles--show-p beg end)
-         (evil-goggles--show beg end 'evil-goggles-undo-redo-add-face)))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-add-face))
       (`(text-changed ,beg ,end)
-       (when (evil-goggles--show-p beg end)
-         (evil-goggles--show beg end 'evil-goggles-undo-redo-change-face))))))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-change-face)))))
 
 (defun evil-goggles--get-undo-item (list)
   "Process LIST.
@@ -368,6 +433,10 @@ This function tries to return a single list, either:
       (car processed-list))))
 
 (defun evil-goggles--combine-undo-list (input)
+  "Combine elements in INPUT list.
+
+Each element is expected to be either '(text-added BEG END) or
+'(text-removed BEG END)."
   (let* ((last (car input))
          (result (list last)))
     (dolist (this (cdr input) (nreverse result))
@@ -416,7 +485,7 @@ Return a list: either ('text-added beg end) or ('text-removed beg end)"
     ;; All others return nil
     (_ nil)))
 
-;; join
+;;; join
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-join "If non-nil, enable join support"
@@ -431,11 +500,11 @@ BEG END are the arguments of the original function."
          (end-line (line-number-at-pos end))
          (line-count (- end-line beg-line)))
     (if (> line-count 1) ;; don't show goggles for single lines ("J"/"gJ" without count)
-        (evil-goggles--with-goggles beg end 'evil-goggles-join-face
+        (evil-goggles--with-blocking-hint beg end 'evil-goggles-join-face
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
-;; indent (fill and move)
+;;; reformat (fill and move)
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-fill-and-move "If non-nil, enable fill and move (reformat) support"
@@ -446,52 +515,29 @@ BEG END are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END are arguments of the original function."
-  (evil-goggles--with-after-goggles beg end 'evil-goggles-fill-and-move-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-fill-and-move-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
-;; paste before and after
+;;; paste before and after
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-paste "If non-nil, enable paste support"
     evil-goggles-paste-face "Face for paste action")
 
-(defun evil-goggles--evil-paste-after-advice (orig-fun count &optional register yank-handler)
-  "Around-advice for function `evil-paste-after'.
+(defun evil-goggles--evil-paste-advice (orig-fun count &optional register yank-handler)
+  "Around-advice for functions `evil-paste-after' and `evil-paste-before'.
 
 ORIG-FUN is the original function.
 COUNT REGISTER YANK-HANDLER are the arguments of the original function."
-  (let ((was-in-normal-state (evil-normal-state-p))
-        (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
-    (when was-in-normal-state
-      (evil-goggles--evil-paste-show register yank-handler))
-    orig-fun-result))
-
-(defun evil-goggles--evil-paste-before-advice (orig-fun count &optional register yank-handler)
-  "Around-advice for function `evil-paste-before'.
-
-ORIG-FUN is the original function.
-COUNT REGISTER YANK-HANDLER are the arguments of the original function."
-  (let ((was-in-normal-state (evil-normal-state-p))
-        (orig-fun-result (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)))
-    (when was-in-normal-state
-      (evil-goggles--evil-paste-show register yank-handler))
-    orig-fun-result))
-
-(defun evil-goggles--evil-paste-show (register yank-handler)
-  "Helper fun to show the goggles overlay on the last pasted text.
-
-The overlay region is derermined by evil's marks [ and ]
-Argument REGISTER is the evil register.
-Argument YANK-HANDLER is the yank hanler."
-  (unless evil-goggles--on
-    (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
-           (end (save-excursion (evil-goto-mark ?\]) (point)))
-           (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
-           (beg-corrected (if is-beg-at-eol (1+ beg) beg))
-           (show-fn (if (evil-goggles--evil-paste-block-p register yank-handler)
-                        'evil-goggles--show-block
-                      'evil-goggles--show)))
-      (funcall show-fn beg-corrected end 'evil-goggles-paste-face))))
+  (prog1
+      (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
+    (when (evil-normal-state-p)
+      (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
+             (end (save-excursion (evil-goto-mark ?\]) (point)))
+             (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
+             (beg-corrected (if is-beg-at-eol (1+ beg) beg))
+             (use-block-hint (evil-goggles--evil-paste-block-p register yank-handler)))
+        (evil-goggles--show-hint beg-corrected end 'evil-goggles-paste-face use-block-hint)))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
   "Return t if the paste was a vertical block.
@@ -507,7 +553,7 @@ Argument YANK-HANDLER is the yank hanler."
                               0 'yank-handler text))))))
     (eq yh 'evil-yank-block-handler)))
 
-;; shift left & right
+;;; shift left & right
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-shift "If non-nil, enable shift left/right support"
@@ -518,10 +564,10 @@ Argument YANK-HANDLER is the yank hanler."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original function."
-  (evil-goggles--with-after-goggles beg end 'evil-goggles-shift-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-shift-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
 
-;; set mark
+;;; set mark
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-set-marker "If non-nil, enable set mark support"
@@ -545,19 +591,19 @@ CHAR POS ADVANCE are the arguments of the original function."
             (end (1+ (save-excursion
                        (move-end-of-line nil)
                        (point)))))
-        (evil-goggles--show beg end 'evil-goggles-set-marker-face)))))
+        (evil-goggles--show-hint beg end 'evil-goggles-set-marker-face)))))
 
-;; ex global
+;;; ex global
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
   "Around-advice for function `evil-ex-global'.
 
 ORIG-FUN is the original function.
 BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original function."
-  (let* ((evil-goggles--on t)) ;; set to `t' to prevent showing the overlay
+  (evil-goggles--with-disabled-hint
     (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
 
-;; surround
+;;; surround
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-surround "If non-nil, enable surround support"
@@ -568,10 +614,10 @@ BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original funct
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-surround-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-surround-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
 
-;; commentary
+;;; commentary
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-commentary "If non-nil, enable commentary support"
@@ -582,10 +628,10 @@ BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original fun
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-commentary-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-commentary-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
-;; nerd-commenter
+;;; nerd-commenter
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-nerd-commenter "If non-nil, enable nerd-commenter support"
@@ -596,10 +642,10 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE are the arguments of the original function."
-  (evil-goggles--with-goggles beg end 'evil-goggles-nerd-commenter-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-nerd-commenter-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
-;; replace with register
+;;; replace with register
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-replace-with-register "If non-nil, enable replace with register support"
@@ -610,7 +656,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
 
 ORIG-FUN is the original function.
 COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function."
-  (evil-goggles--with-after-goggles beg end 'evil-goggles-nerd-commenter-face
+  (evil-goggles--with-async-hint beg end 'evil-goggles-nerd-commenter-face
     (evil-goggles--funcall-preserve-interactive orig-fun count beg end type register)))
 
 ;;; mode defined below ;;;
@@ -654,8 +700,8 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-fill-and-move :around 'evil-goggles--evil-fill-and-move-advice))
 
     (when evil-goggles-enable-paste
-      (advice-add 'evil-paste-after :around 'evil-goggles--evil-paste-after-advice)
-      (advice-add 'evil-paste-before :around 'evil-goggles--evil-paste-before-advice))
+      (advice-add 'evil-paste-after :around 'evil-goggles--evil-paste-advice)
+      (advice-add 'evil-paste-before :around 'evil-goggles--evil-paste-advice))
 
     (when evil-goggles-enable-shift
       (advice-add 'evil-shift-left :around 'evil-goggles--evil-shift-advice)
@@ -689,8 +735,8 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-join 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-join-whitespace 'evil-goggles--evil-join-advice)
     (advice-remove 'evil-fill-and-move 'evil-goggles--evil-fill-and-move-advice)
-    (advice-remove 'evil-paste-after 'evil-goggles--evil-paste-after-advice)
-    (advice-remove 'evil-paste-before 'evil-goggles--evil-paste-before-advice)
+    (advice-remove 'evil-paste-after 'evil-goggles--evil-paste-advice)
+    (advice-remove 'evil-paste-before 'evil-goggles--evil-paste-advice)
     (advice-remove 'evil-shift-left 'evil-goggles--evil-shift-advice)
     (advice-remove 'evil-shift-right 'evil-goggles--evil-shift-advice)
     (advice-remove 'evil-set-marker 'evil-goggles--evil-set-marker-advice)

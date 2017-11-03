@@ -27,6 +27,11 @@ evil-goggles
 
 ![fast-replace](https://cloud.githubusercontent.com/assets/1532071/25314628/889ab1c4-2850-11e7-9cf5-c801b8293583.gif)
 
+## Usage
+
+Enable `(evil-goggles-mode)`, then edit text like you normally would,
+try for example `yy`, `p` `dd` in normal state.
+
 ## Installation
 
 #### with [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
@@ -125,6 +130,20 @@ evil-goggles-undo-redo-change-face
 (setq evil-goggles-duration 0.100) ;; default is 0.200
 ```
 
+- For more fine grained duration configuration, these can be modified:
+
+``` emacs-lisp
+;; this variable affects "blocking" hints, for example when deleting - the hint is displayed,
+;; the deletion is delayed (blocked) until the hint disappers, then the hint is removed and the
+;; deletion executed; it makes sense to have this duration short
+(setq evil-goggles-blocking-duration 0.100) ;; default is nil, i.e. use `evil-goggles-duration'
+
+;; this variable affects "async" hints, for example when indenting - the indentation
+;; is performed with the hint visible, i.e. the hint is displayed, the action (indent) is
+;; executed (asynchronous), then the hint is removed, highlighting the result of the indentation
+(setq evil-goggles-async-duration 0.900) ;; default is nil, i.e. use `evil-goggles-duration'
+```
+
 - To disable the hint on certain actions modify these variable before `evil-goggles-mode` is started:
 ```emacs-lisp
 ;; to disable the hint when pasting:
@@ -152,6 +171,8 @@ evil-goggles-undo-redo-change-face
 
 - [May 28, 2017] Switched to using custom faces per action, deprecated `evil-goggles-faces-alist`
 - [May 28, 2017] Switched to using per-action on/off custom variables, deprecated `evil-goggles-blacklist`
+- [Aug 02, 2017] Add experimental support for undo/redo (no longer experimental since Sep 16, 2017)
 - [Sep 13, 2017] Emacs 24 support
-- [Sep 16, 2017] Add support for undo/redo, it's no longer experimental
+- [Sep 16, 2017] Support for undo/redo is no longer experimental
 - [Sep 17, 2017] Add experimental support for pulsing hints
+- [Nov 03, 2017] Add options `evil-goggles-async-duration` and `evil-goggles-blocking-duration`
