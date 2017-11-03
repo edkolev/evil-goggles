@@ -27,6 +27,11 @@ evil-goggles
 
 ![fast-replace](https://cloud.githubusercontent.com/assets/1532071/25314628/889ab1c4-2850-11e7-9cf5-c801b8293583.gif)
 
+## Usage
+
+Enable `(evil-goggles-mode)`, then edit text like you normally would,
+try for example `yy`, `p` `dd` in normal state.
+
 ## Installation
 
 #### with [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
@@ -123,6 +128,20 @@ evil-goggles-undo-redo-change-face
 - The duration of the overlay is configured with `evil-goggles-duration`:
 ```emacs-lisp
 (setq evil-goggles-duration 0.100) ;; default is 0.200
+```
+
+- For more fine grained duration configuration, these can be modified:
+
+``` emacs-lisp
+;; this variable affects "blocking" hints, for example when deleting - the hint is displayed,
+the deletion is delayed (blocked) until the hint disappers, then the hint is removed and the
+deletion executed; it makes sense to have this duration short
+(setq evil-goggles-blocking-duration 0.100) ;; default is nil, i.e. use `evil-goggles-duration' which defaults to 0.200
+
+;; this variable affects "async" hints, for example when indenting - the indentation
+is performed with the hint visible, i.e. the hint is displayed, the action (indent) is
+executed (asynchronous), then the hint is removed, highlighting the result of the indentation
+(setq evil-goggles-async-duration 0.900) ;; default is nil, i.e. use `evil-goggles-duration' which defaults to 0.200
 ```
 
 - To disable the hint on certain actions modify these variable before `evil-goggles-mode` is started:

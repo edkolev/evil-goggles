@@ -189,8 +189,7 @@ The overlay is pulsed if variable `evil-goggles-pulse' is t."
 
 If hint is visible, check it's ok to display it from BEG to END.  If
 it's not, do BODY1, else BODY2."
-  ;; TODO indent like `if'
-  (declare (indent 3) (debug t))
+  (declare (indent 3) (debug t)) ;; TODO indent like `if'
   `(if (and (not evil-goggles--on) (evil-goggles--show-p ,beg ,end))
        (let ((evil-goggles--on t))
          ,@body2)
