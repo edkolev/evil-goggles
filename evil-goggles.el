@@ -244,15 +244,13 @@ Pulsing the overlay isn't supported.
 Running code while the hint is on isn't supported."
   ;; NOTE both of the limitation stated above can likely be addressed
   ;; if needed
-  (let ((ovs)
-        (dur (or dur evil-goggles-blocking-duration evil-goggles-duration))
-        (overlay-face `(:background ,(evil-goggles--face-background face)))) ;; TODO drop this var
+  (let ((ovs))
     (unwind-protect
         (progn
           ;; create multiple overlays, one for each line in the block
           (evil-apply-on-block (lambda (line-beg line-end)
                                  (add-to-list 'ovs
-                                              (evil-goggles--make-overlay line-beg line-end 'face overlay-face)))
+                                              (evil-goggles--make-overlay line-beg line-end 'face face)))
                                beg end nil)
           ;; TODO add support for pulsing a vertical block
           ;; (dolist (ov ovs) (evil-goggles--show-or-pulse-overlay ov face dur))
