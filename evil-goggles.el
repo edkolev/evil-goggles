@@ -319,7 +319,7 @@ DUR-DOC is the docstring for DUR-NAME."
    '(evil-goggles-undo-redo-remove-face ((t (:inherit magit-diff-removed))))
    '(evil-goggles-undo-redo-add-face    ((t (:inherit magit-diff-added))))))
 
-;; delete
+;;; delete
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-delete "If non-nil, enable delete support"
@@ -333,7 +333,7 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
   (evil-goggles--with-blocking-hint beg end 'evil-goggles-delete-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
-;; indent
+;;; indent
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-indent "If non-nil, enable indent support"
@@ -347,7 +347,7 @@ BEG END are the arguments of the original function."
   (evil-goggles--with-async-hint beg end 'evil-goggles-indent-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
-;; yank
+;;; yank
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-yank "If non-nil, enable yank support"
@@ -361,7 +361,7 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
   (evil-goggles--with-async-hint beg end 'evil-goggles-yank-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
 
-;; undo & redo
+;;; undo & redo
 
 (defcustom evil-goggles-enable-undo t
   "If non-nil, enable undo support.
@@ -487,7 +487,7 @@ Return a list: either ('text-added beg end) or ('text-removed beg end)"
     ;; All others return nil
     (_ nil)))
 
-;; join
+;;; join
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-join "If non-nil, enable join support"
@@ -506,7 +506,7 @@ BEG END are the arguments of the original function."
           (evil-goggles--funcall-preserve-interactive orig-fun beg end))
       (evil-goggles--funcall-preserve-interactive orig-fun beg end))))
 
-;; reformat (fill and move)
+;;; reformat (fill and move)
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-fill-and-move "If non-nil, enable fill and move (reformat) support"
@@ -520,7 +520,7 @@ BEG END are arguments of the original function."
   (evil-goggles--with-async-hint beg end 'evil-goggles-fill-and-move-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end)))
 
-;; paste before and after
+;;; paste before and after
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-paste "If non-nil, enable paste support"
@@ -555,7 +555,7 @@ Argument YANK-HANDLER is the yank hanler."
                               0 'yank-handler text))))))
     (eq yh 'evil-yank-block-handler)))
 
-;; shift left & right
+;;; shift left & right
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-shift "If non-nil, enable shift left/right support"
@@ -569,7 +569,7 @@ BEG END &OPTIONAL COUNT PRESERVE-EMPTY are the arguments of the original functio
   (evil-goggles--with-async-hint beg end 'evil-goggles-shift-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end count preserve-empty)))
 
-;; set mark
+;;; set mark
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-set-marker "If non-nil, enable set mark support"
@@ -595,7 +595,7 @@ CHAR POS ADVANCE are the arguments of the original function."
                        (point)))))
         (evil-goggles--show-hint beg end 'evil-goggles-set-marker-face)))))
 
-;; ex global
+;;; ex global
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
   "Around-advice for function `evil-ex-global'.
@@ -605,7 +605,7 @@ BEG END PATTERN COMMAND &OPTIONAL INVERT are the arguments of the original funct
   (evil-goggles--with-disabled-hint
     (evil-goggles--funcall-preserve-interactive orig-fun beg end pattern command invert)))
 
-;; surround
+;;; surround
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-surround "If non-nil, enable surround support"
@@ -619,7 +619,7 @@ BEG END &OPTIONAL TYPE CHAR FORCE-NEW-LINE are the arguments of the original fun
   (evil-goggles--with-async-hint beg end 'evil-goggles-surround-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type char force-new-line)))
 
-;; commentary
+;;; commentary
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-commentary "If non-nil, enable commentary support"
@@ -633,7 +633,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
   (evil-goggles--with-async-hint beg end 'evil-goggles-commentary-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
-;; nerd-commenter
+;;; nerd-commenter
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-nerd-commenter "If non-nil, enable nerd-commenter support"
@@ -647,7 +647,7 @@ BEG END &OPTIONAL TYPE are the arguments of the original function."
   (evil-goggles--with-async-hint beg end 'evil-goggles-nerd-commenter-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type)))
 
-;; replace with register
+;;; replace with register
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-replace-with-register "If non-nil, enable replace with register support"
