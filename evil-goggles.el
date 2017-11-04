@@ -230,12 +230,15 @@ will be adjusted if BODY modifies the text in it."
           (sit-for ,dur))
       (delete-overlay ov))))
 
-(defun evil-goggles--show-hint (beg end face &optional force-block)
+(defun evil-goggles--show-hint (beg end face &optional force-vertical-hint blocking)
   "Show hint from BEG to END with face FACE for DUR sec.
 
-The hint will be a vertical block if FORCE-BLOCK is non-nil."
-  (if force-block
-      (let ((evil-goggles--force-block force-block))
+The hint will be a vertical block if FORCE-VERTICAL-HINT is non-nil.
+If BLOCKING is non-nil, the hint will be treated like a blocking
+hint, i.e. it will be displayed for `evil-goggles-blocking-duration'
+rather than `evil-goggles-async-duration'"
+  (if (or blocking force-vertical-hint)
+      (let ((evil-goggles--force-block blocking))
         ;; use blocking hint for blocks, async hint doesn't support blocks
         (evil-goggles--with-blocking-hint beg end face))
     (evil-goggles--with-async-hint beg end face)))
@@ -409,7 +412,7 @@ N and LIST are the arguments of the original function."
     ;; show hint on the text which will be removed before undo/redo removes it
     (pcase undo-item
       (`(text-added ,beg ,end)
-       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-remove-face)))
+       (evil-goggles--show-hint beg end 'evil-goggles-undo-redo-remove-face nil t)))
 
     ;; call the undo/redo function
     (funcall orig-fun n list)
