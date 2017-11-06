@@ -30,7 +30,7 @@ evil-goggles
 ## Usage
 
 Enable `(evil-goggles-mode)`, then edit text like you normally would,
-try for example `yy`, `p` `dd` in normal state.
+try for example `yy`, `p`, `dd` in normal state.
 
 ## Installation
 
