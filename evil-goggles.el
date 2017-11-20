@@ -223,12 +223,12 @@ If BODY is non-nil, run BODY before removing the overlay.  The overlay
 will be adjusted if BODY modifies the text in it."
   (declare (indent 4) (debug t))
   `(let ((ov (evil-goggles--make-overlay ,beg ,end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook))))
-    (unwind-protect
-        (progn
-          (evil-goggles--show-or-pulse-overlay ov ,face ,dur)
-          ,@body
-          (sit-for ,dur))
-      (delete-overlay ov))))
+     (unwind-protect
+         (progn
+           (evil-goggles--show-or-pulse-overlay ov ,face ,dur)
+           ,@body
+           (sit-for ,dur))
+       (delete-overlay ov))))
 
 (defun evil-goggles--show-hint (beg end face &optional force-vertical-hint blocking)
   "Show hint from BEG to END with face FACE for DUR sec.
