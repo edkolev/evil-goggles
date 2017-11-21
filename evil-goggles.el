@@ -56,21 +56,24 @@ See also `evil-goggles-async-duration' and `evil-goggles-blocking-duration'."
   :group 'evil-goggles)
 
 (defcustom evil-goggles-async-duration nil
-  "Time in floating seconds the async goggles hint should last.
+  "Time in floating seconds the async hint should last.
 
-If nil, the value of `evil-goggles-duration' will be used.
+This affects the hints which are displayed after the operation has been
+executed, highlighting the result of the operation.
 
-This affects the hints which are displayed before the operation."
+If nil, the value of `evil-goggles-duration' will be used."
   :type 'number
   :group 'evil-goggles)
 
 (defcustom evil-goggles-blocking-duration nil
-  "Time in floating seconds the blocking goggles hint should last.
+  "Time in floating seconds the blocking hint should last.
 
-If nil, the value of `evil-goggles-duration' will be used.
+This affects the blocking hints. Such hints are displayed before the
+operation, then the UI is blocked for the specified duration, then the
+operation is executed. Such an operation is delete, where the hint
+only makes sense to be displayed before text is deleted.
 
-This affects the hints which are displayed before the operation, when
-the operation is executed after the hint disappears."
+If nil, the value of `evil-goggles-duration' will be used."
   :type 'number
   :group 'evil-goggles)
 
