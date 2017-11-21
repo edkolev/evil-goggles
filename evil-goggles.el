@@ -170,7 +170,7 @@ visualized by the hint.
 
 The hint is displayed for `evil-goggles-async-duration' seconds if
 non-nil, else for `evil-goggles-duration' seconds."
-  (declare (indent 4) (debug t))
+  (declare (indent 3) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
      (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-async-duration evil-goggles-duration)
        ,@body)))
@@ -209,7 +209,7 @@ BODY is executed after the hint has been removed, hence the hint is
 
 The hint is displayed for `evil-goggles-blocking-duration' seconds if
 non-nil, else for `evil-goggles-duration' seconds."
-  (declare (indent 4) (debug t))
+  (declare (indent 3) (debug t))
   `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
      (if (or (eq evil-this-type 'block) evil-goggles--force-block)
          (evil-goggles--show-block-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration))
