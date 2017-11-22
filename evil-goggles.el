@@ -541,12 +541,10 @@ COUNT REGISTER YANK-HANDLER are the arguments of the original function."
   (prog1
       (evil-goggles--funcall-preserve-interactive orig-fun count register yank-handler)
     (when (evil-normal-state-p)
-      (let* ((beg (save-excursion (evil-goto-mark ?\[) (point)))
-             (end (save-excursion (evil-goto-mark ?\]) (point)))
-             (is-beg-at-eol (save-excursion (goto-char beg) (eolp)))
-             (beg-corrected (if is-beg-at-eol (1+ beg) beg))
+      (let* ((beg (save-excursion (evil-goto-mark ?\[) (if (eolp) (1+ (point)) (point))))
+             (end (save-excursion (evil-goto-mark ?\]) (if (eolp) (1+ (point)) (point))))
              (use-block-hint (evil-goggles--evil-paste-block-p register yank-handler)))
-        (evil-goggles--show-hint beg-corrected end 'evil-goggles-paste-face use-block-hint)))))
+        (evil-goggles--show-hint beg end 'evil-goggles-paste-face use-block-hint)))))
 
 (defun evil-goggles--evil-paste-block-p (register yank-handler)
   "Return t if the paste was a vertical block.
