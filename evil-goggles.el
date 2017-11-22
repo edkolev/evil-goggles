@@ -105,7 +105,7 @@ This function returns immediately, it doesn't wait for the pulse
 animation to end."
   (let* ((pulse-iterations 10)
          (pulse-delay (/ (float dur) pulse-iterations) ))
-    (ignore pulse-iterations) ;; silence compile warning Unused lexical variable
+    (ignore pulse-delay pulse-iterations) ;; silence compile warnings for Unused lexical variable
     (set-face-attribute 'evil-goggles--pulse-face nil :background background)
     (pulse-momentary-highlight-overlay ov 'evil-goggles--pulse-face)))
 
