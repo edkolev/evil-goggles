@@ -302,10 +302,10 @@ DUR-DOC is the docstring for DUR-NAME."
 
 ;;; core ends here ;;;
 
-;; helper function to inherit from diff-mode's faces
+;; helper function to inherit from diff-mode/magit-diff's faces
 
 (defun evil-goggles-use-diff-faces ()
-  "Load `diff-mode' and use its faces for evil-goggles mode."
+  "Use `diff-mode's diff-* faces for evil-goggles mode."
   (unless (require 'diff-mode nil 'no-error)
     (user-error "Can't load package diff-mode"))
   (custom-set-faces
@@ -315,6 +315,18 @@ DUR-DOC is the docstring for DUR-NAME."
    '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
    '(evil-goggles-undo-redo-add-face    ((t (:inherit diff-added))))
    '(evil-goggles-undo-redo-change-face ((t (:inherit diff-changed))))))
+
+(defun evil-goggles-use-diff-refine-faces ()
+  "Use `diff-mode's diff-refine-* faces for evil-goggles mode."
+  (unless (require 'diff-mode nil 'no-error)
+    (user-error "Can't load package diff-mode"))
+  (custom-set-faces
+   '(evil-goggles-delete-face           ((t (:inherit diff-refine-removed))))
+   '(evil-goggles-paste-face            ((t (:inherit diff-refine-added))))
+   '(evil-goggles-yank-face             ((t (:inherit diff-refine-changed))))
+   '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-refine-removed))))
+   '(evil-goggles-undo-redo-add-face    ((t (:inherit diff-refine-added))))
+   '(evil-goggles-undo-redo-change-face ((t (:inherit diff-refine-changed))))))
 
 (defun evil-goggles-use-magit-faces ()
   "Load `magit-diff' and use its faces for evil-goggles mode."
