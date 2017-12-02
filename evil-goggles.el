@@ -78,9 +78,7 @@ If nil, the value of `evil-goggles-duration' will be used."
   :group 'evil-goggles)
 
 (defcustom evil-goggles-pulse nil
-  "If t, the overlay hint will pulse rather than appear and disapper.
-
-This option is experimental."
+  "If t, the hint will pulse, rather than just appear and disapper."
   :type 'boolean
   :group 'evil-goggles)
 

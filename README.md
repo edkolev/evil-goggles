@@ -88,7 +88,7 @@ By default, all goggles' faces inherit `evil-goggles-default-face`, which in tur
 ;; run `M-x list-faces-display` in a fresh emacs to get a list of faces on your emacs
 ```
 
-- To pulse the visual hint, rather than just show and hide it (experimental):
+- To pulse the visual hint, rather than just show and hide it:
 
 ``` emacs-lisp
 (setq evil-goggles-pulse t)
@@ -174,5 +174,6 @@ evil-goggles-undo-redo-change-face
 - [Aug 02, 2017] Add experimental support for undo/redo (no longer experimental since Sep 16, 2017)
 - [Sep 13, 2017] Emacs 24 support
 - [Sep 16, 2017] Support for undo/redo is no longer experimental
-- [Sep 17, 2017] Add experimental support for pulsing hints
+- [Sep 17, 2017] Add experimental support for pulsing hints (no longer experimental since Dec 02, 2017)
 - [Nov 03, 2017] Add options `evil-goggles-async-duration` and `evil-goggles-blocking-duration`
+- [Dec 02, 2017] Pulsing hints is no longer experimental
