@@ -183,7 +183,9 @@ non-nil, else for `evil-goggles-duration' seconds."
 
 DUR is used only when pulsing.
 The overlay is pulsed if variable `evil-goggles-pulse' is t."
-  (if evil-goggles-pulse
+  ;; pulsing requires a face with background, so don't pulse if the
+  ;; face defines no background
+  (if (and evil-goggles-pulse (face-background face))
       (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur)
     (overlay-put ov 'face face)))
 
