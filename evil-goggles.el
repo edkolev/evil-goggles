@@ -68,9 +68,9 @@ If nil, the value of `evil-goggles-duration' will be used."
 (defcustom evil-goggles-blocking-duration nil
   "Time in floating seconds the blocking hint should last.
 
-This affects the blocking hints. Such hints are displayed before the
+This affects the blocking hints.  Such hints are displayed before the
 operation, then the UI is blocked for the specified duration, then the
-operation is executed. Such an operation is delete, where the hint
+operation is executed.  Such an operation is delete, where the hint
 only makes sense to be displayed before text is deleted.
 
 If nil, the value of `evil-goggles-duration' will be used."
@@ -183,7 +183,7 @@ DUR is used only when pulsing.
 The overlay is pulsed if variable `evil-goggles-pulse' is t."
   ;; pulsing requires a face with background, so don't pulse if the
   ;; face defines no background
-  (if (and evil-goggles-pulse (face-background face))
+  (if (and evil-goggles-pulse (face-background face nil t))
       (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur)
     (overlay-put ov 'face face)))
 
