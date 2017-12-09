@@ -181,11 +181,21 @@ non-nil, else for `evil-goggles-duration' seconds."
 
 DUR is used only when pulsing.
 The overlay is pulsed if variable `evil-goggles-pulse' is t."
-  ;; pulsing requires a face with background, so don't pulse if the
-  ;; face defines no background
-  (if (and evil-goggles-pulse (face-background face nil t))
-      (evil-goggles--pulse-overlay ov (evil-goggles--face-background face) dur)
-    (overlay-put ov 'face face)))
+  (let ((fg (face-foreground face nil t))
+        (bg (face-background face nil t)))
+    (cond
+     ;; pulse enabled and the face has a bg - pulse with the given face's bg
+     ((and evil-goggles-pulse bg)
+      (evil-goggles--pulse-overlay ov bg dur))
+     ;; pulse enabled and the face has no bg or fg - pulse with the default face's bg
+     ((and evil-goggles-pulse (null bg) (null fg))
+      (evil-goggles--pulse-overlay ov (face-background 'evil-goggles-default-face nil t) dur))
+     ;; pulse disabled or face has fg only - show the hint with given face
+     ((and (null bg) (null fg))
+      (overlay-put ov 'face 'evil-goggles-default-face))
+     ;; else show the hint with the given face
+     (t
+      (overlay-put ov 'face face)))))
 
 (defmacro evil-goggles--if-hint-on (beg end body1 &rest body2)
   "Run one block of code if hint is visible, run the other if not.
