@@ -180,22 +180,41 @@ non-nil, else for `evil-goggles-duration' seconds."
   "Show or pulse overlay OV with face FACE.
 
 DUR is used only when pulsing.
-The overlay is pulsed if variable `evil-goggles-pulse' is t."
+The overlay is pulsed if variable `evil-goggles-pulse' is t and the
+FACE is appropriate for pulsing, i.e. it has a background."
+  (pcase (evil-goggles--should-blink-or-pulse face)
+    (`(blink ,blink-face)
+     (overlay-put ov 'face blink-face))
+    (`(pulse ,pulse-bg)
+     (evil-goggles--pulse-overlay ov pulse-bg dur))))
+
+(defun evil-goggles--should-blink-or-pulse (face)
+  "Determine wheter to pulse or blink.
+
+The decision is made based on the value of `evil-goggles-pulse'.
+
+If the FACE has no background, pulsing is not supported, hence the
+decision is to blink.  If the face has no foreground and/or background,
+this function tries to make the most appropriate decision whether to
+pulse or not, and whether to use the given FACE or use the fallback
+face `evil-goggles-default-face'.
+
+This function returns a list - either ('blink face) or ('pulse bg)."
   (let ((fg (face-foreground face nil t))
         (bg (face-background face nil t)))
     (cond
      ;; pulse enabled and the face has a bg - pulse with the given face's bg
      ((and evil-goggles-pulse bg)
-      (evil-goggles--pulse-overlay ov bg dur))
+      `(pulse ,bg))
      ;; pulse enabled and the face has no bg or fg - pulse with the default face's bg
      ((and evil-goggles-pulse (null bg) (null fg))
-      (evil-goggles--pulse-overlay ov (face-background 'evil-goggles-default-face nil t) dur))
+      `(pulse ,(face-background 'evil-goggles-default-face nil t)))
      ;; pulse disabled or face has fg only - show the hint with given face
      ((and (null bg) (null fg))
-      (overlay-put ov 'face 'evil-goggles-default-face))
+      `(blink evil-goggles-default-face))
      ;; else show the hint with the given face
      (t
-      (overlay-put ov 'face face)))))
+      `(blink ,face)))))
 
 (defmacro evil-goggles--if-hint-on (beg end body1 &rest body2)
   "Run one block of code if hint is visible, run the other if not.
