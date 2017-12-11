@@ -79,20 +79,21 @@ try for example `yy`, `p`, `dd` in normal state.
 
 #### Appearance Customization
 
-By default, all goggles' faces inherit `evil-goggles-default-face`, which in turn inherits emacs' `region` face.
+- To pulse the visual hint, rather than just show and hide it:
+
+``` emacs-lisp
+(setq evil-goggles-pulse t)
+```
 
 - To change the default face:
+
 ```emacs-lisp
 (custom-set-faces
  '(evil-goggles-default-face ((t (:inherit 'highlight))))) ;; default is to inherit 'region
 ;; run `M-x list-faces-display` in a fresh emacs to get a list of faces on your emacs
 ```
 
-- To pulse the visual hint, rather than just show and hide it:
-
-``` emacs-lisp
-(setq evil-goggles-pulse t)
-```
+By default, all goggles' faces inherit `evil-goggles-default-face`, which in turn inherits emacs' `region` face.
 
 - To use different faces per edit action:
 ```emacs-lisp
