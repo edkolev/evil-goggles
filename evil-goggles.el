@@ -119,6 +119,7 @@ background of 'evil-goggles-default-face, then 'region."
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'priority 9999)
     (overlay-put ov 'window (selected-window))
+    (overlay-put ov 'evaporate t)
     (while properties
       (overlay-put ov (pop properties) (pop properties)))
     ov))
