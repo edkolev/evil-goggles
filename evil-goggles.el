@@ -46,7 +46,6 @@
 ;;; Code:
 
 (require 'evil)
-(require 'cl-lib)
 
 (defcustom evil-goggles-duration 0.200
   "Time in floating seconds the goggles hint should last.
@@ -77,10 +76,20 @@ If nil, the value of `evil-goggles-duration' will be used."
   :type 'number
   :group 'evil-goggles)
 
-(defcustom evil-goggles-pulse nil
-  "If t, the hint will pulse, rather than just appear and disapper."
-  :type 'boolean
-  :group 'evil-goggles)
+(defcustom evil-goggles-pulse #'display-graphic-p
+  "Controls whether to pulse the hint or just appear and disapper.
+
+If t, the hint will pulse always.
+If nil, the hint will never pulse.
+This variable can also hold a custom function which should return t or nil.
+
+The default is to pulse if the display is graphical, otherwise not."
+  :group 'evil-goggles
+  :type '(choice
+          (const :tag "Always" nil)
+          (const :tag "Never" t)
+          (function :tag "If graphical display" #'display-graphic-p)
+          (function :tag "Custom function")))
 
 (defface evil-goggles-default-face
   '((t (:inherit region)))
@@ -95,6 +104,12 @@ can't work with input such as (backgound . \"red\")."
   :group 'evil-goggles)
 
 (autoload 'pulse-momentary-highlight-overlay "pulse")
+
+(defun evil-goggles--pulse-p ()
+  "Return whether to pulse or not, depending on variable `evil-goggles-pulse'."
+  (if (functionp evil-goggles-pulse)
+      (funcall evil-goggles-pulse)
+    evil-goggles-pulse))
 
 (defun evil-goggles--pulse-overlay (ov background dur)
   "Pulse the overlay OV with the BACKGROUND color for DUR duration.
@@ -180,8 +195,8 @@ non-nil, else for `evil-goggles-duration' seconds."
   "Show or pulse overlay OV with face FACE.
 
 DUR is used only when pulsing.
-The overlay is pulsed if variable `evil-goggles-pulse' is t and the
-FACE is appropriate for pulsing, i.e. it has a background."
+The decision to pulse or not is made by function
+`evil-goggles--should-blink-or-pulse'."
   (pcase (evil-goggles--should-blink-or-pulse face)
     (`(blink ,blink-face)
      (overlay-put ov 'face blink-face))
@@ -194,7 +209,7 @@ FACE is appropriate for pulsing, i.e. it has a background."
 The decision is made based on the value of `evil-goggles-pulse'.
 
 If the FACE has no background, pulsing is not supported, hence the
-decision is to blink.  If the face has no foreground and/or background,
+decision is to blink. If the face has no foreground and/or background,
 this function tries to make the most appropriate decision whether to
 pulse or not, and whether to use the given FACE or use the fallback
 face `evil-goggles-default-face'.
@@ -204,10 +219,10 @@ This function returns a list - either ('blink face) or ('pulse bg)."
         (bg (face-background face nil t)))
     (cond
      ;; pulse enabled and the face has a bg - pulse with the given face's bg
-     ((and evil-goggles-pulse bg)
+     ((and (evil-goggles--pulse-p) bg)
       `(pulse ,bg))
      ;; pulse enabled and the face has no bg or fg - pulse with the default face's bg
-     ((and evil-goggles-pulse (null bg) (null fg))
+     ((and (evil-goggles--pulse-p) (null bg) (null fg))
       `(pulse ,(face-background 'evil-goggles-default-face nil t)))
      ;; pulse disabled or face has fg only - show the hint with given face
      ((and (null bg) (null fg))
@@ -271,7 +286,7 @@ hint, i.e. it will be displayed for `evil-goggles-blocking-duration'
 rather than `evil-goggles-async-duration'"
   (if (or blocking force-vertical-hint)
       (let ((evil-goggles--force-block blocking))
-        ;; use blocking hint for blocks, async hint doesn't support blocks
+        ;; use blocking hint for vertial blocks, async hint doesn't support vertial blocks
         (evil-goggles--with-blocking-hint beg end face))
     (evil-goggles--with-async-hint beg end face)))
 
