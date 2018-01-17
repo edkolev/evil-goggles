@@ -20,7 +20,7 @@ checkdoc:
 	$(bemacs) -l test/make-checkdoc.el
 
 test/evil-tests.el:
-	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/49965280b97d7ba8b913f4bf6ff86662e2263c4e/evil-tests.el" --output test/evil-tests.el
+	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/master/evil-tests.el" --output test/evil-tests.el
 
 evil-test: test/evil-tests.el
 	$(emacs) -nw -Q -l test/elpa.el -l test/make-evil-test.el
