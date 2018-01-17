@@ -1,6 +1,9 @@
 emacs ?= emacs
 bemacs = $(emacs) -batch -l test/elpa.el
 
+all:
+	compile
+
 update:
 	$(emacs) -batch -l test/make-update.el
 
@@ -11,7 +14,7 @@ test:
 	$(bemacs) -l test/make-test.el
 
 clean:
-	rm -f *.elc test/evil-tests.el
+	rm -f *.elc test/evil-tests.el test/evil-tests.el
 
 checkdoc:
 	$(bemacs) -l test/make-checkdoc.el
