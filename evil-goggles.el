@@ -149,6 +149,9 @@ overlay must not be re-displayed.")
 (defvar evil-goggles--force-block nil
   "When non-nil, force the hint about to be shown to be a block.")
 
+(defvar evil-goggles--hint-on-empty-lines nil
+  "When nil, the default, function `evil-goggles--show-p' will not return t for whitespace-only regions.")
+
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-inhibit-operator-value)
@@ -164,8 +167,10 @@ overlay must not be re-displayed.")
        (not (evil-insert-state-p))
        ;; don't show overlay when evil-mc has active cursors
        (not (and (fboundp 'evil-mc-has-cursors-p) (evil-mc-has-cursors-p)))
-       ;; don't show overlay when the region has nothing but whitespace
-       (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
+       ;; don't show hint when the region has nothing but whitespace, but skip this check if `evil-goggles--hint-on-empty-lines' is t
+       (if evil-goggles--hint-on-empty-lines
+           t
+         (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end)))))))
 
 (defun evil-goggles--overlay-insert-behind-hook (ov afterp beg end &optional len)
   "Function which grows/shriks the overlay OV when its text changes.
