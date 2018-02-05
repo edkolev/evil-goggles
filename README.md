@@ -67,6 +67,8 @@ try for example `yy`, `p`, `dd` in normal state.
 - shift left and right (`>`, `<` operators)
 - undo
 - redo
+- set mark
+- start/stop macro recording
 
 #### evil plugins with hint
 
