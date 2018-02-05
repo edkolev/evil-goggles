@@ -122,6 +122,7 @@ evil-goggles-set-marker-face
 evil-goggles-undo-redo-add-face
 evil-goggles-undo-redo-remove-face
 evil-goggles-undo-redo-change-face
+evil-goggles-record-macro-face
 ```
 
 #### Other Customizations
@@ -166,9 +167,10 @@ evil-goggles-undo-redo-change-face
 ;; evil-goggles-enable-set-marker
 ;; evil-goggles-enable-undo
 ;; evil-goggles-enable-redo
+;; evil-goggles-enable-record-macro
 ```
 
-## Recent Significant Changes
+## NEWS - Recent Significant Changes
 
 - [May 28, 2017] Switched to using custom faces per action, deprecated `evil-goggles-faces-alist`
 - [May 28, 2017] Switched to using per-action on/off custom variables, deprecated `evil-goggles-blacklist`
@@ -178,3 +180,4 @@ evil-goggles-undo-redo-change-face
 - [Sep 17, 2017] Add experimental support for pulsing hints (no longer experimental since Dec 02, 2017)
 - [Nov 03, 2017] Add options `evil-goggles-async-duration` and `evil-goggles-blocking-duration`
 - [Dec 02, 2017] Pulsing hints is no longer experimental
+- [Feb 05, 2018] Show hint on start/stop macro recording

@@ -657,6 +657,33 @@ CHAR POS ADVANCE are the arguments of the original function."
           (evil-goggles--hint-on-empty-lines t))
       (evil-goggles--with-async-hint beg end 'evil-goggles-set-marker-face))))
 
+;;; record macro
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-record-macro "If non-nil, enable record macro support"
+    evil-goggles-record-macro-face "Face for record macro action")
+
+(defun evil-goggles--evil-record-macro-advice (orig-fun register)
+  "Around-advice for function `evil-record-macro'.
+
+ORIG-FUN is the original function.
+REGISTER is the argument of the original function."
+  (let ((beg (line-beginning-position))
+        (end (1+ (line-end-position)))
+        (was-defining-kbd-macro defining-kbd-macro)
+        (evil-goggles--hint-on-empty-lines t))
+
+    ;; show hint before starting to record a macro
+    (unless was-defining-kbd-macro
+      (evil-goggles--show-hint beg end 'evil-goggles-record-macro-face))
+
+    (evil-goggles--funcall-preserve-interactive orig-fun register)
+
+    ;; show hint when done defining the macro
+    (when was-defining-kbd-macro
+      (evil-goggles--show-hint beg end 'evil-goggles-record-macro-face))))
+
+
 ;;; ex global
 
 (defun evil-goggles--evil-ex-global-advice (orig-fun beg end pattern command &optional invert)
@@ -774,6 +801,9 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (when evil-goggles-enable-set-marker
       (advice-add 'evil-set-marker :around 'evil-goggles--evil-set-marker-advice))
 
+    (when evil-goggles-enable-record-macro
+      (advice-add 'evil-record-macro :around 'evil-goggles--evil-record-macro-advice))
+
     ;; make sure :global and :v don't show the goggles overlay
     (advice-add 'evil-ex-global :around 'evil-goggles--evil-ex-global-advice)
 
@@ -804,6 +834,7 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (advice-remove 'evil-shift-left 'evil-goggles--evil-shift-advice)
     (advice-remove 'evil-shift-right 'evil-goggles--evil-shift-advice)
     (advice-remove 'evil-set-marker 'evil-goggles--evil-set-marker-advice)
+    (advice-remove 'evil-record-macro 'evil-goggles--evil-record-macro-advice)
 
     (advice-remove 'evil-ex-global 'evil-goggles--evil-ex-global-advice)
 
