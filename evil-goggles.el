@@ -155,12 +155,14 @@ overlay must not be re-displayed.")
        (bound-and-true-p evil-mode)
        (numberp beg)
        (numberp end)
-       (> (- end beg) 1)
+       ;; don't show overlay if the region is a single char on a single line
+       (not (and (<= (- end beg) 1)
+                 (= (line-number-at-pos beg) (line-number-at-pos end))))
        (<= (point-min) beg end)
        (>= (point-max) end beg)
        (not (evil-visual-state-p))
        (not (evil-insert-state-p))
-       ;; don't show overlay when evil-mc has multiple fake cursors
+       ;; don't show overlay when evil-mc has active cursors
        (not (and (fboundp 'evil-mc-has-cursors-p) (evil-mc-has-cursors-p)))
        ;; don't show overlay when the region has nothing but whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
