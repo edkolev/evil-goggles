@@ -652,16 +652,10 @@ CHAR POS ADVANCE are the arguments of the original function."
   (evil-goggles--funcall-preserve-interactive orig-fun char pos advance)
   ;; maybe show the goggles overlay
   (when (<= ?a char ?z)
-    (save-excursion
-      (when pos
-        (goto-char pos))
-      (let ((beg (save-excursion
-                   (move-beginning-of-line nil)
-                   (point)))
-            (end (1+ (save-excursion
-                       (move-end-of-line nil)
-                       (point)))))
-        (evil-goggles--show-hint beg end 'evil-goggles-set-marker-face)))))
+    (let ((beg (line-beginning-position))
+          (end (1+ (line-end-position)))
+          (evil-goggles--hint-on-empty-lines t))
+      (evil-goggles--with-async-hint beg end 'evil-goggles-set-marker-face))))
 
 ;;; ex global
 
