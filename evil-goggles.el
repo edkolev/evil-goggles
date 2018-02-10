@@ -512,10 +512,9 @@ Each element is expected to be either '(text-added BEG END) or
   (let* ((last (car input))
          (result (list last)))
     (dolist (this (cdr input) (nreverse result))
-      (cond ((and (eq (car last) 'text-added)
-                  (eq (car last) (car this))
+      (cond ((and (eq (car last) (car this)) ;; both are either text-added or text-removed
                   (eq (nth 1 last) (nth 1 this)))
-             ;; combine 2 overlapping 'text-added elements
+             ;; combine 2 overlapping elements
              (setcar result (list
                              (car this)
                              (nth 1 this)
