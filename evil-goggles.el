@@ -292,7 +292,7 @@ If BLOCKING is non-nil, the hint will be treated like a blocking
 hint, i.e. it will be displayed for `evil-goggles-blocking-duration'
 rather than `evil-goggles-async-duration'"
   (if (or blocking force-vertical-hint)
-      (let ((evil-goggles--force-block blocking))
+      (let ((evil-goggles--force-block force-vertical-hint))
         ;; use blocking hint for vertial blocks, async hint doesn't support vertial blocks
         (evil-goggles--with-blocking-hint beg end face))
     (evil-goggles--with-async-hint beg end face)))
