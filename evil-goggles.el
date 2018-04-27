@@ -360,6 +360,7 @@ DUR-DOC is the docstring for DUR-NAME."
     (user-error "Can't load package diff-mode"))
   (custom-set-faces
    '(evil-goggles-delete-face           ((t (:inherit diff-removed))))
+   '(evil-goggles-change-face           ((t (:inherit diff-removed))))
    '(evil-goggles-paste-face            ((t (:inherit diff-added))))
    '(evil-goggles-yank-face             ((t (:inherit diff-changed))))
    '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
@@ -372,6 +373,7 @@ DUR-DOC is the docstring for DUR-NAME."
     (user-error "Can't load package diff-mode"))
   (custom-set-faces
    '(evil-goggles-delete-face           ((t (:inherit diff-refine-removed))))
+   '(evil-goggles-change-face           ((t (:inherit diff-refine-removed))))
    '(evil-goggles-paste-face            ((t (:inherit diff-refine-added))))
    '(evil-goggles-yank-face             ((t (:inherit diff-refine-changed))))
    '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-refine-removed))))
@@ -401,6 +403,42 @@ ORIG-FUN is the original function.
 BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original function."
   (evil-goggles--with-blocking-hint beg end 'evil-goggles-delete-face
     (evil-goggles--funcall-preserve-interactive orig-fun beg end type register yank-handler)))
+
+;;; change
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-change "If non-nil, enable change support"
+    evil-goggles-change-face "Face for change action")
+
+(defun evil-goggles--evil-change-advice (orig-fun beg end &optional type register yank-handler delete-func)
+  "Around-advice for function `evil-change`.
+
+ORIG-FUN is the original function.
+BEG END TYPE REGISTER YANK-HANDLER DELETE-FUNC are the arguments of the original function."
+  (evil-goggles--with-blocking-hint beg end 'evil-goggles-change-face
+    (funcall orig-fun beg end type register yank-handler delete-func)))
+
+(defun evil-goggles--evil-change-line-advice (orig-fun beg end &optional type register yank-handler)
+  "Around-advice for function `evil-change-line`.
+
+ORIG-FUN is the original function.
+BEG END TYPE REGISTER YANK-HANDLER are the arguments of the original function."
+  (evil-goggles--with-blocking-hint beg end 'evil-goggles-change-face
+    (funcall orig-fun beg end type register yank-handler)))
+
+;;; substitute
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-substitute "If non-nil, enable substitute support"
+    evil-goggles-substitute-face "Face for substitute action")
+
+(defun evil-goggles--evil-change-whole-line-advice (orig-fun beg end &optional type register yank-handler)
+  "Around-advice for function `evil-change-whole-line`.
+
+ORIG-FUN is the original function.
+BEG END TYPE REGISTER YANK-HANDLER are the arguments of the original function."
+  (evil-goggles--with-blocking-hint beg end 'evil-goggles-substitute-face
+    (funcall orig-fun beg end type register yank-handler)))
 
 ;;; indent
 
@@ -770,6 +808,15 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
     (when evil-goggles-enable-delete
       (advice-add 'evil-delete :around 'evil-goggles--evil-delete-advice))
 
+    ;; `c' and `C' normal state keys
+    (when evil-goggles-enable-change
+      (advice-add 'evil-change :around 'evil-goggles--evil-change-advice)
+      (advice-add 'evil-change-line :around 'evil-goggles--evil-change-line-advice))
+
+    ;; `s' and `S' normal state keys
+    (when evil-goggles-enable-substitute
+      (advice-add 'evil-change-whole-line :around 'evil-goggles--evil-change-whole-line-advice))
+
     (when evil-goggles-enable-indent
       (advice-add 'evil-indent :around 'evil-goggles--evil-indent-advice))
 
@@ -820,6 +867,9 @@ COUNT BEG &OPTIONAL END TYPE REGISTER are the arguments of the original function
       (advice-add 'evil-replace-with-register :around 'evil-goggles--evil-replace-with-register-advice)))
    (t
     (advice-remove 'evil-delete 'evil-goggles--evil-delete-advice)
+    (advice-remove 'evil-change 'evil-goggles--evil-change-advice)
+    (advice-remove 'evil-change-line 'evil-goggles--evil-change-line-advice)
+    (advice-remove 'evil-change-whole-line 'evil-goggles--evil-change-whole-line-advice)
     (advice-remove 'evil-indent 'evil-goggles--evil-indent-advice)
     (advice-remove 'evil-yank 'evil-goggles--evil-yank-advice)
     (advice-remove 'undo-tree-undo 'evil-goggles--undo-tree-undo-advice)
