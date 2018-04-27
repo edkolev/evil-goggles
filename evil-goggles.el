@@ -193,7 +193,7 @@ visualized by the hint.
 The hint is displayed for `evil-goggles-async-duration' seconds if
 non-nil, else for `evil-goggles-duration' seconds."
   (declare (indent 3) (debug t))
-  `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
+  `(evil-goggles--if-can-show-hint ,beg ,end (progn ,@body)
      (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-async-duration evil-goggles-duration)
        ,@body)))
 
@@ -237,13 +237,13 @@ This function returns a list - either ('blink face) or ('pulse bg)."
      (t
       `(blink ,face)))))
 
-(defmacro evil-goggles--if-hint-on (beg end body1 &rest body2)
+(defmacro evil-goggles--if-can-show-hint (beg end body1 &rest body2)
   "Run one block of code if hint is visible, run the other if not.
 
 If hint is visible, check it's ok to display it from BEG to END.  If
 it's not, do BODY1, else BODY2."
   (declare (indent 3) (debug t)) ;; TODO indent like `if'
-  `(if (and (not evil-goggles--on) (evil-goggles--show-p ,beg ,end))
+  `(if (and (not evil-goggles--on) (evil-goggles--show-p ,beg ,end) (called-interactively-p 'any))
        (let ((evil-goggles--on t))
          ,@body2)
      ,body1))
@@ -263,7 +263,7 @@ BODY is executed after the hint has been removed, hence the hint is
 The hint is displayed for `evil-goggles-blocking-duration' seconds if
 non-nil, else for `evil-goggles-duration' seconds."
   (declare (indent 3) (debug t))
-  `(evil-goggles--if-hint-on ,beg ,end (progn ,@body)
+  `(evil-goggles--if-can-show-hint ,beg ,end (progn ,@body)
      (if (or (eq evil-this-type 'block) evil-goggles--force-block)
          (evil-goggles--show-block-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration))
        (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration)))
