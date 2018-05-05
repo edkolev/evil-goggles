@@ -59,6 +59,8 @@ try for example `yy`, `p`, `dd` in normal state.
 #### edit actions with hint
 
 - delete
+- change
+- substitue
 - yank
 - paste
 - indent (`=` operator)
@@ -110,6 +112,8 @@ By default, all goggles' faces inherit `evil-goggles-default-face`, which in tur
 evil-goggles-default-face - inherits from `region` by default
 
 evil-goggles-delete-face - this, and the others below, inherit from `evil-goggles-default-face`
+evil-goggles-change-face
+evil-goggles-substitute-face
 evil-goggles-indent-face
 evil-goggles-yank-face
 evil-goggles-join-face
@@ -156,6 +160,8 @@ evil-goggles-record-macro-face
 ;; list of all on/off variables, their default value is `t`:
 ;;
 ;; evil-goggles-enable-delete
+;; evil-goggles-enable-change
+;; evil-goggles-enable-substitute
 ;; evil-goggles-enable-indent
 ;; evil-goggles-enable-yank
 ;; evil-goggles-enable-join

@@ -81,3 +81,10 @@
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
                '(blink evil-goggles-default-face))))))
+
+(ert-deftest evil-goggles-test-substitute ()
+  (ert-info ("Test visual substitute")
+    (evil-test-buffer
+      ";; [T]his buffer is for notes."
+      ("v3lcABC" [escape])
+      ";; AB[C] buffer is for notes.")))
