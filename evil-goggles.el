@@ -330,7 +330,7 @@ so this package can work with Emacs 24"
        (evil-goggles--funcall-interactively ,fun ,@args)
      (funcall ,fun ,@args)))
 
-(defmacro evil-goggles--define-switch-and-face (switch-name switch-doc face-name face-doc)
+(defmacro evil-goggles--define-switch-and-face (switch-name switch-doc face-name face-doc &optional off-by-default)
   "Helper macro defining an on/off var, a face, and duration var.
 
 SWITCH-NAME is the name of the on/off variable.
@@ -338,10 +338,11 @@ SWITCH-DOC is the docstring for SWITCH-NAME.
 FACE-NAME is the name of the custom face.
 FACE-DOC is the docstring for FACE-NAME.
 DUR-NAME is the name of the duration variable.
-DUR-DOC is the docstring for DUR-NAME."
+DUR-DOC is the docstring for DUR-NAME.
+OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
   (declare (indent 7) (debug t))
   `(progn
-     (defcustom ,switch-name t
+     (defcustom ,switch-name ,(if off-by-default nil t)
        ,(concat switch-doc "\nThis variable must be set before `evil-goggles-mode' is enabled")
        :type 'boolean
        :group 'evil-goggles)
@@ -408,7 +409,8 @@ BEG END &OPTIONAL TYPE REGISTER YANK-HANDLER are the arguments of the original f
 
 (evil-goggles--define-switch-and-face
     evil-goggles-enable-change "If non-nil, enable change support"
-    evil-goggles-change-face "Face for change action")
+    evil-goggles-change-face "Face for change action"
+    :off-by-default)
 
 (defun evil-goggles--evil-change-advice (orig-fun beg end &optional type register yank-handler delete-func)
   "Around-advice for function `evil-change`.
