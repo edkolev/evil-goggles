@@ -34,15 +34,6 @@
 ;;
 ;; (evil-goggles-mode)
 ;;
-;;; Internal APIs:
-;;
-;; These functions should be used for displaying hints:
-;;
-;; - evil-goggles--with-async-hint
-;; - evil-goggles--with-blocking-hint
-;; - evil-goggles--with-disabled-hint
-;; - evil-goggles--show-hint
-;;
 ;;; Code:
 
 (require 'evil)
@@ -175,20 +166,6 @@ convention for the insert-behind-hooks overlay property."
           (move-overlay ov (overlay-start ov) (+ len (overlay-end ov))))
       (move-overlay ov (overlay-start ov) (- (overlay-end ov) len) ))))
 
-(defmacro evil-goggles--with-async-hint (beg end face &rest body)
-  "Show hint from BEG to END with face FACE, do BODY with hint on.
-
-BODY is executed after the hint is displayed but before it's
-removed.  As a result any changes BODY does on the text will be
-visualized by the hint.
-
-The hint is displayed for `evil-goggles-async-duration' seconds if
-non-nil, else for `evil-goggles-duration' seconds."
-  (declare (indent 3) (debug t))
-  `(evil-goggles--if-can-show-hint ,beg ,end (progn ,@body)
-     (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-async-duration evil-goggles-duration)
-       ,@body)))
-
 (defun evil-goggles--show-or-pulse-overlay (ov face dur)
   "Show or pulse overlay OV with face FACE.
 
@@ -229,37 +206,6 @@ This function returns a list - either ('blink face) or ('pulse bg)."
      (t
       `(blink ,face)))))
 
-(defmacro evil-goggles--if-can-show-hint (beg end body1 &rest body2)
-  "Run one block of code if hint is visible, run the other if not.
-
-If hint is visible, check it's ok to display it from BEG to END.  If
-it's not, do BODY1, else BODY2."
-  (declare (indent 3) (debug t)) ;; TODO indent like `if'
-  `(if (and (evil-goggles--show-p ,beg ,end) (called-interactively-p 'any))
-       (let ((evil-goggles--on t))
-         ,@body2)
-     ,body1))
-
-(defmacro evil-goggles--with-disabled-hint (&rest body)
-  "Do BODY with hints disabled."
-  (declare (indent 0) (debug t))
-  `(,@body))
-
-(defmacro evil-goggles--with-blocking-hint (beg end face &rest body)
-  "Show hint from BEG to END with face FACE, hide it, then do BODY.
-
-BODY is executed after the hint has been removed, hence the hint is
-\"blocking\" because BODY won't run until the hint has disappeared.
-
-The hint is displayed for `evil-goggles-blocking-duration' seconds if
-non-nil, else for `evil-goggles-duration' seconds."
-  (declare (indent 3) (debug t))
-  `(evil-goggles--if-can-show-hint ,beg ,end (progn ,@body)
-     (if (or (eq evil-this-type 'block) evil-goggles--force-block)
-         (evil-goggles--show-block-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration))
-       (evil-goggles--show-overlay ,beg ,end ,face (or evil-goggles-blocking-duration evil-goggles-duration)))
-     ,@body))
-
 (defmacro evil-goggles--show-overlay (beg end face dur &rest body)
   "Show overlay from BEG to END with face FACE for DUR seconds.
 
@@ -273,19 +219,6 @@ will be adjusted if BODY modifies the text in it."
            ,@body
            (sit-for ,dur))
        (delete-overlay ov))))
-
-(defun evil-goggles--show-hint (beg end face &optional force-vertical-hint blocking)
-  "Show hint from BEG to END with face FACE for DUR sec.
-
-The hint will be a vertical block if FORCE-VERTICAL-HINT is non-nil.
-If BLOCKING is non-nil, the hint will be treated like a blocking
-hint, i.e. it will be displayed for `evil-goggles-blocking-duration'
-rather than `evil-goggles-async-duration'"
-  (if (or blocking force-vertical-hint)
-      (let ((evil-goggles--force-block force-vertical-hint))
-        ;; use blocking hint for vertial blocks, async hint doesn't support vertial blocks
-        (evil-goggles--with-blocking-hint beg end face))
-    (evil-goggles--with-async-hint beg end face)))
 
 (defun evil-goggles--show-block-overlay (beg end face dur)
   "Show overlay from BEG to END with face FACE for DUR seconds.
@@ -306,14 +239,6 @@ Running code while the hint is on isn't supported."
           ;; (dolist (ov ovs) (evil-goggles--show-or-pulse-overlay ov face dur))
           (sit-for dur))
       (mapcar 'delete-overlay ovs))))
-
-(defun evil-goggles--funcall-interactively (f &rest args)
-  "Call F with ARGS interactively.
-
-This function mimics `funcall-interactively', available in Emacs 25,
-so this package can work with Emacs 24"
-  (cl-letf (((symbol-function 'called-interactively-p) (lambda (_) t)))
-    (apply f args)))
 
 (defmacro evil-goggles--define-switch-and-face (switch-name switch-doc face-name face-doc &optional off-by-default)
   "Helper macro defining an on/off var, a face, and duration var.
