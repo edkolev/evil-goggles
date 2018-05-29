@@ -305,7 +305,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
 
 (defun evil-goggles--get-face (command)
   (or
-   (plist-get (alist-get command evil-goggles--faces) :face)
+   (plist-get (alist-get command evil-goggles--commands) :face)
    'evil-goggles-default-face))
 
 (defun evil-goggles--show-blocking-hint (beg end face)
@@ -419,19 +419,21 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
 
 ;;; assosiation list with faces
 
-(defvar evil-goggles--faces
-  '((evil-delete             :face evil-goggles-delete-face)
-    (evil-yank               :face evil-goggles-yank-face)
-    (evil-indent             :face evil-goggles-indent-face)
-    (evil-change-whole-line  :face evil-goggles-change-face)
-    (evil-change             :face evil-goggles-change-face)
-    (evil-change-line        :face evil-goggles-change-face)
-    (evil-indent             :face evil-goggles-indent-face)
-    (evil-join               :face evil-goggles-join-face)
-    (evil-join-whitespace    :face evil-goggles-join-face)
-    (evil-surround-region    :face evil-goggles-surround-face)
-    (evil-commentary         :face evil-goggles-commentary-face)
-    (evilnc-comment-operator :face evil-goggles-nerd-commenter-face)))
+(defvar evil-goggles--commands
+  '((evil-delete             :face evil-goggles-delete-face         :switch evil-goggles-enable-delete         :advice evil-goggles--generic-blocking-advice)
+    (evil-yank               :face evil-goggles-yank-face           :switch evil-goggles-enable-yank           :advice evil-goggles--generic-async-advice)
+    (evil-change             :face evil-goggles-change-face         :switch evil-goggles-enable-change         :advice evil-goggles--generic-blocking-advice)
+    (evil-change-line        :face evil-goggles-change-face         :switch evil-goggles-enable-change         :advice evil-goggles--generic-blocking-advice)
+    (evil-change-whole-line  :face evil-goggles-change-face         :switch evil-goggles-enable-change         :advice evil-goggles--generic-blocking-advice)
+    (evil-indent             :face evil-goggles-indent-face         :switch evil-goggles-enable-indent         :advice evil-goggles--generic-async-advice)
+    (evil-join               :face evil-goggles-join-face           :switch evil-goggles-enable-join           :advice evil-goggles--join-advice)
+    (evil-join-whitespace    :face evil-goggles-join-face           :switch evil-goggles-enable-join           :advice evil-goggles--join-advice)
+    (evil-fill-and-move      :face evil-goggles-fill-and-move-face  :switch evil-goggles-enable-fill-and-move  :advice evil-goggles--generic-async-advice)
+    (evil-shift-left         :face evil-goggles-shift-face          :switch evil-goggles-enable-shift          :advice evil-goggles--generic-async-advice)
+    (evil-shift-right        :face evil-goggles-shift-face          :switch evil-goggles-enable-shift          :advice evil-goggles--generic-async-advice)
+    (evil-surround-region    :face evil-goggles-surround-face       :switch evil-goggles-enable-surround       :advice evil-goggles--generic-async-advice)
+    (evil-commentary         :face evil-goggles-commentary-face     :switch evil-goggles-enable-commentary     :advice evil-goggles--generic-async-advice)
+    (evilnc-comment-operator :face evil-goggles-nerd-commenter-face :switch evil-goggles-enable-nerd-commenter :advice evil-goggles--generic-async-advice)))
 
 ;;; minor mode defined below ;;;
 
@@ -450,28 +452,20 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
   (if evil-goggles-mode
       (progn
         (add-hook 'pre-command-hook #'evil-goggles--vanish)
-        (when evil-goggles-enable-delete         (advice-add 'evil-delete             :before 'evil-goggles--generic-blocking-advice))
-        (when evil-goggles-enable-yank           (advice-add 'evil-yank               :before 'evil-goggles--generic-async-advice))
-        (when evil-goggles-enable-change         (advice-add 'evil-change             :before 'evil-goggles--generic-blocking-advice))
-        (when evil-goggles-enable-change         (advice-add 'evil-change-line        :before 'evil-goggles--generic-blocking-advice))
-        (when evil-goggles-enable-change         (advice-add 'evil-change-whole-line  :before 'evil-goggles--generic-blocking-advice))
-        (when evil-goggles-enable-indent         (advice-add 'evil-indent             :before 'evil-goggles--generic-async-advice))
-        (when evil-goggles-enable-join           (advice-add 'evil-join               :before 'evil-goggles--join-advice))
-        (when evil-goggles-enable-join           (advice-add 'evil-join-whitespace    :before 'evil-goggles--join-advice))
-        (when evil-goggles-enable-surround       (advice-add 'evil-surround-region    :before 'evil-goggles--generic-async-advice))
-        (when evil-goggles-enable-commentary     (advice-add 'evil-commentary         :before 'evil-goggles--generic-async-advice))
-        (when evil-goggles-enable-nerd-commenter (advice-add 'evilnc-comment-operator :before 'evil-goggles--generic-async-advice)))
+        ;; add advice
+        (dolist (command-cfg evil-goggles--commands)
+          (let ((cmd (car command-cfg))
+                 (advice (plist-get (cdr command-cfg) :advice))
+                 (switch (plist-get (cdr command-cfg) :switch)))
+            (when (symbol-value switch)
+              (advice-add cmd :before advice)))))
+    ;; remove advice
     (remove-hook   'pre-command-hook        'evil-goggles--vanish)
-    (advice-remove 'evil-delete             'evil-goggles--generic-blocking-advice)
-    (advice-remove 'evil-yank               'evil-goggles--generic-async-advice)
-    (advice-remove 'evil-change             'evil-goggles--generic-blocking-advice)
-    (advice-remove 'evil-change-whole-line  'evil-goggles--generic-blocking-advice)
-    (advice-remove 'evil-indent             'evil-goggles--generic-async-advice)
-    (advice-remove 'evil-join               'evil-goggles--join-advice)
-    (advice-remove 'evil-join-whitespace    'evil-goggles--join-advice)
-    (advice-remove 'evil-surround-region    'evil-goggles--generic-async-advice)
-    (advice-remove 'evil-commentary         'evil-goggles--generic-async-advice)
-    (advice-remove 'evilnc-comment-operator 'evil-goggles--generic-async-advice)))
+    (dolist (command-cfg evil-goggles--commands)
+      (let ((cmd (car command-cfg))
+             (advice (plist-get (cdr command-cfg) :advice))
+             (switch (plist-get (cdr command-cfg) :switch)))
+        (advice-remove cmd advice)))))
 
 (provide 'evil-goggles)
 
