@@ -131,9 +131,6 @@ background of 'evil-goggles-default-face, then 'region."
 (defvar evil-goggles--force-block nil
   "When non-nil, force the hint about to be shown to be a block.")
 
-(defvar evil-goggles--hint-on-empty-lines nil
-  "When nil, the default, function `evil-goggles--show-p' will not return t for whitespace-only regions.")
-
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-inhibit-operator-value)
@@ -149,10 +146,7 @@ background of 'evil-goggles-default-face, then 'region."
        (not (evil-insert-state-p))
        ;; don't show overlay when evil-mc has active cursors
        (not (and (fboundp 'evil-mc-has-cursors-p) (evil-mc-has-cursors-p)))
-       ;; don't show hint when the region has nothing but whitespace, but skip this check if `evil-goggles--hint-on-empty-lines' is t
-       (if evil-goggles--hint-on-empty-lines
-           t
-         (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end)))))))
+       (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
 (defun evil-goggles--overlay-insert-behind-hook (ov afterp beg end &optional len)
   "Function which grows/shriks the overlay OV when its text changes.
@@ -308,9 +302,9 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
    (plist-get (alist-get command evil-goggles--commands) :face)
    'evil-goggles-default-face))
 
-(defun evil-goggles--show-blocking-hint (beg end face)
-  "Show blocking hint from BEG to END with face FACE."
-  (let ((dur (or evil-goggles-blocking-duration evil-goggles-duration)))
+(defun evil-goggles--show-blocking-hint (beg end)
+  (let ((dur (or evil-goggles-blocking-duration evil-goggles-duration))
+        (face (evil-goggles--get-face this-command)))
     (if (or (eq evil-this-type 'block) evil-goggles--force-block)
         (evil-goggles--show-block-overlay beg end face dur)
       (evil-goggles--show-overlay beg end face dur))))
@@ -318,7 +312,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
 (defun evil-goggles--generic-blocking-advice (beg end &rest _)
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end))
-    (evil-goggles--show-blocking-hint beg end (evil-goggles--get-face this-command))))
+    (evil-goggles--show-blocking-hint beg end)))
 
 ;;; generic async advice
 
@@ -334,26 +328,29 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (delete-overlay evil-goggles--async-ov)
     (setq evil-goggles--async-ov nil)))
 
+(defun evil-goggles--show-async-hint (beg end)
+  (let ((ov (evil-goggles--make-overlay beg end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
+        (dur (or evil-goggles-async-duration evil-goggles-duration))
+        (face (evil-goggles--get-face this-command)))
+    (unwind-protect
+        ;; show the overlay
+        (evil-goggles--show-or-pulse-overlay ov 'evil-goggles-default-face dur)
+      ;; remove the overlay with a timer
+      (setq
+       evil-goggles--async-ov ov
+       evil-goggles--timer (run-at-time dur
+                                        nil
+                                        #'evil-goggles--vanish)))))
+
 (defun evil-goggles--generic-async-advice (beg end &rest _)
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end))
-    (let ((ov (evil-goggles--make-overlay beg end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
-          (dur (or evil-goggles-async-duration evil-goggles-duration))
-          (face (evil-goggles--get-face this-command)))
-      (unwind-protect
-          ;; show the overlay
-          (evil-goggles--show-or-pulse-overlay ov 'evil-goggles-default-face dur)
-        ;; remove the overlay with a timer
-        (setq
-         evil-goggles--async-ov ov
-         evil-goggles--timer (run-at-time dur
-                                          nil
-                                          #'evil-goggles--vanish))))))
+    (evil-goggles--show-async-hint beg end)))
 
 (defun evil-goggles--generic-async-advice-1 (_ beg end &rest _)
-  (when (called-interactively-p 'interactive)
-    (cl-letf (((symbol-function 'called-interactively-p) (lambda (_) t)))
-      (funcall 'evil-goggles--generic-async-advice beg end))))
+  (when (and (called-interactively-p 'interactive)
+             (evil-goggles--show-p beg end))
+    (evil-goggles--show-async-hint beg end)))
 
 ;;; delete
 
