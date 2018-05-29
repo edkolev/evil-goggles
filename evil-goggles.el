@@ -425,6 +425,19 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-enable-replace-with-register "If non-nil, enable replace with register support"
     evil-goggles-replace-with-register-face "Face for replace with register action")
 
+;;; set mark
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-set-marker "If non-nil, enable replace with register support"
+    evil-goggles-set-marker-face "Face for replace with register action")
+
+(defun evil-goggles--set-marker-advice (char &rest _)
+  (when (and (called-interactively-p 'interactive)
+             (<= ?a char ?z))
+    (let ((beg (line-beginning-position))
+          (end (1+ (line-end-position))))
+      (evil-goggles--show-async-hint beg end))))
+
 ;;; assosiation list with faces
 
 (defvar evil-goggles--commands
@@ -442,7 +455,8 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (evil-surround-region       :face evil-goggles-surround-face              :switch evil-goggles-enable-surround              :advice evil-goggles--generic-async-advice)
     (evil-commentary            :face evil-goggles-commentary-face            :switch evil-goggles-enable-commentary            :advice evil-goggles--generic-async-advice)
     (evilnc-comment-operator    :face evil-goggles-nerd-commenter-face        :switch evil-goggles-enable-nerd-commenter        :advice evil-goggles--generic-async-advice)
-    (evil-replace-with-register :face evil-goggles-replace-with-register-face :switch evil-goggles-enable-replace-with-register :advice evil-goggles--generic-async-advice-1)))
+    (evil-replace-with-register :face evil-goggles-replace-with-register-face :switch evil-goggles-enable-replace-with-register :advice evil-goggles--generic-async-advice-1)
+    (evil-set-marker            :face evil-goggles-set-marker-face            :switch evil-goggles-enable-set-marker            :advice evil-goggles--set-marker-advice)))
 
 ;;; minor mode defined below ;;;
 
