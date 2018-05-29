@@ -438,6 +438,26 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
           (end (1+ (line-end-position))))
       (evil-goggles--show-async-hint beg end))))
 
+;;; record macro
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-record-macro "If non-nil, enable record macro support"
+    evil-goggles-record-macro-face "Face for record macro action")
+
+(defun evil-goggles--record-macro-advice (&rest _)
+  (let ((beg (line-beginning-position))
+        (end (1+ (line-end-position)))
+        (was-defining-kbd-macro defining-kbd-macro)
+        (evil-goggles--hint-on-empty-lines t))
+
+    ;; show hint before starting to record a macro
+    (unless was-defining-kbd-macro
+      (evil-goggles--show-async-hint beg end))
+
+    ;; show hint when done defining the macro
+    (when was-defining-kbd-macro
+      (evil-goggles--show-async-hint beg end))))
+
 ;;; assosiation list with faces
 
 (defvar evil-goggles--commands
@@ -456,7 +476,8 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (evil-commentary            :face evil-goggles-commentary-face            :switch evil-goggles-enable-commentary            :advice evil-goggles--generic-async-advice)
     (evilnc-comment-operator    :face evil-goggles-nerd-commenter-face        :switch evil-goggles-enable-nerd-commenter        :advice evil-goggles--generic-async-advice)
     (evil-replace-with-register :face evil-goggles-replace-with-register-face :switch evil-goggles-enable-replace-with-register :advice evil-goggles--generic-async-advice-1)
-    (evil-set-marker            :face evil-goggles-set-marker-face            :switch evil-goggles-enable-set-marker            :advice evil-goggles--set-marker-advice)))
+    (evil-set-marker            :face evil-goggles-set-marker-face            :switch evil-goggles-enable-set-marker            :advice evil-goggles--set-marker-advice)
+    (evil-record-macro          :face evil-goggles-record-macro-face          :switch evil-goggles-enable-record-macro          :advice evil-goggles--record-macro-advice)))
 
 ;;; minor mode defined below ;;;
 
