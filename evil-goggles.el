@@ -374,6 +374,31 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-enable-indent "If non-nil, enable indent support"
     evil-goggles-indent-face "Face for indent action")
 
+;;; join
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-join "If non-nil, enable join support"
+    evil-goggles-join-face "Face for join action")
+
+(defun evil-goggles--join-advice (beg end &rest _)
+  (when (and (called-interactively-p 'interactive)
+             (evil-goggles--show-p beg end)
+             ;; don't show goggles for single lines ("J"/"gJ" without count)
+             (< 1 (- (line-number-at-pos end) (line-number-at-pos beg))))
+    (evil-goggles--show-blocking-hint beg end (evil-goggles--get-face this-command))))
+
+;;; fill
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-fill-and-move "If non-nil, enable fill-and-move support"
+    evil-goggles-fill-and-move-face "Face for fill-and-move action")
+
+;;; shift
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-shift "If non-nil, enable shift support"
+    evil-goggles-shift-face "Face for shift action")
+
 ;;; assosiation list with faces
 
 (defvar evil-goggles--faces
@@ -381,7 +406,10 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (evil-yank              :face evil-goggles-yank-face)
     (evil-indent            :face evil-goggles-indent-face)
     (evil-change-whole-line :face evil-goggles-change-face)
-    (evil-change            :face evil-goggles-change-face)))
+    (evil-change            :face evil-goggles-change-face)
+    (evil-indent            :face evil-goggles-indent-face)
+    (evil-join              :face evil-goggles-join-face)
+    (evil-join-whitespace   :face evil-goggles-join-face)))
 
 ;;; minor mode defined below ;;;
 
@@ -401,16 +429,20 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
       (progn
         (add-hook 'pre-command-hook #'evil-goggles--vanish)
         (when evil-goggles-enable-delete (advice-add 'evil-delete            :before 'evil-goggles--generic-blocking-advice))
-        (when evil-goggles-enable-yank   (advice-add 'evil-yank              :before 'evil-goggles--generic-blocking-advice))
+        (when evil-goggles-enable-yank   (advice-add 'evil-yank              :before 'evil-goggles--generic-async-advice))
         (when evil-goggles-enable-change (advice-add 'evil-change            :before 'evil-goggles--generic-blocking-advice))
         (when evil-goggles-enable-change (advice-add 'evil-change-whole-line :before 'evil-goggles--generic-blocking-advice))
-        (when evil-goggles-enable-indent (advice-add 'evil-indent            :before 'evil-goggles--generic-async-advice)))
-    (remove-hook   'pre-command-hook      #'evil-goggles--vanish)
+        (when evil-goggles-enable-indent (advice-add 'evil-indent            :before 'evil-goggles--generic-async-advice))
+        (when evil-goggles-enable-join   (advice-add 'evil-join              :before 'evil-goggles--join-advice))
+        (when evil-goggles-enable-join   (advice-add 'evil-join-whitespace   :before 'evil-goggles--join-advice)))
+    (remove-hook   'pre-command-hook       'evil-goggles--vanish)
     (advice-remove 'evil-delete            'evil-goggles--generic-blocking-advice)
-    (advice-remove 'evil-yak               'evil-goggles--generic-blocking-advice)
+    (advice-remove 'evil-yank              'evil-goggles--generic-async-advice)
     (advice-remove 'evil-change            'evil-goggles--generic-blocking-advice)
     (advice-remove 'evil-change-whole-line 'evil-goggles--generic-blocking-advice)
-    (advice-remove 'evil-indent            'evil-goggles--generic-async-advice)))
+    (advice-remove 'evil-indent            'evil-goggles--generic-async-advice)
+    (advice-remove 'evil-join              'evil-goggles--join-advice)
+    (advice-remove 'evil-join-whitespace   'evil-goggles--join-advice)))
 
 (provide 'evil-goggles)
 
