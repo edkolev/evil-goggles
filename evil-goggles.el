@@ -350,6 +350,11 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
                                           nil
                                           #'evil-goggles--vanish))))))
 
+(defun evil-goggles--generic-async-advice-1 (_ beg end &rest _)
+  (when (called-interactively-p 'interactive)
+    (cl-letf (((symbol-function 'called-interactively-p) (lambda (_) t)))
+      (funcall 'evil-goggles--generic-async-advice beg end))))
+
 ;;; delete
 
 (evil-goggles--define-switch-and-face
@@ -417,23 +422,30 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-enable-nerd-commenter "If non-nil, enable nerd-commenter support"
     evil-goggles-nerd-commenter-face "Face for nerd-commenter action")
 
+;;; evil-replace-with-register
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-replace-with-register "If non-nil, enable replace with register support"
+    evil-goggles-replace-with-register-face "Face for replace with register action")
+
 ;;; assosiation list with faces
 
 (defvar evil-goggles--commands
-  '((evil-delete             :face evil-goggles-delete-face         :switch evil-goggles-enable-delete         :advice evil-goggles--generic-blocking-advice)
-    (evil-yank               :face evil-goggles-yank-face           :switch evil-goggles-enable-yank           :advice evil-goggles--generic-async-advice)
-    (evil-change             :face evil-goggles-change-face         :switch evil-goggles-enable-change         :advice evil-goggles--generic-blocking-advice)
-    (evil-change-line        :face evil-goggles-change-face         :switch evil-goggles-enable-change         :advice evil-goggles--generic-blocking-advice)
-    (evil-change-whole-line  :face evil-goggles-change-face         :switch evil-goggles-enable-change         :advice evil-goggles--generic-blocking-advice)
-    (evil-indent             :face evil-goggles-indent-face         :switch evil-goggles-enable-indent         :advice evil-goggles--generic-async-advice)
-    (evil-join               :face evil-goggles-join-face           :switch evil-goggles-enable-join           :advice evil-goggles--join-advice)
-    (evil-join-whitespace    :face evil-goggles-join-face           :switch evil-goggles-enable-join           :advice evil-goggles--join-advice)
-    (evil-fill-and-move      :face evil-goggles-fill-and-move-face  :switch evil-goggles-enable-fill-and-move  :advice evil-goggles--generic-async-advice)
-    (evil-shift-left         :face evil-goggles-shift-face          :switch evil-goggles-enable-shift          :advice evil-goggles--generic-async-advice)
-    (evil-shift-right        :face evil-goggles-shift-face          :switch evil-goggles-enable-shift          :advice evil-goggles--generic-async-advice)
-    (evil-surround-region    :face evil-goggles-surround-face       :switch evil-goggles-enable-surround       :advice evil-goggles--generic-async-advice)
-    (evil-commentary         :face evil-goggles-commentary-face     :switch evil-goggles-enable-commentary     :advice evil-goggles--generic-async-advice)
-    (evilnc-comment-operator :face evil-goggles-nerd-commenter-face :switch evil-goggles-enable-nerd-commenter :advice evil-goggles--generic-async-advice)))
+  '((evil-delete                :face evil-goggles-delete-face                :switch evil-goggles-enable-delete                :advice evil-goggles--generic-blocking-advice)
+    (evil-yank                  :face evil-goggles-yank-face                  :switch evil-goggles-enable-yank                  :advice evil-goggles--generic-async-advice)
+    (evil-change                :face evil-goggles-change-face                :switch evil-goggles-enable-change                :advice evil-goggles--generic-blocking-advice)
+    (evil-change-line           :face evil-goggles-change-face                :switch evil-goggles-enable-change                :advice evil-goggles--generic-blocking-advice)
+    (evil-change-whole-line     :face evil-goggles-change-face                :switch evil-goggles-enable-change                :advice evil-goggles--generic-blocking-advice)
+    (evil-indent                :face evil-goggles-indent-face                :switch evil-goggles-enable-indent                :advice evil-goggles--generic-async-advice)
+    (evil-join                  :face evil-goggles-join-face                  :switch evil-goggles-enable-join                  :advice evil-goggles--join-advice)
+    (evil-join-whitespace       :face evil-goggles-join-face                  :switch evil-goggles-enable-join                  :advice evil-goggles--join-advice)
+    (evil-fill-and-move         :face evil-goggles-fill-and-move-face         :switch evil-goggles-enable-fill-and-move         :advice evil-goggles--generic-async-advice)
+    (evil-shift-left            :face evil-goggles-shift-face                 :switch evil-goggles-enable-shift                 :advice evil-goggles--generic-async-advice)
+    (evil-shift-right           :face evil-goggles-shift-face                 :switch evil-goggles-enable-shift                 :advice evil-goggles--generic-async-advice)
+    (evil-surround-region       :face evil-goggles-surround-face              :switch evil-goggles-enable-surround              :advice evil-goggles--generic-async-advice)
+    (evil-commentary            :face evil-goggles-commentary-face            :switch evil-goggles-enable-commentary            :advice evil-goggles--generic-async-advice)
+    (evilnc-comment-operator    :face evil-goggles-nerd-commenter-face        :switch evil-goggles-enable-nerd-commenter        :advice evil-goggles--generic-async-advice)
+    (evil-replace-with-register :face evil-goggles-replace-with-register-face :switch evil-goggles-enable-replace-with-register :advice evil-goggles--generic-async-advice-1)))
 
 ;;; minor mode defined below ;;;
 
