@@ -455,6 +455,40 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (when was-defining-kbd-macro
       (evil-goggles--show-async-hint beg end))))
 
+;;; paste
+
+(evil-goggles--define-switch-and-face
+    evil-goggles-enable-paste "If non-nil, enable paste support"
+    evil-goggles-paste-face "Face for paste action")
+
+(defun evil-goggles--paste-advice (count &optional register yank-handler)
+  (when (and (called-interactively-p 'interactive)
+             (evil-normal-state-p))
+    (let* ((beg (save-excursion (evil-goto-mark ?\[) (if (eolp) (1+ (point)) (point))))
+           (end (save-excursion (evil-goto-mark ?\]) (if (eolp) (1+ (point)) (point))))
+           (is-vertical-block-pasted (evil-goggles--paste-vert-block-p register yank-handler)))
+      (if is-vertical-block-pasted
+          ;; XXX the async hint can't show vertical block hints - use a blocking hint if a vert block is pasted
+          ;; XXX without the `(1+ end)', the vertical block hint is off by one
+          (evil-goggles--show-blocking-hint beg (1+ end) is-vertical-block-pasted)
+        (evil-goggles--show-async-hint beg end)))))
+
+
+(defun evil-goggles--paste-vert-block-p (register yank-handler)
+  "Return t if the paste is a vertical block.
+
+Argument REGISTER is the evil register.
+Argument YANK-HANDLER is the yank hanler."
+  (let* ((text (if register
+                   (evil-get-register register)
+                 (current-kill 0)))
+         (yh (or yank-handler
+                 (when (stringp text)
+                   (car-safe (get-text-property
+                              0 'yank-handler text))))))
+    (eq yh 'evil-yank-block-handler)))
+
+
 ;;; assosiation list with faces
 
 (defvar evil-goggles--commands
@@ -474,7 +508,9 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (evilnc-comment-operator    :face evil-goggles-nerd-commenter-face        :switch evil-goggles-enable-nerd-commenter        :advice evil-goggles--generic-async-advice)
     (evil-replace-with-register :face evil-goggles-replace-with-register-face :switch evil-goggles-enable-replace-with-register :advice evil-goggles--generic-async-advice-1)
     (evil-set-marker            :face evil-goggles-set-marker-face            :switch evil-goggles-enable-set-marker            :advice evil-goggles--set-marker-advice)
-    (evil-record-macro          :face evil-goggles-record-macro-face          :switch evil-goggles-enable-record-macro          :advice evil-goggles--record-macro-advice)))
+    (evil-record-macro          :face evil-goggles-record-macro-face          :switch evil-goggles-enable-record-macro          :advice evil-goggles--record-macro-advice)
+    (evil-paste-before          :face evil-goggles-paste-face                 :switch evil-goggles-enable-paste                 :advice evil-goggles--paste-advice :after t)
+    (evil-paste-after           :face evil-goggles-paste-face                 :switch evil-goggles-enable-paste                 :advice evil-goggles--paste-advice :after t)))
 
 ;;; minor mode defined below ;;;
 
@@ -497,9 +533,10 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
         (dolist (command-cfg evil-goggles--commands)
           (let ((cmd (car command-cfg))
                  (advice (plist-get (cdr command-cfg) :advice))
-                 (switch (plist-get (cdr command-cfg) :switch)))
+                 (switch (plist-get (cdr command-cfg) :switch))
+                 (after  (plist-get (cdr command-cfg) :after)))
             (when (symbol-value switch)
-              (advice-add cmd :before advice)))))
+              (advice-add cmd (if after :after :before) advice)))))
     ;; remove advice
     (remove-hook   'pre-command-hook        'evil-goggles--vanish)
     (dolist (command-cfg evil-goggles--commands)
