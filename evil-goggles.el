@@ -294,11 +294,6 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
 
 ;;; generic blocking advice
 
-(defun evil-goggles--get-face (command)
-  (or
-   (plist-get (alist-get command evil-goggles--commands) :face)
-   'evil-goggles-default-face))
-
 (defun evil-goggles--show-blocking-hint (beg end &optional force-block)
   (let ((dur (or evil-goggles-blocking-duration evil-goggles-duration))
         (face (evil-goggles--get-face this-command)))
@@ -331,7 +326,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
         (face (evil-goggles--get-face this-command)))
     (unwind-protect
         ;; show the overlay
-        (evil-goggles--show-or-pulse-overlay ov 'evil-goggles-default-face dur)
+        (evil-goggles--show-or-pulse-overlay ov face dur)
       ;; remove the overlay with a timer
       (setq
        evil-goggles--async-ov ov
@@ -344,7 +339,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
              (evil-goggles--show-p beg end))
     (evil-goggles--show-async-hint beg end)))
 
-(defun evil-goggles--generic-async-advice-1 (_ beg end &rest _)
+(defun evil-goggles--generic-async-advice-1 (_ beg end &rest _rest)
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end))
     (evil-goggles--show-async-hint beg end)))
@@ -444,8 +439,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
 (defun evil-goggles--record-macro-advice (&rest _)
   (let ((beg (line-beginning-position))
         (end (1+ (line-end-position)))
-        (was-defining-kbd-macro defining-kbd-macro)
-        (evil-goggles--hint-on-empty-lines t))
+        (was-defining-kbd-macro defining-kbd-macro))
 
     ;; show hint before starting to record a macro
     (unless was-defining-kbd-macro
@@ -461,7 +455,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-enable-paste "If non-nil, enable paste support"
     evil-goggles-paste-face "Face for paste action")
 
-(defun evil-goggles--paste-advice (count &optional register yank-handler)
+(defun evil-goggles--paste-advice (_ &optional register yank-handler)
   (when (and (called-interactively-p 'interactive)
              (evil-normal-state-p))
     (let* ((beg (save-excursion (evil-goto-mark ?\[) (if (eolp) (1+ (point)) (point))))
@@ -512,6 +506,11 @@ Argument YANK-HANDLER is the yank hanler."
     (evil-paste-before          :face evil-goggles-paste-face                 :switch evil-goggles-enable-paste                 :advice evil-goggles--paste-advice :after t)
     (evil-paste-after           :face evil-goggles-paste-face                 :switch evil-goggles-enable-paste                 :advice evil-goggles--paste-advice :after t)))
 
+(defun evil-goggles--get-face (command)
+  (or
+   (plist-get (cdr (assoc command evil-goggles--commands)) :face)
+   'evil-goggles-default-face))
+
 ;;; minor mode defined below ;;;
 
 (defcustom evil-goggles-lighter
@@ -541,8 +540,7 @@ Argument YANK-HANDLER is the yank hanler."
     (remove-hook   'pre-command-hook        'evil-goggles--vanish)
     (dolist (command-cfg evil-goggles--commands)
       (let ((cmd (car command-cfg))
-             (advice (plist-get (cdr command-cfg) :advice))
-             (switch (plist-get (cdr command-cfg) :switch)))
+             (advice (plist-get (cdr command-cfg) :advice)))
         (advice-remove cmd advice)))))
 
 (provide 'evil-goggles)
