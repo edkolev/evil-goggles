@@ -128,9 +128,6 @@ background of 'evil-goggles-default-face, then 'region."
       (overlay-put ov (pop properties) (pop properties)))
     ov))
 
-(defvar evil-goggles--force-block nil
-  "When non-nil, force the hint about to be shown to be a block.")
-
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-inhibit-operator-value)
@@ -302,10 +299,10 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
    (plist-get (alist-get command evil-goggles--commands) :face)
    'evil-goggles-default-face))
 
-(defun evil-goggles--show-blocking-hint (beg end)
+(defun evil-goggles--show-blocking-hint (beg end &optional force-block)
   (let ((dur (or evil-goggles-blocking-duration evil-goggles-duration))
         (face (evil-goggles--get-face this-command)))
-    (if (or (eq evil-this-type 'block) evil-goggles--force-block)
+    (if (or (eq evil-this-type 'block) force-block)
         (evil-goggles--show-block-overlay beg end face dur)
       (evil-goggles--show-overlay beg end face dur))))
 
@@ -387,7 +384,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
              (evil-goggles--show-p beg end)
              ;; don't show goggles for single lines ("J"/"gJ" without count)
              (< 1 (- (line-number-at-pos end) (line-number-at-pos beg))))
-    (evil-goggles--show-blocking-hint beg end (evil-goggles--get-face this-command))))
+    (evil-goggles--show-blocking-hint beg end)))
 
 ;;; fill
 
