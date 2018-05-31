@@ -12,6 +12,9 @@ compile: clean
 test:
 	$(bemacs) -l test/make-test.el
 
+package-lint:
+	$(bemacs) -f package-lint-batch-and-exit evil-goggles.el
+
 clean:
 	rm -f *.elc test/evil-tests.el test/evil-tests.el
 
