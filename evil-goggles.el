@@ -143,6 +143,7 @@ background of 'evil-goggles-default-face, then 'region."
        (not (evil-insert-state-p))
        ;; don't show overlay when evil-mc has active cursors
        (not (and (fboundp 'evil-mc-has-cursors-p) (evil-mc-has-cursors-p)))
+       ;; don't show overlay when the region has only whitespace
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
 (defun evil-goggles--overlay-insert-behind-hook (ov afterp beg end &optional len)
@@ -240,7 +241,7 @@ FACE-NAME is the name of the custom face.
 FACE-DOC is the docstring for FACE-NAME.
 DUR-NAME is the name of the duration variable.
 DUR-DOC is the docstring for DUR-NAME.
-OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
+OFF-BY-DEFAULT if non-nil will set the switch to nil"
   (declare (indent 7) (debug t))
   `(progn
      (defcustom ,switch-name ,(if off-by-default nil t)
@@ -295,6 +296,11 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
 ;;; generic blocking advice
 
 (defun evil-goggles--show-blocking-hint (beg end &optional force-block)
+  "Show blocking hint from BEG to END.
+
+The hint will be a vertical block if `evil-this-type' is `block'. If
+FORCE-BLOCK is non-nil, the hint will always be a vertical block,
+regardless of the value of `evil-this-type'."
   (let ((dur (or evil-goggles-blocking-duration evil-goggles-duration))
         (face (evil-goggles--get-face this-command)))
     (if (or (eq evil-this-type 'block) force-block)
@@ -302,6 +308,10 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
       (evil-goggles--show-overlay beg end face dur))))
 
 (defun evil-goggles--generic-blocking-advice (beg end &rest _)
+  "Advice for interactive functions, show a blocing hint.
+
+This function is intended to be used as advice for interactive funs
+which take BEG and END as their first and second arguments."
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end))
     (evil-goggles--show-blocking-hint beg end)))
@@ -321,6 +331,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     (setq evil-goggles--async-ov nil)))
 
 (defun evil-goggles--show-async-hint (beg end)
+  "Show blocking hint from BEG to END."
   (let ((ov (evil-goggles--make-overlay beg end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
         (dur (or evil-goggles-async-duration evil-goggles-duration))
         (face (evil-goggles--get-face this-command)))
@@ -335,11 +346,19 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
                                         #'evil-goggles--vanish)))))
 
 (defun evil-goggles--generic-async-advice (beg end &rest _)
+  "Advice for interactive functions, show an async hint.
+
+This function is intended to be used as advice for interactive funs
+which take BEG and END as their first and second arguments."
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end))
     (evil-goggles--show-async-hint beg end)))
 
 (defun evil-goggles--generic-async-advice-1 (_ beg end &rest _rest)
+  "Advice for interactive functions, show an async hint.
+
+This function is intended to be used as advice for interactive funs
+which take BEG and END as their second and third arguments."
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end))
     (evil-goggles--show-async-hint beg end)))
@@ -375,6 +394,9 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-join-face "Face for join action")
 
 (defun evil-goggles--join-advice (beg end &rest _)
+  "Advice for `evil-join' and `evil-join-whitespace'.
+
+BEG and END are the argumenets to the original functions."
   (when (and (called-interactively-p 'interactive)
              (evil-goggles--show-p beg end)
              ;; don't show goggles for single lines ("J"/"gJ" without count)
@@ -424,6 +446,9 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-set-marker-face "Face for replace with register action")
 
 (defun evil-goggles--set-marker-advice (char &rest _)
+  "Advice for `evil-set-marker'.
+
+CHAR is an argument for the advice-d function."
   (when (and (called-interactively-p 'interactive)
              (<= ?a char ?z))
     (let ((beg (line-beginning-position))
@@ -437,6 +462,7 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-record-macro-face "Face for record macro action")
 
 (defun evil-goggles--record-macro-advice (&rest _)
+  "Advice for `evil-record-macro'."
   (let ((beg (line-beginning-position))
         (end (1+ (line-end-position)))
         (was-defining-kbd-macro defining-kbd-macro))
@@ -456,6 +482,9 @@ OFF-BY-DEFAULT if non-nil will set the switch to `nil'"
     evil-goggles-paste-face "Face for paste action")
 
 (defun evil-goggles--paste-advice (_ &optional register yank-handler)
+  "Advice for `evil-paste-before' and `evil-paste-after'.
+
+REGISTER and YANK-HANDLER are the argumenets to the original functions."
   (when (and (called-interactively-p 'interactive)
              (evil-normal-state-p))
     (let* ((beg (save-excursion (evil-goto-mark ?\[) (if (eolp) (1+ (point)) (point))))
@@ -507,6 +536,7 @@ Argument YANK-HANDLER is the yank hanler."
     (evil-paste-after           :face evil-goggles-paste-face                 :switch evil-goggles-enable-paste                 :advice evil-goggles--paste-advice :after t)))
 
 (defun evil-goggles--get-face (command)
+  "Lookup face for COMMAND in `evil-goggles--commands'."
   (or
    (plist-get (cdr (assoc command evil-goggles--commands)) :face)
    'evil-goggles-default-face))
