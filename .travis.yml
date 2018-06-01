@@ -22,4 +22,5 @@ script:
   - emacs=$EMACS make update
   - emacs=$EMACS make compile
   - emacs=$EMACS make test
+  - emacs=$EMACS make package-lint
   - emacs=$EMACS make evil-test

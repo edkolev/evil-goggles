@@ -60,7 +60,6 @@ try for example `yy`, `p`, `dd` in normal state.
 
 - delete
 - change
-- substitue
 - yank
 - paste
 - indent (`=` operator)
@@ -113,7 +112,6 @@ evil-goggles-default-face - inherits from `region` by default
 
 evil-goggles-delete-face - this, and the others below, inherit from `evil-goggles-default-face`
 evil-goggles-change-face
-evil-goggles-substitute-face
 evil-goggles-indent-face
 evil-goggles-yank-face
 evil-goggles-join-face
@@ -161,7 +159,6 @@ evil-goggles-record-macro-face
 ;;
 ;; evil-goggles-enable-delete
 ;; evil-goggles-enable-change
-;; evil-goggles-enable-substitute
 ;; evil-goggles-enable-indent
 ;; evil-goggles-enable-yank
 ;; evil-goggles-enable-join
@@ -180,6 +177,7 @@ evil-goggles-record-macro-face
 
 ## NEWS - Recent Significant Changes
 
+- [Jun 01, 2018] Refactor code to not use :around advice-s, which was a source of edge-case-issues
 - [Feb 05, 2018] Show hint on start/stop macro recording
 - [Dec 02, 2017] Pulsing hints is no longer experimental
 - [Nov 03, 2017] Add options `evil-goggles-async-duration` and `evil-goggles-blocking-duration`
