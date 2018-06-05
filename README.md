@@ -85,7 +85,8 @@ try for example `yy`, `p`, `dd` in normal state.
 - To pulse the visual hint, rather than just show and hide it:
 
 ``` emacs-lisp
-(setq evil-goggles-pulse t)
+(setq evil-goggles-pulse t) ;; default is to pulse when running in a graphic display
+
 ```
 
 - To change the default face:
