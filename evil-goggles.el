@@ -369,6 +369,16 @@ which take BEG and END as their second and third arguments."
     evil-goggles-enable-delete "If non-nil, enable delete support"
     evil-goggles-delete-face "Face for delete action")
 
+(defun evil-goggles--delete-line-advice (beg end &rest _)
+  "Advice for `evil-delete-line'.
+
+BEG and END are the argumenets to the original functions."
+  (let ((beg (or beg (point)))
+        (end (or end (line-end-position))))
+    (when (and (called-interactively-p 'interactive)
+               (evil-goggles--show-p beg end))
+      (evil-goggles--show-blocking-hint beg end))))
+
 ;;; yank
 
 (evil-goggles--define-switch-and-face
@@ -516,6 +526,7 @@ Argument YANK-HANDLER is the yank hanler."
 
 (defvar evil-goggles--commands
   '((evil-delete                :face evil-goggles-delete-face                :switch evil-goggles-enable-delete                :advice evil-goggles--generic-blocking-advice)
+    (evil-delete-line           :face evil-goggles-delete-face                :switch evil-goggles-enable-delete                :advice evil-goggles--delete-line-advice)
     (evil-yank                  :face evil-goggles-yank-face                  :switch evil-goggles-enable-yank                  :advice evil-goggles--generic-async-advice)
     (evil-change                :face evil-goggles-change-face                :switch evil-goggles-enable-change                :advice evil-goggles--generic-blocking-advice)
     (evil-change-line           :face evil-goggles-change-face                :switch evil-goggles-enable-change                :advice evil-goggles--generic-blocking-advice)
