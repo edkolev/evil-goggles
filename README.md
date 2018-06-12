@@ -77,6 +77,7 @@ try for example `yy`, `p`, `dd` in normal state.
 - commentary [evil-commentary](https://github.com/linktohack/evil-commentary)
 - nerd-commenter [evil-nerd-commenter](https://github.com/redguardtoo/evil-nerd-commenter)
 - replace with register [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
+- evil-org [evil-org](https://github.com/Somelauw/evil-org-mode/issues)
 
 ## Customizations
 
@@ -86,7 +87,6 @@ try for example `yy`, `p`, `dd` in normal state.
 
 ``` emacs-lisp
 (setq evil-goggles-pulse t) ;; default is to pulse when running in a graphic display
-
 ```
 
 - To change the default face:
