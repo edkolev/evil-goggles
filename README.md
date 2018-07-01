@@ -178,6 +178,7 @@ evil-goggles-record-macro-face
 
 ## NEWS - Recent Significant Changes
 
+- [Jul 01, 2018] Make async hint cleanup more robust
 - [Jun 01, 2018] Refactor code to not use :around advice-s, which was a source of edge-case-issues
 - [Feb 05, 2018] Show hint on start/stop macro recording
 - [Dec 02, 2017] Pulsing hints is no longer experimental
