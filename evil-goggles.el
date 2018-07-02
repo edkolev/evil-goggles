@@ -130,7 +130,8 @@ background of 'evil-goggles-default-face, then 'region."
 
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
-  (and (bound-and-true-p evil-mode)
+  (and (not evil-inhibit-operator-value)
+       (bound-and-true-p evil-mode)
        (numberp beg)
        (numberp end)
        ;; don't show overlay if the region is a single char on a single line
