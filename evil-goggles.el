@@ -328,14 +328,14 @@ which take BEG and END as their first and second arguments."
   (with-local-quit
     (when (overlayp evil-goggles--async-ov)
       (delete-overlay evil-goggles--async-ov)
-      (setq evil-goggles--async-ov nil)
+      (setq evil-goggles--async-ov nil))
     (when (timerp evil-goggles--timer)
       (cancel-timer evil-goggles--timer)
-      (setq evil-goggles--timer nil)
-    (remove-hook 'pre-command-hook 'evil-goggles--vanish)))))
+      (setq evil-goggles--timer nil))
+    (remove-hook 'pre-command-hook 'evil-goggles--vanish)))
 
 (defun evil-goggles--show-async-hint (beg end)
-  "Show blocking hint from BEG to END."
+  "Show asynchronous hint from BEG to END."
   (let ((ov (evil-goggles--make-overlay beg end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
         (dur (or evil-goggles-async-duration evil-goggles-duration))
         (face (evil-goggles--get-face this-command)))
