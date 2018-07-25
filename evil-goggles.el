@@ -232,27 +232,6 @@ Running code while the hint is on isn't supported."
           (sit-for dur))
       (mapcar 'delete-overlay ovs))))
 
-(defmacro evil-goggles--define-switch-and-face (switch-name switch-doc face-name face-doc &optional off-by-default)
-  "Helper macro defining an on/off var, a face, and duration var.
-
-SWITCH-NAME is the name of the on/off variable.
-SWITCH-DOC is the docstring for SWITCH-NAME.
-FACE-NAME is the name of the custom face.
-FACE-DOC is the docstring for FACE-NAME.
-DUR-NAME is the name of the duration variable.
-DUR-DOC is the docstring for DUR-NAME.
-OFF-BY-DEFAULT if non-nil will set the switch to nil"
-  (declare (indent 7) (debug t))
-  `(progn
-     (defcustom ,switch-name ,(if off-by-default nil t)
-       ,(concat switch-doc "\nThis variable must be set before `evil-goggles-mode' is enabled")
-       :type 'boolean
-       :group 'evil-goggles)
-     (defface ,face-name
-       '((t (:inherit evil-goggles-default-face)))
-       ,face-doc
-       :group 'evil-goggles-faces)))
-
 ;;; core ends here ;;;
 
 ;; helper function to inherit from diff-mode/magit-diff's faces
@@ -371,9 +350,13 @@ which take BEG and END as their second and third arguments."
 
 ;;; delete
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-delete "If non-nil, enable delete support"
-    evil-goggles-delete-face "Face for delete action")
+(defcustom evil-goggles-enable-delete t
+  "If non-nil, enable delete support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-delete-face '((t (:inherit evil-goggles-default-face)))
+  "Face for delete action"
+  :group 'evil-goggles-faces)
 
 (defun evil-goggles--delete-line-advice (beg end &rest _)
   "Advice for `evil-delete-line'.
@@ -387,27 +370,43 @@ BEG and END are the argumenets to the original functions."
 
 ;;; yank
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-yank "If non-nil, enable yank support"
-    evil-goggles-yank-face "Face for yank action")
+(defcustom evil-goggles-enable-yank t
+  "If non-nil, enable yank support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-yank-face '((t (:inherit evil-goggles-default-face)))
+  "Face for yank action"
+  :group 'evil-goggles-faces)
 
 ;;; change
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-change "If non-nil, enable change support"
-    evil-goggles-change-face "Face for change action")
+(defcustom evil-goggles-enable-change t
+  "If non-nil, enable change support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-change-face '((t (:inherit evil-goggles-default-face)))
+  "Face for change action"
+  :group 'evil-goggles-faces)
 
 ;;; indent
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-indent "If non-nil, enable indent support"
-    evil-goggles-indent-face "Face for indent action")
+(defcustom evil-goggles-enable-indent t
+  "If non-nil, enable indent support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-indent-face '((t (:inherit evil-goggles-default-face)))
+  "Face for indent action"
+  :group 'evil-goggles-faces)
 
 ;;; join
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-join "If non-nil, enable join support"
-    evil-goggles-join-face "Face for join action")
+(defcustom evil-goggles-enable-join t
+  "If non-nil, enable join support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-join-face '((t (:inherit evil-goggles-default-face)))
+  "Face for join action"
+  :group 'evil-goggles-faces)
 
 (defun evil-goggles--join-advice (beg end &rest _)
   "Advice for `evil-join' and `evil-join-whitespace'.
@@ -421,45 +420,73 @@ BEG and END are the argumenets to the original functions."
 
 ;;; fill
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-fill-and-move "If non-nil, enable fill-and-move support"
-    evil-goggles-fill-and-move-face "Face for fill-and-move action")
+(defcustom evil-goggles-enable-fill-and-move t
+  "If non-nil, enable fill-and-move support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-fill-and-move-face '((t (:inherit evil-goggles-default-face)))
+  "Face for fill-and-move action"
+  :group 'evil-goggles-faces)
 
 ;;; shift
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-shift "If non-nil, enable shift support"
-    evil-goggles-shift-face "Face for shift action")
+(defcustom evil-goggles-enable-shift t
+  "If non-nil, enable shift support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-shift-face '((t (:inherit evil-goggles-default-face)))
+  "Face for shift action"
+  :group 'evil-goggles-faces)
 
 ;;; evil-surround
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-surround "If non-nil, enable surround support"
-    evil-goggles-surround-face "Face for surround action")
+(defcustom evil-goggles-enable-surround t
+  "If non-nil, enable surround support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-surround-face '((t (:inherit evil-goggles-default-face)))
+  "Face for surround action"
+  :group 'evil-goggles-faces)
 
 ;;; evil-commentary
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-commentary "If non-nil, enable commentary support"
-    evil-goggles-commentary-face "Face for commentary action")
+(defcustom evil-goggles-enable-commentary t
+  "If non-nil, enable commentary support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-commentary-face '((t (:inherit evil-goggles-default-face)))
+  "Face for commentary action"
+  :group 'evil-goggles-faces)
 
 ;;; evil-nerd-commenter
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-nerd-commenter "If non-nil, enable nerd-commenter support"
-    evil-goggles-nerd-commenter-face "Face for nerd-commenter action")
+(defcustom evil-goggles-enable-nerd-commenter t
+  "If non-nil, enable nerd-commenter support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-nerd-commenter-face '((t (:inherit evil-goggles-default-face)))
+  "Face for nerd-commenter action"
+  :group 'evil-goggles-faces)
 
 ;;; evil-replace-with-register
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-replace-with-register "If non-nil, enable replace with register support"
-    evil-goggles-replace-with-register-face "Face for replace with register action")
+(defcustom evil-goggles-enable-replace-with-register t
+  "If non-nil, enable replace with register support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-replace-with-register-face '((t (:inherit evil-goggles-default-face)))
+  "Face for replace with register action"
+  :group 'evil-goggles-faces)
 
 ;;; set mark
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-set-marker "If non-nil, enable replace with register support"
-    evil-goggles-set-marker-face "Face for replace with register action")
+(defcustom evil-goggles-enable-set-marker t
+  "If non-nil, enable replace with register support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-set-marker-face '((t (:inherit evil-goggles-default-face)))
+  "Face for replace with register action"
+  :group 'evil-goggles-faces)
 
 (defun evil-goggles--set-marker-advice (char &rest _)
   "Advice for `evil-set-marker'.
@@ -473,9 +500,13 @@ CHAR is an argument for the advice-d function."
 
 ;;; record macro
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-record-macro "If non-nil, enable record macro support"
-    evil-goggles-record-macro-face "Face for record macro action")
+(defcustom evil-goggles-enable-record-macro t
+  "If non-nil, enable record macro support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-record-macro-face '((t (:inherit evil-goggles-default-face)))
+  "Face for record macro action"
+  :group 'evil-goggles-faces)
 
 (defun evil-goggles--record-macro-advice (&rest _)
   "Advice for `evil-record-macro'."
@@ -493,9 +524,13 @@ CHAR is an argument for the advice-d function."
 
 ;;; paste
 
-(evil-goggles--define-switch-and-face
-    evil-goggles-enable-paste "If non-nil, enable paste support"
-    evil-goggles-paste-face "Face for paste action")
+(defcustom evil-goggles-enable-paste t
+  "If non-nil, enable paste support. Must be set before the mode is enabled."
+  :type 'boolean :group 'evil-goggles)
+
+(defface evil-goggles-paste-face '((t (:inherit evil-goggles-default-face)))
+  "Face for paste action"
+  :group 'evil-goggles-faces)
 
 (defun evil-goggles--paste-advice (_ &optional register yank-handler)
   "Advice for `evil-paste-before' and `evil-paste-after'.
