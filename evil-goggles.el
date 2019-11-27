@@ -78,8 +78,8 @@ This variable can also hold a custom function which should return t or nil.
 The default is to pulse if the display is graphical, otherwise not."
   :group 'evil-goggles
   :type '(choice
-          (const :tag "Always" nil)
-          (const :tag "Never" t)
+          (const :tag "Always" t)
+          (const :tag "Never" nil)
           (function :tag "If graphical display" #'display-graphic-p)
           (function :tag "Custom function")))
 
