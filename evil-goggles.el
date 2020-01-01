@@ -165,9 +165,9 @@ DUR is used only when pulsing.
 The decision to pulse or not is made by function
 `evil-goggles--should-blink-or-pulse'."
   (pcase (evil-goggles--should-blink-or-pulse face)
-    (`(blink ,blink-face)
+    (`(do-blink ,blink-face)
      (overlay-put ov 'face blink-face))
-    (`(pulse ,pulse-bg)
+    (`(do-pulse ,pulse-bg)
      (evil-goggles--pulse-overlay ov pulse-bg dur))))
 
 (defun evil-goggles--should-blink-or-pulse (face)
@@ -181,22 +181,22 @@ this function tries to make the most appropriate decision whether to
 pulse or not, and whether to use the given FACE or use the fallback
 face `evil-goggles-default-face'.
 
-This function returns a list - either ('blink face) or ('pulse bg)."
+This function returns a list - either ('do-blink face) or ('do-pulse bg)."
   (let ((fg (face-foreground face nil t))
         (bg (face-background face nil t)))
     (cond
      ;; pulse enabled and the face has a bg - pulse with the given face's bg
      ((and (evil-goggles--pulse-p) bg)
-      `(pulse ,bg))
+      `(do-pulse ,bg))
      ;; pulse enabled and the face has no bg or fg - pulse with the default face's bg
      ((and (evil-goggles--pulse-p) (null bg) (null fg))
-      `(pulse ,(face-background 'evil-goggles-default-face nil t)))
+      `(do-pulse ,(face-background 'evil-goggles-default-face nil t)))
      ;; pulse disabled or face has fg only - show the hint with given face
      ((and (null bg) (null fg))
-      `(blink evil-goggles-default-face))
+      `(do-blink evil-goggles-default-face))
      ;; else show the hint with the given face
      (t
-      `(blink ,face)))))
+      `(do-blink ,face)))))
 
 (defmacro evil-goggles--show-overlay (beg end face dur &rest body)
   "Show overlay from BEG to END with face FACE for DUR seconds.
