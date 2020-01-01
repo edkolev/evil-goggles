@@ -7,7 +7,7 @@ ELPA_DEPENDENCIES=evil evil-test-helpers package-lint
 ELPA_ARCHIVES=gnu melpa
 
 # List of ERT test files:
-TEST_ERT_FILES=$(wildcard test/*.el)
+TEST_ERT_FILES=test/evil-goggles-test.el test/make-evil-test.el
 
 # List of files to check for Emacs conventions:
 LINT_CHECKDOC_FILES=$(wildcard *.el)
@@ -17,6 +17,10 @@ LINT_PACKAGE_LINT_FILES=$(wildcard *.el)
 
 # List of files to check for compilation errors and warnings:
 LINT_COMPILE_FILES=${LINT_CHECKDOC_FILES}
+
+test/evil-tests.el:
+	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/master/evil-tests.el" --output test/evil-tests.el
+	git apply --directory=test/ evil-tests.patch
 
 makel.mk:
 	# Download makel

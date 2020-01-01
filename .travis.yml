@@ -9,4 +9,7 @@ env:
 script:
   - emacs --version
   - make ci-dependencies
+  - make test/evil-tests.el
   - make check
+  - cat test-results.txt
+

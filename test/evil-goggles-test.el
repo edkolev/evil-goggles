@@ -39,7 +39,7 @@
        '(evil-goggles--test-face ((t (:foreground "red")))))
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
-               '(blink evil-goggles--test-face))))
+               '(do-blink evil-goggles--test-face))))
 
     ;; enabled pusling, use bg-only - hints should pulse with the bg color
     (progn
@@ -47,7 +47,7 @@
        '(evil-goggles--test-face ((t (:background "red")))))
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
-               '(pulse "red"))))
+               '(do-pulse "red"))))
 
     ;; enabled pulsing, use an invalid face (no fg, no bg) - hints should pulse with default face's bg
     (progn
@@ -55,7 +55,7 @@
        '(evil-goggles--test-face ((t (:underline nil)))))
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
-               `(pulse ,(face-background 'evil-goggles-default-face nil t))))))
+               `(do-pulse ,(face-background 'evil-goggles-default-face nil t))))))
 
   (let ((evil-goggles-pulse nil))
     ;; disabled pusling, use bg-only - hints shouldn't pulse, only bg
@@ -64,7 +64,7 @@
        '(evil-goggles--test-face ((t (:background "red")))))
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
-               '(blink evil-goggles--test-face))))
+               '(do-blink evil-goggles--test-face))))
 
     ;; disabled pusling, use fg-only - hints shouldn't pulse, only fg
     (progn
@@ -72,7 +72,7 @@
        '(evil-goggles--test-face ((t (:foreground "red")))))
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
-               '(blink evil-goggles--test-face))))
+               '(do-blink evil-goggles--test-face))))
 
     ;; disalbed pulsing, use an invalid face (no fg, no bg) - hints should blink with default face
     (progn
@@ -80,7 +80,7 @@
        '(evil-goggles--test-face ((t (:underline nil)))))
       (should (equal
                (evil-goggles--should-blink-or-pulse 'evil-goggles--test-face)
-               '(blink evil-goggles-default-face))))))
+               '(do-blink evil-goggles-default-face))))))
 
 (ert-deftest evil-goggles-test-substitute ()
   (ert-info ("Test visual substitute")
