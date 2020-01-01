@@ -1,3 +1,4 @@
 .elpa/
 *.elc
 test/evil-tests.el
+makel.mk

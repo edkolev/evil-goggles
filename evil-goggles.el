@@ -147,7 +147,7 @@ background of 'evil-goggles-default-face, then 'region."
        (not (null (string-match-p "[^ \t\n]" (buffer-substring-no-properties beg end))))))
 
 (defun evil-goggles--overlay-insert-behind-hook (ov afterp beg end &optional len)
-  "Function which grows/shriks the overlay OV when its text changes.
+  "Function which grows/shriks the overlay OV when its text is changed.
 
 The OV, AFTERP, BEG, END, LEN arguments are specified by the calling
 convention for the insert-behind-hooks overlay property."
@@ -165,9 +165,9 @@ DUR is used only when pulsing.
 The decision to pulse or not is made by function
 `evil-goggles--should-blink-or-pulse'."
   (pcase (evil-goggles--should-blink-or-pulse face)
-    (`(blink ,blink-face)
+    (`(do-blink ,blink-face)
      (overlay-put ov 'face blink-face))
-    (`(pulse ,pulse-bg)
+    (`(do-pulse ,pulse-bg)
      (evil-goggles--pulse-overlay ov pulse-bg dur))))
 
 (defun evil-goggles--should-blink-or-pulse (face)
@@ -176,27 +176,27 @@ The decision to pulse or not is made by function
 The decision is made based on the value of `evil-goggles-pulse'.
 
 If the FACE has no background, pulsing is not supported, hence the
-decision is to blink. If the face has no foreground and/or background,
+decision is to blink.  If the face has no foreground and/or background,
 this function tries to make the most appropriate decision whether to
 pulse or not, and whether to use the given FACE or use the fallback
 face `evil-goggles-default-face'.
 
-This function returns a list - either ('blink face) or ('pulse bg)."
+This function returns a list - either ('do-blink face) or ('do-pulse bg)."
   (let ((fg (face-foreground face nil t))
         (bg (face-background face nil t)))
     (cond
      ;; pulse enabled and the face has a bg - pulse with the given face's bg
      ((and (evil-goggles--pulse-p) bg)
-      `(pulse ,bg))
+      `(do-pulse ,bg))
      ;; pulse enabled and the face has no bg or fg - pulse with the default face's bg
      ((and (evil-goggles--pulse-p) (null bg) (null fg))
-      `(pulse ,(face-background 'evil-goggles-default-face nil t)))
+      `(do-pulse ,(face-background 'evil-goggles-default-face nil t)))
      ;; pulse disabled or face has fg only - show the hint with given face
      ((and (null bg) (null fg))
-      `(blink evil-goggles-default-face))
+      `(do-blink evil-goggles-default-face))
      ;; else show the hint with the given face
      (t
-      `(blink ,face)))))
+      `(do-blink ,face)))))
 
 (defmacro evil-goggles--show-overlay (beg end face dur &rest body)
   "Show overlay from BEG to END with face FACE for DUR seconds.
@@ -277,7 +277,7 @@ Running code while the hint is on isn't supported."
 (defun evil-goggles--show-blocking-hint (beg end &optional force-block)
   "Show blocking hint from BEG to END.
 
-The hint will be a vertical block if `evil-this-type' is `block'. If
+The hint will be a vertical block if `evil-this-type' is `block'.  If
 FORCE-BLOCK is non-nil, the hint will always be a vertical block,
 regardless of the value of `evil-this-type'."
   (let ((dur (or evil-goggles-blocking-duration evil-goggles-duration))
@@ -351,7 +351,7 @@ which take BEG and END as their second and third arguments."
 ;;; delete
 
 (defcustom evil-goggles-enable-delete t
-  "If non-nil, enable delete support. Must be set before the mode is enabled."
+  "If non-nil, enable delete support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-delete-face '((t (:inherit evil-goggles-default-face)))
@@ -371,7 +371,7 @@ BEG and END are the argumenets to the original functions."
 ;;; yank
 
 (defcustom evil-goggles-enable-yank t
-  "If non-nil, enable yank support. Must be set before the mode is enabled."
+  "If non-nil, enable yank support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-yank-face '((t (:inherit evil-goggles-default-face)))
@@ -381,7 +381,7 @@ BEG and END are the argumenets to the original functions."
 ;;; change
 
 (defcustom evil-goggles-enable-change t
-  "If non-nil, enable change support. Must be set before the mode is enabled."
+  "If non-nil, enable change support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-change-face '((t (:inherit evil-goggles-default-face)))
@@ -391,7 +391,7 @@ BEG and END are the argumenets to the original functions."
 ;;; indent
 
 (defcustom evil-goggles-enable-indent t
-  "If non-nil, enable indent support. Must be set before the mode is enabled."
+  "If non-nil, enable indent support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-indent-face '((t (:inherit evil-goggles-default-face)))
@@ -401,7 +401,7 @@ BEG and END are the argumenets to the original functions."
 ;;; join
 
 (defcustom evil-goggles-enable-join t
-  "If non-nil, enable join support. Must be set before the mode is enabled."
+  "If non-nil, enable join support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-join-face '((t (:inherit evil-goggles-default-face)))
@@ -421,7 +421,7 @@ BEG and END are the argumenets to the original functions."
 ;;; fill
 
 (defcustom evil-goggles-enable-fill-and-move t
-  "If non-nil, enable fill-and-move support. Must be set before the mode is enabled."
+  "If non-nil, enable fill-and-move support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-fill-and-move-face '((t (:inherit evil-goggles-default-face)))
@@ -431,7 +431,7 @@ BEG and END are the argumenets to the original functions."
 ;;; shift
 
 (defcustom evil-goggles-enable-shift t
-  "If non-nil, enable shift support. Must be set before the mode is enabled."
+  "If non-nil, enable shift support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-shift-face '((t (:inherit evil-goggles-default-face)))
@@ -441,7 +441,7 @@ BEG and END are the argumenets to the original functions."
 ;;; evil-surround
 
 (defcustom evil-goggles-enable-surround t
-  "If non-nil, enable surround support. Must be set before the mode is enabled."
+  "If non-nil, enable surround support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-surround-face '((t (:inherit evil-goggles-default-face)))
@@ -451,7 +451,7 @@ BEG and END are the argumenets to the original functions."
 ;;; evil-commentary
 
 (defcustom evil-goggles-enable-commentary t
-  "If non-nil, enable commentary support. Must be set before the mode is enabled."
+  "If non-nil, enable commentary support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-commentary-face '((t (:inherit evil-goggles-default-face)))
@@ -461,7 +461,7 @@ BEG and END are the argumenets to the original functions."
 ;;; evil-nerd-commenter
 
 (defcustom evil-goggles-enable-nerd-commenter t
-  "If non-nil, enable nerd-commenter support. Must be set before the mode is enabled."
+  "If non-nil, enable nerd-commenter support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-nerd-commenter-face '((t (:inherit evil-goggles-default-face)))
@@ -471,7 +471,7 @@ BEG and END are the argumenets to the original functions."
 ;;; evil-replace-with-register
 
 (defcustom evil-goggles-enable-replace-with-register t
-  "If non-nil, enable replace with register support. Must be set before the mode is enabled."
+  "If non-nil, enable replace with register support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-replace-with-register-face '((t (:inherit evil-goggles-default-face)))
@@ -481,7 +481,7 @@ BEG and END are the argumenets to the original functions."
 ;;; set mark
 
 (defcustom evil-goggles-enable-set-marker t
-  "If non-nil, enable replace with register support. Must be set before the mode is enabled."
+  "If non-nil, enable replace with register support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-set-marker-face '((t (:inherit evil-goggles-default-face)))
@@ -501,7 +501,7 @@ CHAR is an argument for the advice-d function."
 ;;; record macro
 
 (defcustom evil-goggles-enable-record-macro t
-  "If non-nil, enable record macro support. Must be set before the mode is enabled."
+  "If non-nil, enable record macro support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-record-macro-face '((t (:inherit evil-goggles-default-face)))
@@ -525,7 +525,7 @@ CHAR is an argument for the advice-d function."
 ;;; paste
 
 (defcustom evil-goggles-enable-paste t
-  "If non-nil, enable paste support. Must be set before the mode is enabled."
+  "If non-nil, enable paste support.  Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-paste-face '((t (:inherit evil-goggles-default-face)))
