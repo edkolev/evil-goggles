@@ -10,7 +10,7 @@ ELPA_ARCHIVES=melpa
 TEST_ERT_FILES=$(wildcard test/*.el)
 
 # List of files to check for Emacs conventions:
-LINT_CHECKDOC_FILES=$(wildcard *.el) ${TEST_ERT_FILES}
+LINT_CHECKDOC_FILES=$(wildcard *.el)
 
 # List of files to check for packaging guidelines:
 LINT_PACKAGE_LINT_FILES=$(wildcard *.el)
