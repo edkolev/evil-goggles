@@ -7,7 +7,7 @@ ELPA_DEPENDENCIES=evil evil-test-helpers package-lint
 ELPA_ARCHIVES=gnu melpa
 
 # List of ERT test files:
-TEST_ERT_FILES=test/evil-goggles-test.el test/make-evil-test.el
+TEST_ERT_FILES=test/evil-goggles-test.el test/evil-tests-with-evil-goggles.el
 
 # List of files to check for Emacs conventions:
 LINT_CHECKDOC_FILES=$(wildcard *.el)
