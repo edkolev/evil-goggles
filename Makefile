@@ -4,7 +4,7 @@ ELPA_DEPENDENCIES=evil evil-test-helpers package-lint
 
 # List of package archives to download above dependencies
 # from. Available archives are: gnu, melpa, melpa-stable and org:
-ELPA_ARCHIVES=melpa
+ELPA_ARCHIVES=gnu melpa
 
 # List of ERT test files:
 TEST_ERT_FILES=$(wildcard test/*.el)
