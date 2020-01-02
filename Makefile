@@ -18,10 +18,8 @@ LINT_PACKAGE_LINT_FILES=$(wildcard *.el)
 # List of files to check for compilation errors and warnings:
 LINT_COMPILE_FILES=${LINT_CHECKDOC_FILES}
 
-# TODO remove evil-tests.patch after this https://github.com/emacs-evil/evil/pull/1239
 test/evil-tests.el:
-	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/master/evil-tests.el" --output test/evil-tests.el
-	git apply --directory=test/ evil-tests.patch
+	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/40daccf17685ba4e59cf56563a8b0c4a386e109c/evil-tests.el" --output test/evil-tests.el
 
 makel.mk:
 	# Download makel
