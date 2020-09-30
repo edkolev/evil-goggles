@@ -179,6 +179,7 @@ evil-goggles-record-macro-face
 
 ## NEWS - Recent Significant Changes
 
+- [Oct 01, 2020] Add support for `evil-local-mode`
 - [Jul 01, 2018] Make async hint cleanup more robust
 - [Jun 01, 2018] Refactor code to not use :around advice-s, which was a source of edge-case-issues
 - [Feb 05, 2018] Show hint on start/stop macro recording
