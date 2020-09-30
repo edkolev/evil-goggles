@@ -30,7 +30,7 @@ makel.mk:
 		curl \
 		--fail --silent --show-error --insecure --location \
 		--retry 9 --retry-delay 9 \
-		-O https://gitlab.petton.fr/DamienCassou/makel/raw/v0.6.0/makel.mk; \
+		-O https://gitea.petton.fr/DamienCassou/makel/raw/tag/v0.6.0/makel.mk; \
 	fi
 
 # Include makel.mk if present
