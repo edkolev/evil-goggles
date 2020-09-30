@@ -19,7 +19,7 @@ LINT_PACKAGE_LINT_FILES=$(wildcard *.el)
 LINT_COMPILE_FILES=${LINT_CHECKDOC_FILES}
 
 test/evil-tests.el:
-	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/40daccf17685ba4e59cf56563a8b0c4a386e109c/evil-tests.el" --output test/evil-tests.el
+	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/master/evil-tests.el" --output test/evil-tests.el
 
 makel.mk:
 	# Download makel
