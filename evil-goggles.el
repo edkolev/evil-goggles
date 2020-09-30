@@ -287,7 +287,7 @@ regardless of the value of `evil-this-type'."
       (evil-goggles--show-overlay beg end face dur))))
 
 (defun evil-goggles--generic-blocking-advice (beg end &rest _)
-  "Advice for interactive functions, show a blocing hint.
+  "Advice for interactive functions, show a blocking hint.
 
 This function is intended to be used as advice for interactive funs
 which take BEG and END as their first and second arguments."
