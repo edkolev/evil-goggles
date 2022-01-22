@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/edkolev/evil-goggles.svg?branch=master)](https://travis-ci.org/edkolev/evil-goggles)
+[![NonGNU ELPA](https://elpa.nongnu.org/nongnu/evil-goggles.svg)](https://elpa.nongnu.org/nongnu/evil-goggles.html)
 [![MELPA](https://melpa.org/packages/evil-goggles-badge.svg)](https://melpa.org/#/evil-goggles)
 
 evil-goggles
@@ -34,7 +35,7 @@ try for example `yy`, `p`, `dd` in normal state.
 
 ## Installation
 
-#### with [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
+#### with [use-package](https://github.com/jwiegley/use-package) from [NonGNU ELPA](https://elpa.nongnu.org/) or [MELPA](https://melpa.org)
 ``` emacs-lisp
 (use-package evil-goggles
   :ensure t
@@ -48,7 +49,7 @@ try for example `yy`, `p`, `dd` in normal state.
   (evil-goggles-use-diff-faces))
 ```
 
-#### without [use-package](https://github.com/jwiegley/use-package) from [Melpa](https://melpa.org)
+#### without [use-package](https://github.com/jwiegley/use-package) from [NonGNU ELPA](https://elpa.nongnu.org/) or [MELPA](https://melpa.org)
 
 `M-x package-install RET evil-goggles RET`, then add in `init.el`:
 
