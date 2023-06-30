@@ -542,15 +542,14 @@ REGISTER and YANK-HANDLER are the argumenets to the original functions."
               ;; paste called via evil-paste-pop/evil-paste-pop-next (via `C-n', `C-p')
               (memq real-this-command '(evil-paste-pop evil-paste-pop-next)))
              (evil-normal-state-p))
-    (let* ((beg (save-excursion (evil-goto-mark ?\[) (if (eolp) (1+ (point)) (point))))
-           (end (save-excursion (evil-goto-mark ?\]) (if (eolp) (1+ (point)) (point))))
+    (let* ((beg (save-excursion (goto-char (evil-get-marker ?\[)) (if (eolp) (1+ (point)) (point))))
+           (end (save-excursion (goto-char (evil-get-marker ?\])) (if (eolp) (1+ (point)) (point))))
            (is-vertical-block-pasted (evil-goggles--paste-vert-block-p register yank-handler)))
       (if is-vertical-block-pasted
           ;; XXX the async hint can't show vertical block hints - use a blocking hint if a vert block is pasted
           ;; XXX without the `(1+ end)', the vertical block hint is off by one
           (evil-goggles--show-blocking-hint beg (1+ end) is-vertical-block-pasted)
         (evil-goggles--show-async-hint beg end)))))
-
 
 (defun evil-goggles--paste-vert-block-p (register yank-handler)
   "Return t if the paste is a vertical block.
