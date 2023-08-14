@@ -1,6 +1,6 @@
 # Space-separated list of the dependencies of your project (include
 # package-lint and/or buttercup if you want makel to use these tools):
-ELPA_DEPENDENCIES=evil evil-test-helpers package-lint
+ELPA_DEPENDENCIES=evil package-lint
 
 # List of package archives to download above dependencies
 # from. Available archives are: gnu, melpa, melpa-stable and org:
@@ -19,7 +19,8 @@ LINT_PACKAGE_LINT_FILES=$(wildcard *.el)
 LINT_COMPILE_FILES=${LINT_CHECKDOC_FILES}
 
 test/evil-tests.el:
-	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/40daccf17685ba4e59cf56563a8b0c4a386e109c/evil-tests.el" --output test/evil-tests.el
+	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/master/evil-tests.el" --output test/evil-tests.el
+	curl -s "https://raw.githubusercontent.com/emacs-evil/evil/master/evil-test-helpers.el" --output test/evil-test-helpers.el
 
 makel.mk:
 	# Download makel
@@ -29,7 +30,7 @@ makel.mk:
 		curl \
 		--fail --silent --show-error --insecure --location \
 		--retry 9 --retry-delay 9 \
-		-O https://gitlab.petton.fr/DamienCassou/makel/raw/v0.6.0/makel.mk; \
+		-O https://gitea.petton.fr/DamienCassou/makel/raw/tag/v0.6.0/makel.mk; \
 	fi
 
 # Include makel.mk if present

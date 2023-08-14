@@ -131,7 +131,7 @@ background of 'evil-goggles-default-face, then 'region."
 (defun evil-goggles--show-p (beg end)
   "Return t if the overlay should be displayed in region BEG to END."
   (and (not evil-inhibit-operator-value)
-       (bound-and-true-p evil-mode)
+       (bound-and-true-p evil-local-mode)
        (numberp beg)
        (numberp end)
        ;; don't show overlay if the region is a single char on a single line
@@ -287,7 +287,7 @@ regardless of the value of `evil-this-type'."
       (evil-goggles--show-overlay beg end face dur))))
 
 (defun evil-goggles--generic-blocking-advice (beg end &rest _)
-  "Advice for interactive functions, show a blocing hint.
+  "Advice for interactive functions, show a blocking hint.
 
 This function is intended to be used as advice for interactive funs
 which take BEG and END as their first and second arguments."
