@@ -1,6 +1,6 @@
 ;;; evil-goggles.el --- Add a visual hint to evil operations -*- lexical-binding: t; coding: utf-8 -*-
 
-;; Copyright (C) 2017 edkolev
+;; Copyright (C) 2023 edkolev
 
 ;; Author: edkolev <evgenysw@gmail.com>
 ;; URL: http://github.com/edkolev/evil-goggles
@@ -115,8 +115,8 @@ animation to end."
 (defun evil-goggles--face-background (face)
   "Return the background of FACE or use a fallback.
 
-If the given FACE doesn't have a background, then fallback to the
-background of 'evil-goggles-default-face, then 'region."
+If FACE doesn't have a background, then fallback to the background of
+`evil-goggles-default-face', then `region'."
   (face-background face nil '(evil-goggles-default-face region)))
 
 (defun evil-goggles--make-overlay (beg end &rest properties)
@@ -421,7 +421,9 @@ BEG and END are the argumenets to the original functions."
 ;;; fill
 
 (defcustom evil-goggles-enable-fill-and-move t
-  "If non-nil, enable fill-and-move support.  Must be set before the mode is enabled."
+  "If non-nil, enable fill-and-move support.
+
+Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-fill-and-move-face '((t (:inherit evil-goggles-default-face)))
@@ -461,7 +463,9 @@ BEG and END are the argumenets to the original functions."
 ;;; evil-nerd-commenter
 
 (defcustom evil-goggles-enable-nerd-commenter t
-  "If non-nil, enable nerd-commenter support.  Must be set before the mode is enabled."
+  "If non-nil, enable nerd-commenter support.
+
+Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-nerd-commenter-face '((t (:inherit evil-goggles-default-face)))
@@ -471,7 +475,9 @@ BEG and END are the argumenets to the original functions."
 ;;; evil-replace-with-register
 
 (defcustom evil-goggles-enable-replace-with-register t
-  "If non-nil, enable replace with register support.  Must be set before the mode is enabled."
+  "If non-nil, enable replace with register support.
+
+Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-replace-with-register-face '((t (:inherit evil-goggles-default-face)))
@@ -481,7 +487,9 @@ BEG and END are the argumenets to the original functions."
 ;;; set mark
 
 (defcustom evil-goggles-enable-set-marker t
-  "If non-nil, enable replace with register support.  Must be set before the mode is enabled."
+  "If non-nil, enable replace with register support.
+
+Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-set-marker-face '((t (:inherit evil-goggles-default-face)))
@@ -501,7 +509,9 @@ CHAR is an argument for the advice-d function."
 ;;; record macro
 
 (defcustom evil-goggles-enable-record-macro t
-  "If non-nil, enable record macro support.  Must be set before the mode is enabled."
+  "If non-nil, enable record macro support.
+
+Must be set before the mode is enabled."
   :type 'boolean :group 'evil-goggles)
 
 (defface evil-goggles-record-macro-face '((t (:inherit evil-goggles-default-face)))
@@ -612,6 +622,7 @@ Argument YANK-HANDLER is the yank hanler."
 (define-minor-mode evil-goggles-mode
   "evil-goggles global minor mode."
   :lighter evil-goggles-lighter
+  :group 'evil-goggles
   :global t
   :require 'evil-goggles
   (if evil-goggles-mode
