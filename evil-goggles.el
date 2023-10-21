@@ -287,7 +287,7 @@ regardless of the value of `evil-this-type'."
       (evil-goggles--show-overlay beg end face dur))))
 
 (defun evil-goggles--generic-blocking-advice (beg end &rest _)
-  "Advice for interactive functions, show a blocing hint.
+  "Advice for interactive functions, shows a blocing hint.
 
 This function is intended to be used as advice for interactive funs
 which take BEG and END as their first and second arguments."
@@ -303,7 +303,7 @@ which take BEG and END as their first and second arguments."
 (defun evil-goggles--vanish (&rest _)
   "Remove the async overlay, cancel the timer, unregister from ‘pre-command-hook’."
   ;; user's C-g during this function execution should not result in
-  ;; this function getting removed from pre-command-hook/run-at-time
+  ;; preventing cleanup of pre-command-hook/run-at-time
   (with-local-quit
     (when (overlayp evil-goggles--async-ov)
       (delete-overlay evil-goggles--async-ov)
@@ -315,17 +315,18 @@ which take BEG and END as their first and second arguments."
 
 (defun evil-goggles--show-async-hint (beg end)
   "Show asynchronous hint from BEG to END."
-  (let ((ov (evil-goggles--make-overlay beg end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
-        (dur (or evil-goggles-async-duration evil-goggles-duration))
+  (when evil-goggles--async-ov
+    (evil-goggles--vanish))
+
+  (let ((dur (or evil-goggles-async-duration evil-goggles-duration))
         (face (evil-goggles--get-face this-command)))
     (unwind-protect
-        ;; show the overlay
-        (evil-goggles--show-or-pulse-overlay ov face dur)
+        (setq evil-goggles--async-ov (evil-goggles--make-overlay beg end 'insert-behind-hooks '(evil-goggles--overlay-insert-behind-hook)))
+        (evil-goggles--show-or-pulse-overlay evil-goggles--async-ov face dur)
       ;; any command by the user should prematurely cleanup the overlay
       (add-hook 'pre-command-hook #'evil-goggles--vanish)
       ;; remove the overlay with a timer
       (setq
-       evil-goggles--async-ov ov
        evil-goggles--timer (run-at-time dur
                                         nil
                                         #'evil-goggles--vanish)))))
