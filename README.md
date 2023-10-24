@@ -78,7 +78,8 @@ try for example `yy`, `p`, `dd` in normal state.
 - commentary [evil-commentary](https://github.com/linktohack/evil-commentary)
 - nerd-commenter [evil-nerd-commenter](https://github.com/redguardtoo/evil-nerd-commenter)
 - replace with register [evil-ReplaceWithRegister](https://github.com/Dewdrops/evil-ReplaceWithRegister)
-- evil-org [evil-org](https://github.com/Somelauw/evil-org-mode/issues)
+- evil-org [evil-org](https://github.com/Somelauw/evil-org-mode/)
+- evil-cleverparens [evil-cleverparens](https://github.com/luxbock/evil-cleverparens)
 
 ## Customizations
 
